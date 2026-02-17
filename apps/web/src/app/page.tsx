@@ -7,16 +7,14 @@ import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { Navbar } from "@/components/navbar";
 import { OpenSourceBlock } from "@/components/open-source-block";
-import { ProblemSection } from "@/components/problem-section";
 
 export default function Home() {
 	return (
-		<div className="min-h-screen bg-zinc-950 text-zinc-50">
+		<div className="min-h-screen bg-[#0a0a0a] text-white">
 			<Navbar />
 			<main>
 				<Hero />
 				<AgentLogoBelt />
-				<ProblemSection />
 				<HowItWorks />
 				<FeatureBento />
 				<ComparisonTable />
@@ -24,18 +22,18 @@ export default function Home() {
 				<FAQ />
 				<FinalCTA />
 			</main>
-			<footer className="border-t border-zinc-800 py-10 px-6">
+			<footer className="border-t border-[#222] py-10 px-6">
 				<div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-					<span className="font-mono font-bold text-sm text-zinc-400">
+					<span className="font-mono font-bold text-sm text-[#666]">
 						skill-kit
 					</span>
-					<p className="text-xs text-zinc-600">
+					<p className="text-xs text-[#444]">
 						Built by{" "}
 						<a
 							href="https://github.com/crafter-station"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-zinc-500 hover:text-zinc-300 transition-colors"
+							className="text-[#666] hover:text-white transition-colors"
 						>
 							Crafter Station
 						</a>
