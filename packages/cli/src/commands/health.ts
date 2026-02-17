@@ -4,10 +4,11 @@ import { join } from "node:path";
 import { getTopSkills } from "../db/queries";
 import { getDb } from "../db/schema";
 import { scanInstalledSkills } from "../scanner/skills";
-import { bold, dim, green, yellow } from "../tui/colors";
+import { bold, dim, green, red, yellow } from "../tui/colors";
 import { healthGauge } from "../tui/health";
 
-const CONTEXT_BUDGET = 16000;
+const METADATA_BUDGET = 16000;
+const BODY_LINE_LIMIT = 500;
 
 function check(label: string) {
 	return `  ${green("✓")} ${label}`;
@@ -21,26 +22,66 @@ function info(label: string) {
 	return `  ${dim("●")} ${label}`;
 }
 
-function _formatSize(bytes: number): string {
-	if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-	return `${bytes} B`;
+function parseFrontmatter(content: string): {
+	name: string;
+	description: string;
+	bodyLines: number;
+} {
+	const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+	if (!match)
+		return { name: "", description: "", bodyLines: content.split("\n").length };
+
+	const yaml = match[1];
+	const body = content.slice(match[0].length);
+	const bodyLines = body.trim() ? body.trim().split("\n").length : 0;
+
+	let name = "";
+	let description = "";
+
+	const nameMatch = yaml.match(/^name:\s*(.+)$/m);
+	if (nameMatch) name = nameMatch[1].trim().replace(/^["']|["']$/g, "");
+
+	const descMatch = yaml.match(/^description:\s*(.+)$/m);
+	if (descMatch) description = descMatch[1].trim().replace(/^["']|["']$/g, "");
+
+	return { name, description, bodyLines };
 }
 
 export async function runHealth(): Promise<void> {
 	const skills = scanInstalledSkills();
-	const _skillsDir = join(homedir(), ".claude", "skills");
 	const dbPath = join(homedir(), ".skillkit", "analytics.db");
 	const dbExists = existsSync(dbPath);
 
-	let totalContextChars = 0;
+	let totalMetadataChars = 0;
+	let totalBodyChars = 0;
+	const oversizedSkills: Array<{ name: string; lines: number }> = [];
+	const longDescSkills: Array<{ name: string; chars: number }> = [];
+
 	for (const skill of skills) {
 		const skillMdPath = join(skill.path, "SKILL.md");
-		if (existsSync(skillMdPath)) {
-			try {
-				const content = readFileSync(skillMdPath, "utf-8");
-				totalContextChars += content.length;
-			} catch {}
-		}
+		if (!existsSync(skillMdPath)) continue;
+		try {
+			const content = readFileSync(skillMdPath, "utf-8");
+			const fm = parseFrontmatter(content);
+
+			const metadataSize =
+				(fm.name || skill.name).length + fm.description.length;
+			totalMetadataChars += metadataSize;
+			totalBodyChars += content.length;
+
+			if (fm.bodyLines > BODY_LINE_LIMIT) {
+				oversizedSkills.push({
+					name: fm.name || skill.name,
+					lines: fm.bodyLines,
+				});
+			}
+			if (fm.description.length > 1024) {
+				longDescSkills.push({
+					name: fm.name || skill.name,
+					chars: fm.description.length,
+				});
+			}
+		} catch {}
 	}
 
 	let eventCount = 0;
@@ -66,14 +107,12 @@ export async function runHealth(): Promise<void> {
 		}
 	}
 
-	const contextPct = Math.min(
+	const metadataPct = Math.min(
 		100,
-		Math.round((totalContextChars / CONTEXT_BUDGET) * 100),
+		Math.round((totalMetadataChars / METADATA_BUDGET) * 100),
 	);
-	const usedContextKb = (totalContextChars / 1000).toFixed(1);
-	const budgetKb = (CONTEXT_BUDGET / 1000).toFixed(1);
 
-	console.log(`\n  ${bold("SKILL-KIT HEALTH REPORT")}\n`);
+	console.log(`\n  ${bold("SKILLKIT HEALTH REPORT")}\n`);
 
 	console.log(check(`${skills.length} skills installed`));
 
@@ -91,37 +130,67 @@ export async function runHealth(): Promise<void> {
 
 	if (neverUsed.length > 0) {
 		console.log();
-		console.log(warn(`${neverUsed.length} skills never used`));
+		console.log(warn(`${neverUsed.length} skills never used in 30d`));
 		const preview = neverUsed.slice(0, 5).join(", ");
 		const more = neverUsed.length > 5 ? ` +${neverUsed.length - 5} more` : "";
 		console.log(`    ${dim(preview + more)}`);
 		console.log(`    ${dim("Run: skillkit prune")}`);
 	}
 
-	const unusedContextChars = neverUsed.reduce((acc, name) => {
-		const skill = skills.find((s) => s.name === name);
-		if (!skill) return acc;
-		const skillMdPath = join(skill.path, "SKILL.md");
-		if (!existsSync(skillMdPath)) return acc;
-		try {
-			return acc + readFileSync(skillMdPath, "utf-8").length;
-		} catch {
-			return acc;
-		}
-	}, 0);
-
 	console.log();
-	const gaugeStr = healthGauge(100 - contextPct);
-	console.log(
-		info(
-			`Context budget: ${contextPct}% consumed (${usedContextKb}K / ${budgetKb}K chars)`,
-		),
-	);
-	console.log(`    ${gaugeStr}`);
-	if (unusedContextChars > 0) {
+	const gaugeStr = healthGauge(100 - metadataPct);
+	const metaKb = (totalMetadataChars / 1000).toFixed(1);
+	const budgetKb = (METADATA_BUDGET / 1000).toFixed(1);
+
+	if (metadataPct >= 90) {
 		console.log(
-			`    ${dim(`${neverUsed.length} unused skills waste ~${(unusedContextChars / 1000).toFixed(1)}K chars`)}`,
+			`  ${red("●")} Metadata budget: ${metadataPct}% (${metaKb}K / ${budgetKb}K chars)`,
 		);
+	} else if (metadataPct >= 70) {
+		console.log(
+			`  ${yellow("●")} Metadata budget: ${metadataPct}% (${metaKb}K / ${budgetKb}K chars)`,
+		);
+	} else {
+		console.log(
+			info(
+				`Metadata budget: ${metadataPct}% (${metaKb}K / ${budgetKb}K chars)`,
+			),
+		);
+	}
+	console.log(`    ${gaugeStr}`);
+	console.log(
+		`    ${dim(`Names + descriptions loaded at startup (2% of context window)`)}`,
+	);
+
+	const bodyKb = (totalBodyChars / 1000).toFixed(1);
+	console.log(info(`Total skill content: ${bodyKb}K chars (loaded on-demand)`));
+
+	if (oversizedSkills.length > 0) {
+		console.log();
+		console.log(
+			warn(
+				`${oversizedSkills.length} skills exceed ${BODY_LINE_LIMIT}-line recommendation`,
+			),
+		);
+		for (const s of oversizedSkills.slice(0, 5)) {
+			console.log(`    ${dim(`${s.name}: ${s.lines} lines`)}`);
+		}
+		if (oversizedSkills.length > 5) {
+			console.log(`    ${dim(`+${oversizedSkills.length - 5} more`)}`);
+		}
+		console.log(
+			`    ${dim("Split large SKILL.md into referenced files for progressive disclosure")}`,
+		);
+	}
+
+	if (longDescSkills.length > 0) {
+		console.log();
+		console.log(
+			warn(`${longDescSkills.length} skills have descriptions over 1024 chars`),
+		);
+		for (const s of longDescSkills.slice(0, 3)) {
+			console.log(`    ${dim(`${s.name}: ${s.chars} chars`)}`);
+		}
 	}
 
 	console.log();
