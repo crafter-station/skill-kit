@@ -1,9 +1,8 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
 import { upsertInstalledSkill } from "../db/queries";
 import { getDb } from "../db/schema";
-import { scanAllSessions } from "../scanner/index";
+import { scanAllSessions, countAllSessions } from "../scanner/index";
 import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
 import { bold, cyan, dim } from "../tui/colors";
 
@@ -20,18 +19,6 @@ function detectSource(skillPath: string): "skills.sh" | "manual" {
 		} catch {}
 	}
 	return "manual";
-}
-
-function countSessions(): number {
-	const projectsDir = join(homedir(), ".claude", "projects");
-	if (!existsSync(projectsDir)) return 0;
-
-	let count = 0;
-	const glob = new Bun.Glob("**/*.jsonl");
-	for (const _ of glob.scanSync({ cwd: projectsDir })) {
-		count++;
-	}
-	return count;
 }
 
 export async function runScan(): Promise<void> {
@@ -99,7 +86,7 @@ export async function runScan(): Promise<void> {
 
 	console.log(dim("  Scanning sessions..."));
 
-	const sessionCount = countSessions();
+	const sessionCount = countAllSessions();
 	const newInvocations = await scanAllSessions(db);
 	const totalRow = db
 		.query<{ count: number }, []>(
