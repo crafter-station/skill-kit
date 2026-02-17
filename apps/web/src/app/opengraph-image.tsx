@@ -41,36 +41,28 @@ export default async function Image() {
 					zIndex: 1,
 				}}
 			>
-				<div
+				<span
 					style={{
-						display: "flex",
-						alignItems: "baseline",
-						gap: 12,
+						fontSize: 96,
+						fontStyle: "italic",
+						color: "#fafafa",
+						fontFamily: "Georgia, serif",
+						letterSpacing: "-0.02em",
 					}}
 				>
-					<span
-						style={{
-							fontSize: 72,
-							fontStyle: "italic",
-							color: "#fafafa",
-							fontFamily: "Georgia, serif",
-							letterSpacing: "-0.02em",
-						}}
-					>
-						skillkit
-					</span>
-				</div>
+					skillkit
+				</span>
 
 				<div
 					style={{
-						fontSize: 24,
-						color: "#555555",
+						fontSize: 28,
+						color: "#a3a3a3",
 						fontFamily: "system-ui, sans-serif",
-						letterSpacing: "0.05em",
+						letterSpacing: "0.08em",
 						textTransform: "uppercase",
 					}}
 				>
-					Analytics for AI Agent Skills
+					Local analytics for AI agent skills
 				</div>
 
 				<div

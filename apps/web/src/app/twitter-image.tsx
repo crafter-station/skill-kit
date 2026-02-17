@@ -43,7 +43,7 @@ export default async function Image() {
 			>
 				<span
 					style={{
-						fontSize: 72,
+						fontSize: 96,
 						fontStyle: "italic",
 						color: "#fafafa",
 						fontFamily: "Georgia, serif",
@@ -55,14 +55,14 @@ export default async function Image() {
 
 				<div
 					style={{
-						fontSize: 24,
-						color: "#555555",
+						fontSize: 28,
+						color: "#a3a3a3",
 						fontFamily: "system-ui, sans-serif",
-						letterSpacing: "0.05em",
+						letterSpacing: "0.08em",
 						textTransform: "uppercase",
 					}}
 				>
-					Analytics for AI Agent Skills
+					Local analytics for AI agent skills
 				</div>
 
 				<div
