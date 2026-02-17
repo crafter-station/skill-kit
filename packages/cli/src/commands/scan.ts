@@ -112,6 +112,6 @@ export async function runScan(): Promise<void> {
 	}
 
 	console.log(
-		`\n  ${dim("Ready. Run")} ${cyan("skill-kit stats")} ${dim("to see usage.")}\n`,
+		`\n  ${dim("Ready. Run")} ${cyan("skillkit stats")} ${dim("to see usage.")}\n`,
 	);
 }

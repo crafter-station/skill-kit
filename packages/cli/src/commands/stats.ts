@@ -35,7 +35,7 @@ export async function runStats(): Promise<void> {
 
 	if (stats.total === 0) {
 		console.log(`\n  ${yellow("No analytics data yet.")}`);
-		console.log(`  ${dim("Run: skill-kit scan")}\n`);
+		console.log(`  ${dim("Run: skillkit scan")}\n`);
 		return;
 	}
 

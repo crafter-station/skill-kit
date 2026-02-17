@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const DB_DIR = join(homedir(), ".skill-kit");
+const DB_DIR = join(homedir(), ".skillkit");
 const DB_PATH = join(DB_DIR, "analytics.db");
 
 export function getDb(): Database {

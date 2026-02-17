@@ -1,5 +1,5 @@
 {
-	"name": "skill-kit",
+	"name": "skillkit",
 	"private": true,
 	"workspaces": [
 		"apps/*",

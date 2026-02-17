@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"type": "module",
 	"bin": {
-		"skill-kit": "./src/bin.ts"
+		"skillkit": "./src/bin.ts"
 	},
 	"exports": {
 		".": {
@@ -13,7 +13,7 @@
 	},
 	"scripts": {
 		"dev": "bun run src/bin.ts",
-		"build": "bun build src/bin.ts --compile --outfile dist/skill-kit",
+		"build": "bun build src/bin.ts --compile --outfile dist/skillkit",
 		"test": "bun test src/",
 		"type-check": "tsc --noEmit"
 	},
