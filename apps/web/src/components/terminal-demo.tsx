@@ -69,7 +69,6 @@ const STEPS: Step[] = [
 const CHAR_DELAY = 40;
 const LINE_DELAY = 100;
 const STEP_PAUSE = 800;
-const LOOP_PAUSE = 4000;
 
 type TerminalLine =
 	| { kind: "prompt"; command: string; cursor: boolean }
@@ -112,66 +111,69 @@ export function TerminalDemo() {
 			});
 
 		const run = async () => {
-			while (!cancelled) {
-				setLines([]);
+			setLines([]);
 
-				for (let stepIdx = 0; stepIdx < STEPS.length; stepIdx++) {
-					const step = STEPS[stepIdx] as Step;
+			for (let stepIdx = 0; stepIdx < STEPS.length; stepIdx++) {
+				const step = STEPS[stepIdx] as Step;
+				if (cancelled) break;
+
+				if (stepIdx > 0) {
+					setLines((prev) => [...prev, { kind: "separator" }]);
+					await delay(200);
+				}
+
+				let typed = "";
+				setLines((prev) => [
+					...prev,
+					{ kind: "prompt", command: "", cursor: true },
+				]);
+
+				for (const char of step.command) {
 					if (cancelled) break;
-
-					if (stepIdx > 0) {
-						setLines((prev) => [...prev, { kind: "separator" }]);
-						await delay(200);
-					}
-
-					let typed = "";
-					setLines((prev) => [
-						...prev,
-						{ kind: "prompt", command: "", cursor: true },
-					]);
-
-					for (const char of step.command) {
-						if (cancelled) break;
-						await delay(CHAR_DELAY);
-						typed += char;
-						const cmd = typed;
-						setLines((prev) => {
-							const next = [...prev];
-							next[next.length - 1] = {
-								kind: "prompt",
-								command: cmd,
-								cursor: true,
-							};
-							return next;
-						});
-					}
-
-					if (cancelled) break;
-
+					await delay(CHAR_DELAY);
+					typed += char;
+					const cmd = typed;
 					setLines((prev) => {
 						const next = [...prev];
 						next[next.length - 1] = {
 							kind: "prompt",
-							command: step.command,
-							cursor: false,
+							command: cmd,
+							cursor: true,
 						};
 						return next;
 					});
-
-					await delay(LINE_DELAY);
-
-					for (const outputLine of step.output) {
-						if (cancelled) break;
-						await delay(LINE_DELAY);
-						setLines((prev) => [...prev, { kind: "output", line: outputLine }]);
-					}
-
-					if (cancelled) break;
-					await delay(STEP_PAUSE);
 				}
 
 				if (cancelled) break;
-				await delay(LOOP_PAUSE);
+
+				setLines((prev) => {
+					const next = [...prev];
+					next[next.length - 1] = {
+						kind: "prompt",
+						command: step.command,
+						cursor: false,
+					};
+					return next;
+				});
+
+				await delay(LINE_DELAY);
+
+				for (const outputLine of step.output) {
+					if (cancelled) break;
+					await delay(LINE_DELAY);
+					setLines((prev) => [...prev, { kind: "output", line: outputLine }]);
+				}
+
+				if (cancelled) break;
+				await delay(STEP_PAUSE);
+			}
+
+			if (!cancelled) {
+				setLines((prev) => [
+					...prev,
+					{ kind: "separator" },
+					{ kind: "prompt", command: "", cursor: true },
+				]);
 			}
 		};
 
@@ -202,7 +204,7 @@ export function TerminalDemo() {
 				</div>
 				<div
 					ref={scrollRef}
-					className="p-5 font-mono text-sm min-h-[280px] max-h-[360px] overflow-y-auto"
+					className="p-5 font-mono text-sm h-[380px] overflow-y-auto"
 					style={{ background: "#0a0a0a" }}
 				>
 					{lines.map((line, i) => {
