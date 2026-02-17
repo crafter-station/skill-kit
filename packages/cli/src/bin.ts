@@ -10,17 +10,17 @@ function printHelp(): void {
   ${bold("USAGE")}
     skill-kit <command> [args]
 
+  ${bold("ANALYTICS")} ${dim("(local-first)")}
+    ${cyan("scan")}        Discover installed skills and index session data
+    ${cyan("list")}        List installed skills with size & context budget
+    ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
+    ${cyan("health")}      Health check: unused skills, context budget, DB
+
   ${bold("MANAGEMENT")} ${dim("(powered by skills.sh)")}
     ${cyan("install")}     Install a skill ${dim("(skill-kit install owner/repo)")}
     ${cyan("uninstall")}   Remove a skill ${dim("(skill-kit uninstall name)")}
     ${cyan("update")}      Update all skills to latest
     ${cyan("find")}        Search the skills.sh registry
-
-  ${bold("ANALYTICS")} ${dim("(local-first)")}
-    ${cyan("list")}        List installed skills with size & context budget
-    ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
-    ${cyan("health")}      Health check: unused skills, context budget, DB
-    ${cyan("analyze")}     Scan session files to populate analytics DB
 
   ${bold("OTHER")}
     ${cyan("version")}     Print version
@@ -33,6 +33,11 @@ async function main(): Promise<void> {
 	const args = process.argv.slice(3);
 
 	switch (cmd) {
+		case "scan": {
+			const { runScan } = await import("./commands/scan");
+			await runScan();
+			break;
+		}
 		case "install":
 		case "add": {
 			const { runInstall } = await import("./commands/install");
@@ -71,17 +76,6 @@ async function main(): Promise<void> {
 		case "health": {
 			const { runHealth } = await import("./commands/health");
 			await runHealth();
-			break;
-		}
-		case "analyze": {
-			const { getDb } = await import("./db/schema");
-			const { scanAllSessions } = await import("./scanner/index");
-			const db = getDb();
-			console.log("\n  Scanning ~/.claude/projects/ for skill invocations...");
-			const count = await scanAllSessions(db);
-			console.log(
-				`  ${count > 0 ? `Found ${count} new invocations.` : "No new invocations found."}\n`,
-			);
 			break;
 		}
 		case "version":

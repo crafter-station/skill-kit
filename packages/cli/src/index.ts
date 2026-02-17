@@ -1,5 +1,6 @@
 export { runHealth } from "./commands/health";
 export { runList } from "./commands/list";
+export { runScan } from "./commands/scan";
 export { runStats } from "./commands/stats";
 export {
 	getDailyUsage,

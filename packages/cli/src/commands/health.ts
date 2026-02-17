@@ -83,10 +83,10 @@ export async function runHealth(): Promise<void> {
 		);
 	} else if (dbExists) {
 		console.log(warn("Analytics DB exists but has no data"));
-		console.log(dim("    Run: skill-kit stats"));
+		console.log(dim("    Run: skill-kit scan"));
 	} else {
 		console.log(warn("Analytics DB not found"));
-		console.log(dim("    Run: skill-kit stats"));
+		console.log(dim("    Run: skill-kit scan"));
 	}
 
 	if (neverUsed.length > 0) {
