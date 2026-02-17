@@ -55,7 +55,7 @@ const STEPS: Step[] = [
 		command: "skillkit health",
 		output: [
 			{
-				text: "  Budget: [████████░░] 78% (31.2K / 40K)",
+				text: "  [████████░░] 78% metadata budget (12.5K / 16.0K)",
 				type: "output",
 			},
 			{
@@ -256,7 +256,7 @@ export function TerminalDemo() {
 					style={{ background: "#0e0e0e" }}
 				>
 					<span>-- NORMAL --</span>
-					<span>skillkit v0.1.0</span>
+					<span>skillkit v0.1.4</span>
 					<span>utf-8</span>
 				</div>
 			</div>

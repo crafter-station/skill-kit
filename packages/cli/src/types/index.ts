@@ -4,6 +4,7 @@ export interface InstalledSkill {
 	description: string;
 	size: number;
 	installedAt: string;
+	agent: string;
 }
 
 export interface SkillInvocation {

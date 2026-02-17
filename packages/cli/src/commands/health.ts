@@ -3,9 +3,8 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { getTopSkills } from "../db/queries";
 import { getDb } from "../db/schema";
-import { scanInstalledSkills } from "../scanner/skills";
+import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
 import { bold, dim, green, red, yellow } from "../tui/colors";
-import { healthGauge } from "../tui/health";
 
 const METADATA_BUDGET = 16000;
 const BODY_LINE_LIMIT = 500;
@@ -31,7 +30,7 @@ function parseFrontmatter(content: string): {
 	if (!match)
 		return { name: "", description: "", bodyLines: content.split("\n").length };
 
-	const yaml = match[1];
+	const yaml = match[1] ?? "";
 	const body = content.slice(match[0].length);
 	const bodyLines = body.trim() ? body.trim().split("\n").length : 0;
 
@@ -39,10 +38,11 @@ function parseFrontmatter(content: string): {
 	let description = "";
 
 	const nameMatch = yaml.match(/^name:\s*(.+)$/m);
-	if (nameMatch) name = nameMatch[1].trim().replace(/^["']|["']$/g, "");
+	if (nameMatch?.[1]) name = nameMatch[1].trim().replace(/^["']|["']$/g, "");
 
 	const descMatch = yaml.match(/^description:\s*(.+)$/m);
-	if (descMatch) description = descMatch[1].trim().replace(/^["']|["']$/g, "");
+	if (descMatch?.[1])
+		description = descMatch[1].trim().replace(/^["']|["']$/g, "");
 
 	return { name, description, bodyLines };
 }
@@ -114,7 +114,9 @@ export async function runHealth(): Promise<void> {
 
 	console.log(`\n  ${bold("SKILLKIT HEALTH REPORT")}\n`);
 
-	console.log(check(`${skills.length} skills installed`));
+	const agents = getDetectedAgents();
+	console.log(check(`${skills.length} skills across ${agents.length} agents`));
+	console.log(dim(`    ${agents.join(", ")}`));
 
 	if (dbExists && hasDbData) {
 		console.log(
@@ -138,28 +140,26 @@ export async function runHealth(): Promise<void> {
 	}
 
 	console.log();
-	const gaugeStr = healthGauge(100 - metadataPct);
 	const metaKb = (totalMetadataChars / 1000).toFixed(1);
 	const budgetKb = (METADATA_BUDGET / 1000).toFixed(1);
 
-	if (metadataPct >= 90) {
-		console.log(
-			`  ${red("●")} Metadata budget: ${metadataPct}% (${metaKb}K / ${budgetKb}K chars)`,
-		);
-	} else if (metadataPct >= 70) {
-		console.log(
-			`  ${yellow("●")} Metadata budget: ${metadataPct}% (${metaKb}K / ${budgetKb}K chars)`,
-		);
-	} else {
-		console.log(
-			info(
-				`Metadata budget: ${metadataPct}% (${metaKb}K / ${budgetKb}K chars)`,
-			),
-		);
-	}
-	console.log(`    ${gaugeStr}`);
+	const filled = Math.round(Math.min(metadataPct, 100) / 10);
+	const empty = 10 - filled;
+	const barFill = "█".repeat(filled);
+	const barEmpty = "░".repeat(empty);
+	const colorBar =
+		metadataPct >= 90
+			? red(barFill)
+			: metadataPct >= 70
+				? yellow(barFill)
+				: green(barFill);
+	const bar = `[${colorBar}${dim(barEmpty)}]`;
+
 	console.log(
-		`    ${dim(`Names + descriptions loaded at startup (2% of context window)`)}`,
+		`  ${bar} ${bold(`${metadataPct}%`)} metadata budget ${dim(`(${metaKb}K / ${budgetKb}K)`)}`,
+	);
+	console.log(
+		`    ${dim("name + description of each skill, loaded at startup")}`,
 	);
 
 	const bodyKb = (totalBodyChars / 1000).toFixed(1);

@@ -151,11 +151,10 @@ export function HowItWorks() {
 							<div className="border-t border-[#1a1a1a]" />
 							<div className="p-4 space-y-2">
 								<div className="leading-7">
-									<span className="text-[#555]">Budget </span>
 									<span className="text-white">[████████</span>
 									<span className="text-[#333]">░░</span>
 									<span className="text-white">] 78%</span>
-									<span className="text-[#555]"> (31.2K / 40K)</span>
+									<span className="text-[#555]"> metadata budget (12.5K / 16.0K)</span>
 								</div>
 								<div className="border-t border-[#1a1a1a] pt-2 space-y-0.5">
 									<div className="text-[#555] leading-7">
@@ -180,7 +179,7 @@ export function HowItWorks() {
 										Removed lint (2.1K)
 									</div>
 									<div className="text-white leading-7">
-										Reclaimed 3.0K tokens · 10 skills active · 28.2K / 40K
+										Reclaimed 3.0K · 10 skills active · 9.5K / 16.0K
 									</div>
 								</div>
 							</div>

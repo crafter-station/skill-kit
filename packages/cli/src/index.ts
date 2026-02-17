@@ -13,7 +13,7 @@ export {
 } from "./db/queries";
 export { getDb } from "./db/schema";
 export { parseSessionFile, scanAllSessions } from "./scanner/index";
-export { scanInstalledSkills } from "./scanner/skills";
+export { getDetectedAgents, scanInstalledSkills } from "./scanner/skills";
 export type {
 	InstalledSkill,
 	SkillInvocation,

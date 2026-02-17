@@ -16,6 +16,13 @@ npx @crafter/skillkit stats
 npx @crafter/skillkit health
 ```
 
+Or install globally:
+
+```bash
+npm i -g @crafter/skillkit
+skillkit scan
+```
+
 ## Commands
 
 | Command | Description |
@@ -27,18 +34,6 @@ npx @crafter/skillkit health
 | `skillkit prune` | Remove unused skills to reclaim context budget |
 
 Install skills via [skills.sh](https://skills.sh): `npx skills add <owner/repo>`
-
-Already using skills.sh? Run `skillkit scan` to pick up everything you've installed and start tracking usage.
-
-## Use as a Skill
-
-Install skillkit as a Claude Code skill so the agent can run analytics commands for you:
-
-```bash
-npx skills add crafter-station/skill-kit
-```
-
-Then ask your agent things like "which skills do I use the most?" or "clean up unused skills" and it will run the right commands.
 
 ## How It Works
 
@@ -70,7 +65,7 @@ $ skillkit stats
 
 ### Health
 
-Checks context budget usage and flags unused skills.
+Checks metadata budget usage (name + description loaded at startup) and flags unused skills.
 
 ```
 $ skillkit health
@@ -84,8 +79,8 @@ Removes skills that haven't been used in the last 30 days.
 
 ```
 $ skillkit prune
-  × scaffold (0.9K)
-  × lint (2.1K)
+  x scaffold (0.9K)
+  x lint (2.1K)
 
   2 skills · 3.0K context reclaimable
 
@@ -94,7 +89,7 @@ $ skillkit prune
 
 ## Data Storage
 
-All data stays on your machine:
+All data stays on your machine. No telemetry. No signup.
 
 | Path | Purpose |
 |------|---------|
@@ -111,33 +106,6 @@ Scans skill directories for 15+ agents automatically:
 - OpenHands, Amp, Goose, Kilo Code, Trae
 
 Skills installed via [skills.sh](https://skills.sh) symlinks are deduplicated across agents.
-
-## Project Structure
-
-```
-skill-kit/
-├── apps/web/          # Landing page (Next.js)
-├── packages/cli/      # CLI tool (Bun, zero deps)
-└── packages/skill/    # Claude Code skill (SKILL.md)
-```
-
-## Development
-
-```bash
-bun install
-
-# Run CLI locally
-bun run packages/cli/src/bin.ts scan
-
-# Run landing page
-bun run --filter '@crafter/skillkit-web' dev
-
-# Type check
-bun run --filter '*' type-check
-
-# Lint
-biome check --write .
-```
 
 ## License
 

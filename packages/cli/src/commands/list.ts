@@ -16,8 +16,13 @@ export function runList(): void {
 	const skills = scanInstalledSkills();
 
 	if (skills.length === 0) {
-		console.log("\n  No skills installed in ~/.claude/skills/\n");
+		console.log("\n  No skills found.\n");
 		return;
+	}
+
+	const agentCounts = new Map<string, number>();
+	for (const s of skills) {
+		agentCounts.set(s.agent, (agentCounts.get(s.agent) ?? 0) + 1);
 	}
 
 	const totalSize = skills.reduce((acc, s) => acc + s.size, 0);
@@ -40,7 +45,10 @@ export function runList(): void {
 		console.log(`  ${name}${desc}${size}`);
 	}
 
+	const agentSummary = [...agentCounts.entries()]
+		.map(([a, c]) => `${a} (${c})`)
+		.join(", ");
 	console.log(
-		`\n  ${dim(`Total: ${skills.length} skills | ${formatSize(totalSize)} context budget`)}\n`,
+		`\n  ${dim(`Total: ${skills.length} skills | ${formatSize(totalSize)} | ${agentSummary}`)}\n`,
 	);
 }

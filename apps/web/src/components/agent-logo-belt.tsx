@@ -6,9 +6,13 @@ const AGENTS = [
 	"Claude Code",
 	"Cursor",
 	"Codex",
-	"VS Code",
 	"Windsurf",
 	"Gemini CLI",
+	"Cline",
+	"Roo Code",
+	"GitHub Copilot",
+	"OpenHands",
+	"Goose",
 ];
 
 export function AgentLogoBelt() {
@@ -33,6 +37,9 @@ export function AgentLogoBelt() {
 							{agent}
 						</span>
 					))}
+					<span className="px-4 py-2 font-mono text-sm text-[#333]">
+						+30 more
+					</span>
 				</motion.div>
 			</div>
 		</section>

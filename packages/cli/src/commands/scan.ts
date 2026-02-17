@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { upsertInstalledSkill } from "../db/queries";
 import { getDb } from "../db/schema";
 import { scanAllSessions } from "../scanner/index";
-import { scanInstalledSkills } from "../scanner/skills";
+import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
 import { bold, cyan, dim } from "../tui/colors";
 
 function detectSource(skillPath: string): "skills.sh" | "manual" {
@@ -37,7 +37,12 @@ function countSessions(): number {
 export async function runScan(): Promise<void> {
 	const db = getDb();
 
-	console.log(`\n  ${dim("Scanning ~/.claude/skills/ ...")}`);
+	const agents = getDetectedAgents();
+	if (agents.length === 0) {
+		console.log(`\n  ${dim("No agent skill directories found.")}\n`);
+		return;
+	}
+	console.log(`\n  ${dim(`Scanning ${agents.length} agents: ${agents.join(", ")}`)}`);
 
 	const skills = scanInstalledSkills();
 

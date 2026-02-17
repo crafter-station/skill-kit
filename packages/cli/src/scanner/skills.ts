@@ -3,6 +3,24 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { InstalledSkill } from "../types";
 
+const AGENT_SKILL_PATHS: Array<{ agent: string; dir: string }> = [
+	{ agent: "Claude Code", dir: join(homedir(), ".claude", "skills") },
+	{ agent: "Cursor", dir: join(homedir(), ".cursor", "skills") },
+	{ agent: "Codex", dir: join(homedir(), ".codex", "skills") },
+	{ agent: "Windsurf", dir: join(homedir(), ".codeium", "windsurf", "skills") },
+	{ agent: "Gemini CLI", dir: join(homedir(), ".gemini", "skills") },
+	{ agent: "Cline", dir: join(homedir(), ".cline", "skills") },
+	{ agent: "Roo Code", dir: join(homedir(), ".roo", "skills") },
+	{ agent: "Continue", dir: join(homedir(), ".continue", "skills") },
+	{ agent: "OpenCode", dir: join(homedir(), ".config", "opencode", "skills") },
+	{ agent: "GitHub Copilot", dir: join(homedir(), ".copilot", "skills") },
+	{ agent: "OpenHands", dir: join(homedir(), ".openhands", "skills") },
+	{ agent: "Amp", dir: join(homedir(), ".config", "agents", "skills") },
+	{ agent: "Goose", dir: join(homedir(), ".config", "goose", "skills") },
+	{ agent: "Kilo Code", dir: join(homedir(), ".kilocode", "skills") },
+	{ agent: "Trae", dir: join(homedir(), ".trae", "skills") },
+];
+
 function parseYamlFrontmatter(content: string): Record<string, string> {
 	const match = content.match(/^---\n([\s\S]*?)\n---/);
 	if (!match || !match[1]) return {};
@@ -38,12 +56,13 @@ function getDirSize(dirPath: string): number {
 	return total;
 }
 
-export function scanInstalledSkills(): InstalledSkill[] {
-	const skillsDir = join(homedir(), ".claude", "skills");
+function scanSkillsDir(
+	skillsDir: string,
+	agent: string,
+): InstalledSkill[] {
 	if (!existsSync(skillsDir)) return [];
 
 	const skills: InstalledSkill[] = [];
-
 	let entries: string[];
 	try {
 		entries = readdirSync(skillsDir);
@@ -95,8 +114,37 @@ export function scanInstalledSkills(): InstalledSkill[] {
 			description,
 			size,
 			installedAt: new Date(stat.birthtime).toISOString(),
+			agent,
 		});
 	}
 
-	return skills.sort((a, b) => a.name.localeCompare(b.name));
+	return skills;
+}
+
+export function scanInstalledSkills(): InstalledSkill[] {
+	const allSkills: InstalledSkill[] = [];
+	const seen = new Set<string>();
+
+	for (const { agent, dir } of AGENT_SKILL_PATHS) {
+		const skills = scanSkillsDir(dir, agent);
+		for (const skill of skills) {
+			try {
+				const ino = statSync(skill.path).ino;
+				const key = `${ino}`;
+				if (seen.has(key)) continue;
+				seen.add(key);
+			} catch {}
+			allSkills.push(skill);
+		}
+	}
+
+	return allSkills.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function getDetectedAgents(): string[] {
+	const agents: string[] = [];
+	for (const { agent, dir } of AGENT_SKILL_PATHS) {
+		if (existsSync(dir)) agents.push(agent);
+	}
+	return agents;
 }
