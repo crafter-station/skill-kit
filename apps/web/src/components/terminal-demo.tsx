@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 type OutputLine = {
 	text: string;
-	type: "output" | "success" | "header" | "empty";
+	type: "output" | "highlight" | "header" | "empty";
 };
 
 type Step = {
@@ -14,19 +14,39 @@ type Step = {
 
 const STEPS: Step[] = [
 	{
-		command: "skill-kit stats",
+		command: "skill-kit scan",
 		output: [
 			{
-				text: "  SKILL-KIT ANALYTICS (30d)",
+				text: "  Scanning ~/.claude/skills/ ...",
+				type: "output",
+			},
+			{
+				text: "  Found 12 skills (8 via skills.sh, 4 manual)",
+				type: "highlight",
+			},
+			{
+				text: "  Indexed 211 sessions · 1,847 invocations",
+				type: "output",
+			},
+		],
+	},
+	{
+		command: "skill-kit stats --top 3",
+		output: [
+			{
+				text: "  SKILL       30d   TREND",
 				type: "header",
 			},
-			{ text: "", type: "empty" },
 			{
-				text: "  ▁▂▃▅▇█▆▅▇█  127 invocations across 12 skills",
-				type: "success",
+				text: "  commit      42    ▂▃▅▇█▆▅▇█",
+				type: "highlight",
 			},
 			{
-				text: "  Top: commit (42), review (38), deploy (27)",
+				text: "  review      38    ▁▃▅▆▇▇▆▅▃",
+				type: "output",
+			},
+			{
+				text: "  deploy      27    ▁▁▂▃▅▇█▇▅",
 				type: "output",
 			},
 		],
@@ -35,57 +55,33 @@ const STEPS: Step[] = [
 		command: "skill-kit health",
 		output: [
 			{
-				text: "  SKILL-KIT HEALTH REPORT",
-				type: "header",
-			},
-			{ text: "", type: "empty" },
-			{
-				text: "  Context budget: [████████░░] 78% (31.2K / 40K tokens)",
+				text: "  Budget: [████████░░] 78% (31.2K / 40K)",
 				type: "output",
 			},
 			{
-				text: "  ⚠ 3 skills unused in 30 days — run skill-kit uninstall to reclaim context",
-				type: "success",
-			},
-		],
-	},
-	{
-		command: "skill-kit list",
-		output: [
-			{
-				text: "  SKILL           SIZE     LAST USED    INVOCATIONS",
-				type: "header",
-			},
-			{
-				text: "  commit          1.2K     2h ago       42",
-				type: "output",
-			},
-			{
-				text: "  review          3.8K     1d ago       38",
-				type: "output",
-			},
-			{
-				text: "  deploy          0.9K     3d ago       27",
-				type: "output",
+				text: "  ! 3 skills unused in 30d — run skill-kit prune",
+				type: "highlight",
 			},
 		],
 	},
 ];
 
 const CHAR_DELAY = 40;
-const LINE_DELAY = 120;
-const STEP_PAUSE = 600;
+const LINE_DELAY = 100;
+const STEP_PAUSE = 800;
 const LOOP_PAUSE = 4000;
 
 type TerminalLine =
 	| { kind: "prompt"; command: string; cursor: boolean }
-	| { kind: "output"; line: OutputLine };
+	| { kind: "output"; line: OutputLine }
+	| { kind: "separator" };
 
 export function TerminalDemo() {
 	const [lines, setLines] = useState<TerminalLine[]>([]);
 	const [visible, setVisible] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const animRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const scrollRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(
@@ -97,6 +93,12 @@ export function TerminalDemo() {
 		if (containerRef.current) observer.observe(containerRef.current);
 		return () => observer.disconnect();
 	}, []);
+
+	useEffect(() => {
+		if (scrollRef.current) {
+			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+		}
+	}, [lines]);
 
 	useEffect(() => {
 		if (!visible) return;
@@ -112,8 +114,14 @@ export function TerminalDemo() {
 			while (!cancelled) {
 				setLines([]);
 
-				for (const step of STEPS) {
+				for (let stepIdx = 0; stepIdx < STEPS.length; stepIdx++) {
+					const step = STEPS[stepIdx]!;
 					if (cancelled) break;
+
+					if (stepIdx > 0) {
+						setLines((prev) => [...prev, { kind: "separator" }]);
+						await delay(200);
+					}
 
 					let typed = "";
 					setLines((prev) => [
@@ -154,7 +162,10 @@ export function TerminalDemo() {
 					for (const outputLine of step.output) {
 						if (cancelled) break;
 						await delay(LINE_DELAY);
-						setLines((prev) => [...prev, { kind: "output", line: outputLine }]);
+						setLines((prev) => [
+							...prev,
+							{ kind: "output", line: outputLine },
+						]);
 					}
 
 					if (cancelled) break;
@@ -175,63 +186,52 @@ export function TerminalDemo() {
 	}, [visible]);
 
 	return (
-		<div
-			ref={containerRef}
-			className="relative w-full max-w-2xl mx-auto"
-			style={{
-				filter: "drop-shadow(0 0 80px rgba(16,185,129,0.12))",
-			}}
-		>
-			<div
-				className="absolute inset-x-0 -top-16 h-32 pointer-events-none"
-				style={{
-					background:
-						"radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.08) 0%, transparent 70%)",
-				}}
-			/>
-			<div
-				className="relative rounded-xl border border-zinc-800 overflow-hidden"
-				style={{ boxShadow: "0 0 80px -20px rgba(16,185,129,0.2)" }}
-			>
+		<div ref={containerRef} className="relative w-full max-w-2xl mx-auto">
+			<div className="relative rounded-xl border border-[#222] overflow-hidden">
 				<div
-					className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800"
+					className="flex items-center gap-2 px-4 py-3 border-b border-[#222]"
 					style={{ background: "#0a0a0a" }}
 				>
-					<span
-						className="w-3 h-3 rounded-full"
-						style={{ background: "#ff5f57" }}
-					/>
-					<span
-						className="w-3 h-3 rounded-full"
-						style={{ background: "#febc2e" }}
-					/>
-					<span
-						className="w-3 h-3 rounded-full"
-						style={{ background: "#28c840" }}
-					/>
-					<span className="flex-1 text-center text-xs text-zinc-500 font-mono -ml-16">
+					<span className="w-3 h-3 rounded-full bg-[#333]" />
+					<span className="w-3 h-3 rounded-full bg-[#333]" />
+					<span className="w-3 h-3 rounded-full bg-[#333]" />
+					<span className="flex-1 text-center text-xs text-[#555] font-mono -ml-16">
 						skill-kit
+					</span>
+					<span className="text-[10px] font-mono text-[#333] tracking-wider uppercase">
+						normal
 					</span>
 				</div>
 				<div
-					className="p-5 font-mono text-sm min-h-[280px]"
+					ref={scrollRef}
+					className="p-5 font-mono text-sm min-h-[280px] max-h-[360px] overflow-y-auto"
 					style={{ background: "#0a0a0a" }}
 				>
 					{lines.map((line, i) => {
+						if (line.kind === "separator") {
+							return (
+								<div
+									key={i}
+									className="border-t border-[#1a1a1a] my-3"
+								/>
+							);
+						}
+
 						if (line.kind === "prompt") {
 							return (
-								<div key={i} className="flex items-start gap-2 leading-6">
-									<span className="text-emerald-400 select-none">$</span>
+								<div
+									key={i}
+									className="flex items-start gap-2 leading-6"
+								>
+									<span className="text-[#555] select-none">
+										$
+									</span>
 									<span className="text-white">
 										{line.command}
 										{line.cursor && (
-											<span
-												className="inline-block w-[2px] h-[14px] ml-[1px] align-middle"
-												style={{
-													background: "#10b981",
-													animation: "blink 1s step-end infinite",
-												}}
-											/>
+											<span className="vim-cursor">
+												&nbsp;
+											</span>
 										)}
 									</span>
 								</div>
@@ -246,32 +246,48 @@ export function TerminalDemo() {
 
 						if (ol.type === "header") {
 							return (
-								<div key={i} className="text-zinc-500 leading-6">
+								<div key={i} className="text-[#555] leading-6">
 									{ol.text}
 								</div>
 							);
 						}
 
-						if (ol.type === "success") {
+						if (ol.type === "highlight") {
 							return (
-								<div key={i} className="text-emerald-400 leading-6">
+								<div key={i} className="text-white leading-6">
 									{ol.text}
 								</div>
 							);
 						}
 
 						return (
-							<div key={i} className="text-zinc-400 leading-6">
+							<div key={i} className="text-[#888] leading-6">
 								{ol.text}
 							</div>
 						);
 					})}
 				</div>
+				<div
+					className="flex items-center justify-between px-4 py-1.5 border-t border-[#222] text-[10px] font-mono text-[#444]"
+					style={{ background: "#0e0e0e" }}
+				>
+					<span>-- INSERT --</span>
+					<span>skill-kit v0.1.0</span>
+					<span>utf-8</span>
+				</div>
 			</div>
 			<style>{`
-				@keyframes blink {
-					0%, 100% { opacity: 1; }
-					50% { opacity: 0; }
+				.vim-cursor {
+					display: inline-block;
+					width: 8px;
+					height: 16px;
+					background: white;
+					vertical-align: text-bottom;
+					animation: vim-blink 1.2s step-end infinite;
+				}
+				@keyframes vim-blink {
+					0%, 70% { opacity: 1; }
+					71%, 100% { opacity: 0; }
 				}
 			`}</style>
 		</div>
