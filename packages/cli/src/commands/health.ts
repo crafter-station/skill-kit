@@ -29,7 +29,7 @@ function _formatSize(bytes: number): string {
 export async function runHealth(): Promise<void> {
 	const skills = scanInstalledSkills();
 	const _skillsDir = join(homedir(), ".claude", "skills");
-	const dbPath = join(homedir(), ".skill-kit", "analytics.db");
+	const dbPath = join(homedir(), ".skillkit", "analytics.db");
 	const dbExists = existsSync(dbPath);
 
 	let totalContextChars = 0;
@@ -83,10 +83,10 @@ export async function runHealth(): Promise<void> {
 		);
 	} else if (dbExists) {
 		console.log(warn("Analytics DB exists but has no data"));
-		console.log(dim("    Run: skill-kit scan"));
+		console.log(dim("    Run: skillkit scan"));
 	} else {
 		console.log(warn("Analytics DB not found"));
-		console.log(dim("    Run: skill-kit scan"));
+		console.log(dim("    Run: skillkit scan"));
 	}
 
 	if (neverUsed.length > 0) {
@@ -95,7 +95,7 @@ export async function runHealth(): Promise<void> {
 		const preview = neverUsed.slice(0, 5).join(", ");
 		const more = neverUsed.length > 5 ? ` +${neverUsed.length - 5} more` : "";
 		console.log(`    ${dim(preview + more)}`);
-		console.log(`    ${dim("Run: skill-kit uninstall <name>")}`);
+		console.log(`    ${dim("Run: skillkit prune")}`);
 	}
 
 	const unusedContextChars = neverUsed.reduce((acc, name) => {

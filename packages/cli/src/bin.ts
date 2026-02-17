@@ -5,16 +5,17 @@ const VERSION = "0.1.0";
 
 function printHelp(): void {
 	console.log(`
-  ${bold("skill-kit")} ${dim(`v${VERSION}`)} - Analytics for AI agent skills
+  ${bold("skillkit")} ${dim(`v${VERSION}`)} - Analytics for AI agent skills
 
   ${bold("USAGE")}
-    skill-kit <command> [args]
+    skillkit <command> [args]
 
   ${bold("COMMANDS")}
     ${cyan("scan")}        Discover installed skills and index session data
     ${cyan("list")}        List installed skills with size & context budget
     ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
     ${cyan("health")}      Health check: unused skills, context budget, DB
+    ${cyan("prune")}       Remove unused skills to reclaim context budget
     ${cyan("version")}     Print version
     ${cyan("help")}        Show this help message
 
@@ -45,6 +46,11 @@ async function main(): Promise<void> {
 		case "health": {
 			const { runHealth } = await import("./commands/health");
 			await runHealth();
+			break;
+		}
+		case "prune": {
+			const { runPrune } = await import("./commands/prune");
+			await runPrune();
 			break;
 		}
 		case "version":
