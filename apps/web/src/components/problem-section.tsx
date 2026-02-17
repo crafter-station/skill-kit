@@ -4,19 +4,19 @@ import { Check, X } from "lucide-react";
 import { motion } from "motion/react";
 
 const WITHOUT = [
-	"Manually copy SKILL.md between projects",
-	"No versioning — skills break silently",
-	"No discovery — finding good skills is guesswork",
-	"No analytics — which skills are you actually using?",
-	"Security blindspot — 341 malicious skills found on registries",
+	"50 skills installed, no idea which ones you actually use",
+	"Context window bloated with unused skills eating tokens",
+	"No way to tell if a skill invocation failed or succeeded",
+	"Guessing which skills to keep vs drop after each project",
+	"Zero visibility into how skills affect agent performance",
 ];
 
 const WITH = [
-	"One command to install from a curated registry",
-	"Semantic versioning with safe updates",
-	"Searchable directory with quality scores",
-	"Usage analytics with sparklines and health checks",
-	"Publisher verification and security scanning",
+	"Usage sparklines show exactly which skills earn their keep",
+	"Context budget analysis — see token cost per skill",
+	"Health checks flag unused skills wasting your context window",
+	"Session scanning extracts real invocation data from JSONL logs",
+	"Install and manage via skills.sh, analyze with SkillKit",
 ];
 
 export function ProblemSection() {
@@ -31,7 +31,7 @@ export function ProblemSection() {
 					className="text-center mb-16"
 				>
 					<h2 className="text-3xl font-bold text-white">
-						Skills today are broken
+						You have no idea which skills matter
 					</h2>
 				</motion.div>
 				<div className="grid md:grid-cols-2 gap-6">

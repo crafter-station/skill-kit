@@ -1,30 +1,64 @@
 #!/usr/bin/env bun
 import { bold, cyan, dim, yellow } from "./tui/colors";
 
-const VERSION = "0.0.1";
+const VERSION = "0.1.0";
 
 function printHelp(): void {
 	console.log(`
-  ${bold("skill-kit")} ${dim(`v${VERSION}`)} - Claude skill analytics & management
+  ${bold("skill-kit")} ${dim(`v${VERSION}`)} - Analytics & management for AI agent skills
 
   ${bold("USAGE")}
-    skill-kit <command>
+    skill-kit <command> [args]
 
-  ${bold("COMMANDS")}
-    ${cyan("list")}      List all installed skills
-    ${cyan("stats")}     Show usage analytics (last 30 days)
-    ${cyan("health")}    Run a health check on your skill setup
-    ${cyan("analyze")}   Scan sessions and populate analytics DB
-    ${cyan("version")}   Print version
-    ${cyan("help")}      Show this help message
+  ${bold("MANAGEMENT")} ${dim("(powered by skills.sh)")}
+    ${cyan("install")}     Install a skill ${dim("(skill-kit install owner/repo)")}
+    ${cyan("uninstall")}   Remove a skill ${dim("(skill-kit uninstall name)")}
+    ${cyan("update")}      Update all skills to latest
+    ${cyan("find")}        Search the skills.sh registry
+
+  ${bold("ANALYTICS")} ${dim("(local-first)")}
+    ${cyan("list")}        List installed skills with size & context budget
+    ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
+    ${cyan("health")}      Health check: unused skills, context budget, DB
+    ${cyan("analyze")}     Scan session files to populate analytics DB
+
+  ${bold("OTHER")}
+    ${cyan("version")}     Print version
+    ${cyan("help")}        Show this help message
 `);
 }
 
 async function main(): Promise<void> {
 	const cmd = process.argv[2];
+	const args = process.argv.slice(3);
 
 	switch (cmd) {
-		case "list": {
+		case "install":
+		case "add": {
+			const { runInstall } = await import("./commands/install");
+			runInstall(args);
+			break;
+		}
+		case "uninstall":
+		case "remove": {
+			const { runUninstall } = await import("./commands/uninstall");
+			runUninstall(args);
+			break;
+		}
+		case "update":
+		case "upgrade": {
+			const { runUpdate } = await import("./commands/update");
+			runUpdate();
+			break;
+		}
+		case "find":
+		case "search": {
+			const { runFind } = await import("./commands/find");
+			runFind(args);
+			break;
+		}
+		case "list":
+		case "ls": {
 			const { runList } = await import("./commands/list");
 			runList();
 			break;

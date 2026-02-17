@@ -4,7 +4,7 @@ import { Check, Copy } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 
-const INSTALL_CMD = "curl -fsSL skill-kit.dev/install | sh";
+const INSTALL_CMD = "npx @crafter/skillkit";
 
 export function FinalCTA() {
 	const [copied, setCopied] = useState(false);

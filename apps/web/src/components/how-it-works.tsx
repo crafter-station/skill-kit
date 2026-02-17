@@ -5,20 +5,23 @@ import { motion } from "motion/react";
 const STEPS = [
 	{
 		number: "01",
-		title: "Discover",
-		description: "Browse the registry for verified skills",
-		snippet: "$ skill-kit search auth",
+		title: "Install with skills.sh",
+		description:
+			"Use the standard. SkillKit wraps skills.sh for install, update, and search.",
+		snippet: "$ skill-kit install owner/repo",
 	},
 	{
 		number: "02",
-		title: "Install",
-		description: "One command. Works with any agent.",
-		snippet: "$ skill-kit install @clerk/auth",
+		title: "Analyze usage",
+		description:
+			"Scan your session files to see which skills you actually invoke.",
+		snippet: "$ skill-kit stats",
 	},
 	{
 		number: "03",
-		title: "Manage",
-		description: "Track usage, check health, stay updated.",
+		title: "Optimize",
+		description:
+			"Drop unused skills, reclaim context budget, keep what matters.",
 		snippet: "$ skill-kit health",
 	},
 ];

@@ -47,7 +47,7 @@ export function Hero() {
 					variants={fadeUp}
 					className="text-5xl md:text-6xl font-bold tracking-tight text-white max-w-3xl leading-[1.1]"
 				>
-					The package manager for AI agent skills
+					Know which skills actually matter
 				</motion.h1>
 
 				<motion.p
@@ -57,8 +57,8 @@ export function Hero() {
 					variants={fadeUp}
 					className="text-lg text-zinc-400 max-w-2xl leading-relaxed"
 				>
-					Install, track, and manage skills for Claude Code, Cursor, Codex, and
-					more. Like npm, but for your AI coding agent.
+					Local-first analytics for your AI agent skills. See what you use, what
+					wastes context, and what to drop. Powered by skills.sh.
 				</motion.p>
 
 				<motion.div

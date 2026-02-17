@@ -6,10 +6,10 @@
 		"packages/*"
 	],
 	"scripts": {
-		"dev": "bun run --filter '@skill-kit/web' dev",
+		"dev": "bun run --filter '@crafter/skillkit-web' dev",
 		"build": "bun run --filter '*' build",
-		"build:cli": "bun run --filter '@skill-kit/cli' build",
-		"build:web": "bun run --filter '@skill-kit/web' build",
+		"build:cli": "bun run --filter '@crafter/skillkit' build",
+		"build:web": "bun run --filter '@crafter/skillkit-web' build",
 		"lint": "biome check --write .",
 		"lint:check": "biome check .",
 		"type-check": "bun run --filter '*' type-check"

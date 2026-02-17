@@ -4,34 +4,34 @@ import { motion } from "motion/react";
 
 const ITEMS = [
 	{
-		question: "How is this different from manually copying SKILL.md files?",
+		question: "How is this different from skills.sh?",
 		answer:
-			"SkillKit adds versioning, discovery, and analytics on top of the SKILL.md standard. Instead of hunting down files and copying them between projects, you get a single command that handles installation, updates, and health checks automatically.",
+			"skills.sh is the standard for skill distribution — install, update, search. SkillKit is the analytics layer on top. We delegate management commands to skills.sh and add local-first usage tracking, health checks, and context budget analysis that skills.sh doesn't provide.",
 	},
 	{
 		question: "Which AI coding agents are supported?",
 		answer:
-			"Claude Code, Cursor, Codex, VS Code (via extensions), Windsurf, and Gemini CLI are all supported today. SkillKit is built on the open SKILL.md standard, so any agent that adopts it works automatically.",
+			"Claude Code, Cursor, Codex, VS Code (via extensions), Windsurf, and Gemini CLI. SkillKit scans session JSONL files to extract skill invocations, so any agent that logs tool use is supported.",
 	},
 	{
 		question: "Is SkillKit free?",
 		answer:
-			"Yes. SkillKit is MIT-licensed and free forever for individual developers. We may introduce paid plans for teams with advanced features like private registries and audit logs.",
+			"Yes. SkillKit is MIT-licensed and free forever. All analytics are local-first — your data never leaves your machine.",
 	},
 	{
-		question: "How do I publish my own skill?",
+		question: "What data does SkillKit collect?",
 		answer:
-			"Run `skill-kit publish` from any directory with a SKILL.md file. The CLI guides you through signing up as a verified publisher and submitting your skill for review.",
+			"None. All analytics are stored locally in a SQLite database at ~/.skill-kit/analytics.db. SkillKit scans your local session files and never phones home.",
 	},
 	{
-		question: "Do you collect telemetry?",
+		question: "How does the session scanning work?",
 		answer:
-			"We collect anonymous usage counts (install/uninstall events) to power the registry's popularity signals. You can opt out at any time with `skill-kit config set telemetry false`.",
+			"Run `skill-kit analyze` to scan ~/.claude/projects/ for JSONL session files. It extracts Skill tool_use blocks and populates a local analytics database with invocation counts, timestamps, and patterns.",
 	},
 	{
-		question: "Can I use SkillKit in my team?",
+		question: "Can I use SkillKit without skills.sh?",
 		answer:
-			"Absolutely. SkillKit supports a skills.json lockfile you can commit to your repo, so every team member installs the same verified versions. Team-private registries are on the roadmap.",
+			"Yes. The analytics commands (list, stats, health, analyze) work independently. The management commands (install, uninstall, update, find) delegate to skills.sh and require it to be available via npx.",
 	},
 ];
 

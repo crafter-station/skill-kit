@@ -1,5 +1,5 @@
 {
-	"name": "@skill-kit/web",
+	"name": "@crafter/skillkit-web",
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",

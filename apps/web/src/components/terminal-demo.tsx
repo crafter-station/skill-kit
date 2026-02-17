@@ -14,48 +14,58 @@ type Step = {
 
 const STEPS: Step[] = [
 	{
-		command: "skill-kit install @anthropic/memory",
+		command: "skill-kit stats",
 		output: [
-			{ text: "  Installing @anthropic/memory v2.1.0...", type: "output" },
-			{ text: "  ✓ Added to ~/.claude/skills/memory", type: "success" },
-			{ text: "  Done in 0.3s", type: "output" },
+			{
+				text: "  SKILL-KIT ANALYTICS (30d)",
+				type: "header",
+			},
+			{ text: "", type: "empty" },
+			{
+				text: "  ▁▂▃▅▇█▆▅▇█  127 invocations across 12 skills",
+				type: "success",
+			},
+			{
+				text: "  Top: commit (42), review (38), deploy (27)",
+				type: "output",
+			},
+		],
+	},
+	{
+		command: "skill-kit health",
+		output: [
+			{
+				text: "  SKILL-KIT HEALTH REPORT",
+				type: "header",
+			},
+			{ text: "", type: "empty" },
+			{
+				text: "  Context budget: [████████░░] 78% (31.2K / 40K tokens)",
+				type: "output",
+			},
+			{
+				text: "  ⚠ 3 skills unused in 30 days — run skill-kit uninstall to reclaim context",
+				type: "success",
+			},
 		],
 	},
 	{
 		command: "skill-kit list",
 		output: [
 			{
-				text: "  SKILL                 VERSION  AGENT        STATUS",
+				text: "  SKILL           SIZE     LAST USED    INVOCATIONS",
 				type: "header",
 			},
 			{
-				text: "  @anthropic/memory     2.1.0    claude-code  ● active",
+				text: "  commit          1.2K     2h ago       42",
 				type: "output",
 			},
 			{
-				text: "  @cursor/docs          1.0.2    cursor       ● active",
+				text: "  review          3.8K     1d ago       38",
 				type: "output",
 			},
 			{
-				text: "  @rams/design-review   1.3.0    claude-code  ● active",
-				type: "output",
-			},
-			{ text: "", type: "empty" },
-			{
-				text: "  3 skills installed across 2 agents",
-				type: "output",
-			},
-		],
-	},
-	{
-		command: "skill-kit stats",
-		output: [
-			{
-				text: "  ▁▂▃▅▇█▆▅▇█  127 invocations (30d)",
-				type: "success",
-			},
-			{
-				text: "  Top: @anthropic/memory (42), @cursor/docs (38), @rams/design-review (27)",
+				text: "  deploy          0.9K     3d ago       27",
 				type: "output",
 			},
 		],

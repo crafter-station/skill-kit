@@ -8,33 +8,43 @@ type CellValue = boolean | "partial";
 type Row = {
 	feature: string;
 	skillkit: CellValue;
+	skillssh: CellValue;
 	manual: CellValue;
-	rams: CellValue;
 };
 
 const ROWS: Row[] = [
-	{ feature: "Install command", skillkit: true, manual: false, rams: true },
-	{ feature: "Versioning", skillkit: true, manual: false, rams: false },
 	{
-		feature: "Multi-agent",
+		feature: "Install / update skills",
 		skillkit: true,
+		skillssh: true,
 		manual: false,
-		rams: "partial" as const,
 	},
+	{ feature: "Registry search", skillkit: true, skillssh: true, manual: false },
 	{
 		feature: "Usage analytics",
 		skillkit: true,
+		skillssh: false,
 		manual: false,
-		rams: false,
 	},
 	{
-		feature: "Security scanning",
+		feature: "Context budget tracking",
 		skillkit: true,
+		skillssh: false,
 		manual: false,
-		rams: false,
 	},
-	{ feature: "Auto-updates", skillkit: true, manual: false, rams: false },
-	{ feature: "Open source", skillkit: true, manual: true, rams: false },
+	{ feature: "Health checks", skillkit: true, skillssh: false, manual: false },
+	{
+		feature: "Session JSONL scanning",
+		skillkit: true,
+		skillssh: false,
+		manual: false,
+	},
+	{
+		feature: "Local-first (no telemetry)",
+		skillkit: true,
+		skillssh: false,
+		manual: true,
+	},
 ];
 
 function Cell({ value }: { value: CellValue }) {
@@ -63,8 +73,11 @@ export function ComparisonTable() {
 					className="text-center mb-12"
 				>
 					<h2 className="text-3xl font-bold text-white">
-						How SkillKit compares
+						SkillKit + skills.sh = complete stack
 					</h2>
+					<p className="text-zinc-400 mt-3 text-sm">
+						skills.sh handles distribution. SkillKit handles observability.
+					</p>
 				</motion.div>
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
@@ -83,10 +96,10 @@ export function ComparisonTable() {
 									SkillKit
 								</th>
 								<th className="text-center px-6 py-4 text-zinc-500 font-medium">
-									Manual Copy
+									skills.sh
 								</th>
 								<th className="text-center px-6 py-4 text-zinc-500 font-medium">
-									rams.ai
+									Manual Copy
 								</th>
 							</tr>
 						</thead>
@@ -103,10 +116,10 @@ export function ComparisonTable() {
 										<Cell value={row.skillkit} />
 									</td>
 									<td className="px-6 py-4 text-center">
-										<Cell value={row.manual} />
+										<Cell value={row.skillssh} />
 									</td>
 									<td className="px-6 py-4 text-center">
-										<Cell value={row.rams} />
+										<Cell value={row.manual} />
 									</td>
 								</tr>
 							))}

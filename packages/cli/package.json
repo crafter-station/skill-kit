@@ -1,6 +1,6 @@
 {
-	"name": "@skill-kit/cli",
-	"version": "0.0.1",
+	"name": "@crafter/skillkit",
+	"version": "0.1.0",
 	"type": "module",
 	"bin": {
 		"skill-kit": "./src/bin.ts"
