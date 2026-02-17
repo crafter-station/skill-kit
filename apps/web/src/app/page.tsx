@@ -25,7 +25,7 @@ export default function Home() {
 			<footer className="border-t border-[#222] py-10 px-6">
 				<div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
 					<span className="font-mono font-bold text-sm text-[#666]">
-						skill-kit
+						skillkit
 					</span>
 					<p className="text-xs text-[#444]">
 						Built by{" "}

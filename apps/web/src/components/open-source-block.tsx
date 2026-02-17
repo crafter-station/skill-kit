@@ -19,7 +19,9 @@ export function OpenSourceBlock() {
 							MIT License
 						</span>
 					</div>
-					<h2 className="text-4xl md:text-5xl font-serif italic text-white">Built in the open</h2>
+					<h2 className="text-4xl md:text-5xl font-serif italic text-white">
+						Built in the open
+					</h2>
 					<p className="text-[#888] leading-relaxed">
 						SkillKit is free and open source. All analytics run locally on your
 						machine. Contribute, fork, or audit the code.

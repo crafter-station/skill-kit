@@ -14,7 +14,7 @@ type Step = {
 
 const STEPS: Step[] = [
 	{
-		command: "skill-kit scan",
+		command: "skillkit scan",
 		output: [
 			{
 				text: "  Scanning ~/.claude/skills/ ...",
@@ -31,7 +31,7 @@ const STEPS: Step[] = [
 		],
 	},
 	{
-		command: "skill-kit stats --top 3",
+		command: "skillkit stats --top 3",
 		output: [
 			{
 				text: "  SKILL       30d   TREND",
@@ -52,14 +52,14 @@ const STEPS: Step[] = [
 		],
 	},
 	{
-		command: "skill-kit health",
+		command: "skillkit health",
 		output: [
 			{
 				text: "  Budget: [████████░░] 78% (31.2K / 40K)",
 				type: "output",
 			},
 			{
-				text: "  ! 3 skills unused in 30d — run skill-kit prune",
+				text: "  ! 3 skills unused in 30d — run skillkit prune",
 				type: "highlight",
 			},
 		],
@@ -94,6 +94,7 @@ export function TerminalDemo() {
 		return () => observer.disconnect();
 	}, []);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new lines
 	useEffect(() => {
 		if (scrollRef.current) {
 			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -115,7 +116,7 @@ export function TerminalDemo() {
 				setLines([]);
 
 				for (let stepIdx = 0; stepIdx < STEPS.length; stepIdx++) {
-					const step = STEPS[stepIdx]!;
+					const step = STEPS[stepIdx] as Step;
 					if (cancelled) break;
 
 					if (stepIdx > 0) {
@@ -162,10 +163,7 @@ export function TerminalDemo() {
 					for (const outputLine of step.output) {
 						if (cancelled) break;
 						await delay(LINE_DELAY);
-						setLines((prev) => [
-							...prev,
-							{ kind: "output", line: outputLine },
-						]);
+						setLines((prev) => [...prev, { kind: "output", line: outputLine }]);
 					}
 
 					if (cancelled) break;
@@ -196,7 +194,7 @@ export function TerminalDemo() {
 					<span className="w-3 h-3 rounded-full bg-[#333]" />
 					<span className="w-3 h-3 rounded-full bg-[#333]" />
 					<span className="flex-1 text-center text-xs text-[#555] font-mono -ml-16">
-						skill-kit
+						skillkit
 					</span>
 					<span className="text-[10px] font-mono text-[#333] tracking-wider uppercase">
 						normal
@@ -209,30 +207,16 @@ export function TerminalDemo() {
 				>
 					{lines.map((line, i) => {
 						if (line.kind === "separator") {
-							return (
-								<div
-									key={i}
-									className="border-t border-[#1a1a1a] my-3"
-								/>
-							);
+							return <div key={i} className="border-t border-[#1a1a1a] my-3" />;
 						}
 
 						if (line.kind === "prompt") {
 							return (
-								<div
-									key={i}
-									className="flex items-start gap-2 leading-6"
-								>
-									<span className="text-[#555] select-none">
-										$
-									</span>
+								<div key={i} className="flex items-start gap-2 leading-6">
+									<span className="text-[#555] select-none">$</span>
 									<span className="text-white">
 										{line.command}
-										{line.cursor && (
-											<span className="vim-cursor">
-												&nbsp;
-											</span>
-										)}
+										{line.cursor && <span className="vim-cursor">&nbsp;</span>}
 									</span>
 								</div>
 							);
@@ -272,7 +256,7 @@ export function TerminalDemo() {
 					style={{ background: "#0e0e0e" }}
 				>
 					<span>-- INSERT --</span>
-					<span>skill-kit v0.1.0</span>
+					<span>skillkit v0.1.0</span>
 					<span>utf-8</span>
 				</div>
 			</div>

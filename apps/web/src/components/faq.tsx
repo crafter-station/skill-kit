@@ -6,7 +6,7 @@ const ITEMS = [
 	{
 		question: "How is this different from skills.sh?",
 		answer:
-			"skills.sh is the standard for skill distribution — install, update, search. SkillKit is the analytics layer on top. We delegate management commands to skills.sh and add local-first usage tracking, health checks, and context budget analysis that skills.sh doesn't provide.",
+			"skills.sh handles skill distribution — install, update, search. SkillKit is the analytics layer on top: local-first usage tracking, health checks, context budget analysis, and pruning that skills.sh doesn't provide.",
 	},
 	{
 		question: "Which AI coding agents are supported?",
@@ -21,12 +21,12 @@ const ITEMS = [
 	{
 		question: "What data does SkillKit collect?",
 		answer:
-			"None. All analytics are stored locally in a SQLite database at ~/.skill-kit/analytics.db. SkillKit scans your local session files and never phones home.",
+			"None. All analytics are stored locally in a SQLite database at ~/.skillkit/analytics.db. SkillKit scans your local session files and never phones home.",
 	},
 	{
 		question: "How does the session scanning work?",
 		answer:
-			"Run `skill-kit scan` to discover installed skills and scan ~/.claude/projects/ for JSONL session files. It extracts Skill tool_use blocks and populates a local analytics database with invocation counts, timestamps, and patterns.",
+			"Run `skillkit scan` to discover installed skills and scan ~/.claude/projects/ for JSONL session files. It extracts Skill tool_use blocks and populates a local analytics database with invocation counts, timestamps, and patterns.",
 	},
 	{
 		question: "Can I use SkillKit without skills.sh?",

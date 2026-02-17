@@ -17,15 +17,11 @@ export function Navbar() {
 		<header
 			className={cn(
 				"sticky top-0 z-50 w-full transition-all duration-200 backdrop-blur-md",
-				scrolled
-					? "border-b border-[#222] bg-[#0a0a0a]/80"
-					: "bg-transparent",
+				scrolled ? "border-b border-[#222] bg-[#0a0a0a]/80" : "bg-transparent",
 			)}
 		>
 			<div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-				<span className="font-serif italic text-lg text-white">
-					skill-kit
-				</span>
+				<span className="font-serif italic text-lg text-white">skillkit</span>
 				<nav className="flex items-center gap-1">
 					<a
 						href="https://github.com/crafter-station/skill-kit#readme"

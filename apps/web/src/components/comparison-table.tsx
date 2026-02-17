@@ -56,9 +56,7 @@ function Cell({ value }: { value: CellValue }) {
 		);
 	}
 	if (value) {
-		return (
-			<Check className="w-4 h-4 text-white mx-auto" aria-hidden="true" />
-		);
+		return <Check className="w-4 h-4 text-white mx-auto" aria-hidden="true" />;
 	}
 	return <X className="w-4 h-4 text-[#333] mx-auto" aria-hidden="true" />;
 }

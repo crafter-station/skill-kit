@@ -38,8 +38,7 @@ function CodeBlock({
 	variant: "before" | "after";
 }) {
 	const barColor = variant === "before" ? "bg-[#444]" : "bg-white";
-	const highlightColor =
-		variant === "before" ? "text-[#666]" : "text-white/90";
+	const highlightColor = variant === "before" ? "text-[#666]" : "text-white/90";
 
 	return (
 		<div className="rounded-xl border border-[#222] bg-[#0a0a0a] overflow-hidden font-mono text-sm">

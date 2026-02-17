@@ -40,7 +40,7 @@ export function HowItWorks() {
 						<div className="rounded-lg border border-[#222] bg-[#0a0a0a] p-4 font-mono text-sm">
 							<div className="flex items-start gap-2 leading-7">
 								<span className="text-[#555] select-none">$</span>
-								<span className="text-white">skill-kit scan</span>
+								<span className="text-white">skillkit scan</span>
 							</div>
 							<div className="mt-3 pt-3 border-t border-[#1a1a1a] space-y-0.5">
 								<div className="text-[#555] leading-7">
@@ -56,7 +56,7 @@ export function HowItWorks() {
 									Indexed 211 sessions · 1,847 invocations
 								</div>
 								<div className="text-white leading-7">
-									Ready. Run skill-kit stats to see usage.
+									Ready. Run skillkit stats to see usage.
 								</div>
 							</div>
 						</div>
@@ -84,7 +84,7 @@ export function HowItWorks() {
 							<div className="p-4">
 								<div className="flex items-start gap-2 leading-7">
 									<span className="text-[#555] select-none">$</span>
-									<span className="text-white">skill-kit stats --top 5</span>
+									<span className="text-white">skillkit stats --top 5</span>
 								</div>
 							</div>
 							<div className="border-t border-[#1a1a1a]" />
@@ -145,20 +145,16 @@ export function HowItWorks() {
 							<div className="p-4">
 								<div className="flex items-start gap-2 leading-7">
 									<span className="text-[#555] select-none">$</span>
-									<span className="text-white">skill-kit health</span>
+									<span className="text-white">skillkit health</span>
 								</div>
 							</div>
 							<div className="border-t border-[#1a1a1a]" />
 							<div className="p-4 space-y-2">
 								<div className="leading-7">
 									<span className="text-[#555]">Budget </span>
-									<span className="text-white">
-										[████████
-									</span>
+									<span className="text-white">[████████</span>
 									<span className="text-[#333]">░░</span>
-									<span className="text-white">
-										] 78%
-									</span>
+									<span className="text-white">] 78%</span>
 									<span className="text-[#555]"> (31.2K / 40K)</span>
 								</div>
 								<div className="border-t border-[#1a1a1a] pt-2 space-y-0.5">
@@ -174,7 +170,7 @@ export function HowItWorks() {
 							<div className="p-4">
 								<div className="flex items-start gap-2 leading-7">
 									<span className="text-[#555] select-none">$</span>
-									<span className="text-white">skill-kit prune</span>
+									<span className="text-white">skillkit prune</span>
 								</div>
 								<div className="mt-2 pt-2 border-t border-[#1a1a1a]">
 									<div className="text-[#555] leading-7">
