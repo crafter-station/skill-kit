@@ -4,13 +4,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-	title: "SkillKit - The Package Manager for AI Agent Skills",
+	title: "SkillKit - Local-First Analytics for AI Agent Skills",
 	description:
-		"Install, manage, and discover skills for Claude Code, Cursor, Codex, and more. One command. Every skill. Any agent. Open source.",
+		"Know which skills matter. Usage analytics, health checks, and context budget tracking for Claude Code, Cursor, Codex, and more. Powered by skills.sh.",
 	openGraph: {
 		title: "SkillKit",
 		description:
-			"The package manager for AI agent skills. Install, manage, and discover skills for Claude Code, Cursor, Codex, and more.",
+			"Local-first analytics for AI agent skills. Usage tracking, health checks, and context budget analysis. Powered by skills.sh.",
 		siteName: "SkillKit",
 	},
 };
