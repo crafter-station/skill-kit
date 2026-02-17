@@ -26,12 +26,12 @@ const ITEMS = [
 	{
 		question: "How does the session scanning work?",
 		answer:
-			"Run `skill-kit analyze` to scan ~/.claude/projects/ for JSONL session files. It extracts Skill tool_use blocks and populates a local analytics database with invocation counts, timestamps, and patterns.",
+			"Run `skill-kit scan` to discover installed skills and scan ~/.claude/projects/ for JSONL session files. It extracts Skill tool_use blocks and populates a local analytics database with invocation counts, timestamps, and patterns.",
 	},
 	{
 		question: "Can I use SkillKit without skills.sh?",
 		answer:
-			"Yes. The analytics commands (list, stats, health, analyze) work independently. The management commands (install, uninstall, update, find) delegate to skills.sh and require it to be available via npx.",
+			"Yes. SkillKit is purely an analytics tool — scan, list, stats, and health all work independently. Use skills.sh (npx skills add) to install and manage skills, then use SkillKit to measure and optimize.",
 	},
 ];
 

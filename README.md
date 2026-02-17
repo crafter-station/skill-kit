@@ -1,6 +1,6 @@
 # skill-kit
 
-Analytics & management for AI agent skills. Local-first usage tracking, context budget analysis, and health checks for your Claude Code skills.
+Local-first analytics for AI agent skills. Track usage, measure context budget, and find what to prune.
 
 ## Why
 
@@ -11,19 +11,12 @@ AI coding agents load skills into their context window on every session. More sk
 ## Quick Start
 
 ```bash
-# Run directly (no install needed)
 npx @crafter/skillkit scan
-
-# See usage analytics
 npx @crafter/skillkit stats
-
-# Check context budget health
 npx @crafter/skillkit health
 ```
 
 ## Commands
-
-### Analytics (local-first)
 
 | Command | Description |
 |---------|-------------|
@@ -32,16 +25,9 @@ npx @crafter/skillkit health
 | `skill-kit stats` | Usage analytics with sparklines (last 30 days) |
 | `skill-kit health` | Health check: unused skills, context budget, DB |
 
-### Management (powered by [skills.sh](https://skills.sh))
+Install skills via [skills.sh](https://skills.sh): `npx skills add <owner/repo>`
 
-| Command | Description |
-|---------|-------------|
-| `skill-kit install <owner/repo>` | Install a skill |
-| `skill-kit uninstall <name>` | Remove a skill |
-| `skill-kit update` | Update all skills to latest |
-| `skill-kit find <query>` | Search the skills.sh registry |
-
-Already using `npx skills add`? Run `skill-kit scan` to pick up everything you've already installed.
+Already using skills.sh? Run `skill-kit scan` to pick up everything you've installed and start tracking usage.
 
 ## How It Works
 
@@ -64,7 +50,7 @@ $ skill-kit scan
 Parses JSONL session files for `Skill` tool_use blocks and shows sparkline trends.
 
 ```
-$ skill-kit stats --top 5
+$ skill-kit stats
   SKILL           ████████████████████  42  ▂▃▅▇█▆▅▇█
   commit          ████████████████████  42  ▂▃▅▇█▆▅▇█
   review          ████████████████      38  ▁▃▅▆▇▇▆▅▃
@@ -73,7 +59,7 @@ $ skill-kit stats --top 5
 
 ### Health
 
-Checks context budget usage and flags unused skills wasting context window space.
+Checks context budget usage and flags unused skills.
 
 ```
 $ skill-kit health
@@ -88,12 +74,12 @@ All data stays on your machine:
 | Path | Purpose |
 |------|---------|
 | `~/.skill-kit/analytics.db` | SQLite database with invocation history |
-| `~/.claude/skills/` | Installed skills (read-only by skill-kit) |
-| `~/.claude/projects/**/*.jsonl` | Session files (read-only by skill-kit) |
+| `~/.claude/skills/` | Installed skills (read-only) |
+| `~/.claude/projects/**/*.jsonl` | Session files (read-only) |
 
 ## Supported Agents
 
-skill-kit works with any agent that logs tool use in JSONL session files:
+Works with any agent that logs tool use in JSONL session files:
 
 - Claude Code
 - Cursor
