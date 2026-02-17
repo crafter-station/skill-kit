@@ -51,14 +51,16 @@ function Cell({ value }: { value: CellValue }) {
 	if (value === "partial") {
 		return (
 			<span className="inline-flex items-center justify-center w-6 h-6">
-				<span className="text-xs text-zinc-500 font-mono">~</span>
+				<span className="text-xs text-[#555] font-mono">~</span>
 			</span>
 		);
 	}
 	if (value) {
-		return <Check className="w-4 h-4 text-emerald-400 mx-auto" />;
+		return (
+			<Check className="w-4 h-4 text-white mx-auto" aria-hidden="true" />
+		);
 	}
-	return <X className="w-4 h-4 text-zinc-600 mx-auto" />;
+	return <X className="w-4 h-4 text-[#333] mx-auto" aria-hidden="true" />;
 }
 
 export function ComparisonTable() {
@@ -72,11 +74,12 @@ export function ComparisonTable() {
 					transition={{ duration: 0.5 }}
 					className="text-center mb-12"
 				>
-					<h2 className="text-3xl font-bold text-white">
-						SkillKit + skills.sh = complete stack
+					<h2 className="text-4xl md:text-5xl font-serif italic text-white">
+						Distribution + Observability
 					</h2>
-					<p className="text-zinc-400 mt-3 text-sm">
-						skills.sh handles distribution. SkillKit handles observability.
+					<p className="text-[#888] mt-3 text-sm">
+						skills.sh installs your skills. SkillKit tells you which ones
+						matter.
 					</p>
 				</motion.div>
 				<motion.div
@@ -84,21 +87,21 @@ export function ComparisonTable() {
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true }}
 					transition={{ duration: 0.5, delay: 0.1 }}
-					className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden"
+					className="rounded-xl border border-[#222] bg-[#0a0a0a] overflow-hidden"
 				>
 					<table className="w-full text-sm">
 						<thead>
-							<tr className="border-b border-zinc-800">
-								<th className="text-left px-6 py-4 text-zinc-500 font-medium">
+							<tr className="border-b border-[#222]">
+								<th className="text-left px-6 py-4 text-[#555] font-medium">
 									Feature
 								</th>
-								<th className="text-center px-6 py-4 text-emerald-400 font-semibold">
+								<th className="text-center px-6 py-4 text-white font-semibold">
 									SkillKit
 								</th>
-								<th className="text-center px-6 py-4 text-zinc-500 font-medium">
+								<th className="text-center px-6 py-4 text-[#555] font-medium">
 									skills.sh
 								</th>
-								<th className="text-center px-6 py-4 text-zinc-500 font-medium">
+								<th className="text-center px-6 py-4 text-[#555] font-medium">
 									Manual Copy
 								</th>
 							</tr>
@@ -108,10 +111,10 @@ export function ComparisonTable() {
 								<tr
 									key={row.feature}
 									className={
-										i < ROWS.length - 1 ? "border-b border-zinc-800/60" : ""
+										i < ROWS.length - 1 ? "border-b border-[#1a1a1a]" : ""
 									}
 								>
-									<td className="px-6 py-4 text-zinc-300">{row.feature}</td>
+									<td className="px-6 py-4 text-[#ccc]">{row.feature}</td>
 									<td className="px-6 py-4 text-center">
 										<Cell value={row.skillkit} />
 									</td>

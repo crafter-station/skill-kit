@@ -46,7 +46,7 @@ export function FAQ() {
 					transition={{ duration: 0.5 }}
 					className="text-center mb-12"
 				>
-					<h2 className="text-3xl font-bold text-white">
+					<h2 className="text-4xl md:text-5xl font-serif italic text-white">
 						Frequently asked questions
 					</h2>
 				</motion.div>
@@ -60,15 +60,15 @@ export function FAQ() {
 					{ITEMS.map((item) => (
 						<details
 							key={item.question}
-							className="group rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden"
+							className="group rounded-xl border border-[#222] bg-[#0a0a0a] overflow-hidden"
 						>
-							<summary className="flex items-center justify-between gap-4 px-6 py-5 text-sm font-medium text-zinc-200 cursor-pointer select-none list-none hover:text-white transition-colors">
+							<summary className="flex items-center justify-between gap-4 px-6 py-5 text-sm font-medium text-[#ccc] cursor-pointer select-none list-none hover:text-white transition-colors">
 								{item.question}
-								<span className="text-zinc-600 group-open:text-emerald-400 transition-colors shrink-0 text-base leading-none">
+								<span className="text-[#444] group-open:text-white transition-colors shrink-0 text-base leading-none">
 									+
 								</span>
 							</summary>
-							<p className="px-6 pb-5 text-sm text-zinc-400 leading-relaxed border-t border-zinc-800 pt-4">
+							<p className="px-6 pb-5 text-sm text-[#888] leading-relaxed border-t border-[#222] pt-4">
 								{item.answer}
 							</p>
 						</details>

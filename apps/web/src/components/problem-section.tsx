@@ -1,23 +1,69 @@
 "use client";
 
-import { Check, X } from "lucide-react";
 import { motion } from "motion/react";
 
-const WITHOUT = [
-	"50 skills installed, no idea which ones you actually use",
-	"Context window bloated with unused skills eating tokens",
-	"No way to tell if a skill invocation failed or succeeded",
-	"Guessing which skills to keep vs drop after each project",
-	"Zero visibility into how skills affect agent performance",
+const BEFORE = [
+	{ line: 1, text: "/**" },
+	{ line: 2, text: " * 50 skills installed,", highlight: true },
+	{ line: 3, text: " * no idea which ones you use.", highlight: true },
+	{ line: 4, text: " */" },
+	{ line: 5, text: "export const Skills = () => {" },
+	{ line: 6, text: "  <Skill.Provider>" },
+	{ line: 7, text: "    <Bloated />", highlight: true },
+	{ line: 8, text: "    <Invisible />", highlight: true },
+	{ line: 9, text: "    <Guessing />", highlight: true },
+	{ line: 10, text: "  </Skill.Provider>" },
+	{ line: 11, text: "};" },
 ];
 
-const WITH = [
-	"Usage sparklines show exactly which skills earn their keep",
-	"Context budget analysis — see token cost per skill",
-	"Health checks flag unused skills wasting your context window",
-	"Session scanning extracts real invocation data from JSONL logs",
-	"Install and manage via skills.sh, analyze with SkillKit",
+const AFTER = [
+	{ line: 1, text: "/**" },
+	{ line: 2, text: " * Every skill earns its keep,", highlight: true },
+	{ line: 3, text: " * measured and optimized.", highlight: true },
+	{ line: 4, text: " */" },
+	{ line: 5, text: "export const Skills = () => {" },
+	{ line: 6, text: "  <Skill.Provider>" },
+	{ line: 7, text: "    <Tracked />", highlight: true },
+	{ line: 8, text: "    <Measured />", highlight: true },
+	{ line: 9, text: "    <Optimized />", highlight: true },
+	{ line: 10, text: "  </Skill.Provider>" },
+	{ line: 11, text: "};" },
 ];
+
+function CodeBlock({
+	lines,
+	variant,
+}: {
+	lines: typeof BEFORE;
+	variant: "before" | "after";
+}) {
+	const barColor = variant === "before" ? "bg-[#444]" : "bg-white";
+	const highlightColor =
+		variant === "before" ? "text-[#666]" : "text-white/90";
+
+	return (
+		<div className="rounded-xl border border-[#222] bg-[#0a0a0a] overflow-hidden font-mono text-sm">
+			<div className="p-5 space-y-0">
+				{lines.map((l) => (
+					<div key={l.line} className="flex items-start leading-7">
+						<span className="w-8 text-right text-[#444] select-none pr-4 shrink-0">
+							{String(l.line).padStart(2, "0")}
+						</span>
+						{l.highlight && (
+							<span
+								className={`w-[2px] shrink-0 self-stretch mr-3 ${barColor}`}
+							/>
+						)}
+						{!l.highlight && <span className="w-[2px] shrink-0 mr-3" />}
+						<span className={l.highlight ? highlightColor : "text-[#555]"}>
+							{l.text}
+						</span>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
 
 export function ProblemSection() {
 	return (
@@ -30,9 +76,14 @@ export function ProblemSection() {
 					transition={{ duration: 0.5 }}
 					className="text-center mb-16"
 				>
-					<h2 className="text-3xl font-bold text-white">
-						You have no idea which skills matter
+					<h2 className="text-4xl md:text-5xl font-serif italic text-white">
+						Think diff
 					</h2>
+					<p className="text-[#888] mt-4 max-w-2xl mx-auto leading-relaxed">
+						Software development is changing rapidly. As code gets easier to
+						generate, the bottleneck shifts to understanding which skills
+						actually matter.
+					</p>
 				</motion.div>
 				<div className="grid md:grid-cols-2 gap-6">
 					<motion.div
@@ -40,48 +91,16 @@ export function ProblemSection() {
 						whileInView={{ opacity: 1, x: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.5, delay: 0.1 }}
-						className="rounded-xl border border-zinc-800 bg-zinc-900 p-8"
 					>
-						<div className="flex items-center gap-2 mb-6">
-							<span className="w-2 h-2 rounded-full bg-red-400" />
-							<h3 className="text-sm font-medium text-red-400 uppercase tracking-widest">
-								Without SkillKit
-							</h3>
-						</div>
-						<ul className="space-y-4">
-							{WITHOUT.map((item) => (
-								<li key={item} className="flex items-start gap-3">
-									<X className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-									<span className="text-sm text-zinc-400 leading-relaxed">
-										{item}
-									</span>
-								</li>
-							))}
-						</ul>
+						<CodeBlock lines={BEFORE} variant="before" />
 					</motion.div>
 					<motion.div
 						initial={{ opacity: 0, x: 20 }}
 						whileInView={{ opacity: 1, x: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.5, delay: 0.2 }}
-						className="rounded-xl border border-emerald-500/20 bg-zinc-900 p-8"
 					>
-						<div className="flex items-center gap-2 mb-6">
-							<span className="w-2 h-2 rounded-full bg-emerald-400" />
-							<h3 className="text-sm font-medium text-emerald-400 uppercase tracking-widest">
-								With SkillKit
-							</h3>
-						</div>
-						<ul className="space-y-4">
-							{WITH.map((item) => (
-								<li key={item} className="flex items-start gap-3">
-									<Check className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
-									<span className="text-sm text-zinc-400 leading-relaxed">
-										{item}
-									</span>
-								</li>
-							))}
-						</ul>
+						<CodeBlock lines={AFTER} variant="after" />
 					</motion.div>
 				</div>
 			</div>

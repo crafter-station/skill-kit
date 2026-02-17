@@ -17,13 +17,6 @@ export function FinalCTA() {
 
 	return (
 		<section className="relative py-32 px-6 overflow-hidden">
-			<div
-				className="absolute inset-0 pointer-events-none"
-				style={{
-					background:
-						"radial-gradient(ellipse 60% 40% at 50% -5%, rgba(16,185,129,0.08) 0%, transparent 60%)",
-				}}
-			/>
 			<div className="max-w-3xl mx-auto text-center relative">
 				<motion.div
 					initial={{ opacity: 0, y: 24 }}
@@ -32,20 +25,20 @@ export function FinalCTA() {
 					transition={{ duration: 0.5 }}
 					className="flex flex-col items-center gap-8"
 				>
-					<h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-						Ready to level up your AI agent?
+					<h2 className="text-4xl md:text-5xl font-serif italic text-white leading-tight">
+						Stop guessing. Start measuring.
 					</h2>
 					<div className="w-full max-w-lg">
-						<div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 font-mono text-sm">
-							<span className="text-zinc-300 truncate">{INSTALL_CMD}</span>
+						<div className="flex items-center justify-between gap-3 rounded-lg border border-[#222] bg-[#0a0a0a] px-4 py-3 font-mono text-sm">
+							<span className="text-[#888] truncate">{INSTALL_CMD}</span>
 							<button
 								type="button"
 								onClick={handleCopy}
-								className="shrink-0 text-zinc-500 hover:text-zinc-200 transition-colors"
+								className="shrink-0 text-[#555] hover:text-white transition-colors"
 								aria-label="Copy install command"
 							>
 								{copied ? (
-									<Check className="w-4 h-4 text-emerald-400" />
+									<Check className="w-4 h-4 text-white" />
 								) : (
 									<Copy className="w-4 h-4" />
 								)}
@@ -54,16 +47,20 @@ export function FinalCTA() {
 					</div>
 					<div className="flex flex-wrap items-center justify-center gap-3">
 						<a
-							href="#"
-							className="px-6 py-2.5 rounded-md bg-emerald-500 text-white font-medium text-sm hover:bg-emerald-400 transition-colors"
+							href="https://github.com/crafter-station/skill-kit#readme"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="px-6 py-2.5 rounded-md bg-white text-black font-medium text-sm hover:bg-white/90 transition-colors"
 						>
 							Get Started
 						</a>
 						<a
-							href="#"
-							className="px-6 py-2.5 rounded-md border border-zinc-700 text-zinc-300 font-medium text-sm hover:border-zinc-600 hover:text-white transition-colors"
+							href="https://github.com/crafter-station/skill-kit"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="px-6 py-2.5 rounded-md border border-[#333] text-[#ccc] font-medium text-sm hover:border-[#555] hover:text-white transition-colors"
 						>
-							Read the Docs
+							View Source
 						</a>
 					</div>
 				</motion.div>

@@ -13,9 +13,9 @@ const AGENTS = [
 
 export function AgentLogoBelt() {
 	return (
-		<section className="py-16 px-6 border-y border-zinc-800/50">
+		<section className="py-16 px-6 border-y border-[#1a1a1a]">
 			<div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
-				<p className="text-xs text-zinc-500 uppercase tracking-widest font-medium">
+				<p className="text-xs text-[#555] uppercase tracking-widest font-medium">
 					Works with the tools you already use
 				</p>
 				<motion.div
@@ -28,7 +28,7 @@ export function AgentLogoBelt() {
 					{AGENTS.map((agent) => (
 						<span
 							key={agent}
-							className="px-4 py-2 rounded-full border border-zinc-800 font-mono text-sm text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors cursor-default"
+							className="px-4 py-2 rounded-full border border-[#222] font-mono text-sm text-[#555] hover:text-white hover:border-[#444] transition-colors cursor-default"
 						>
 							{agent}
 						</span>
