@@ -1,32 +1,37 @@
 ---
-name: skill-kit
-description: "Skill analytics, health checks, and management for AI coding agents. Use when user asks about skill usage, stats, health, installed skills, or wants to install/uninstall/update skills."
+name: skillkit
+description: "Local-first analytics for AI agent skills. Use when user asks about skill usage, analytics, health, context budget, or wants to clean up unused skills."
 ---
 
 # SkillKit
 
-The package manager for AI agent skills. Tracks usage, runs health checks, and manages installed skills.
+Analytics for AI agent skills. Tracks usage, measures context budget, and prunes what you don't use.
 
 ## Commands
 
-Run these via the terminal:
+Run via terminal (requires Bun):
 
-- `skill-kit list` - List all installed skills with size and description
-- `skill-kit stats` - Show usage analytics with sparklines (last 30 days)
-- `skill-kit health` - Run a health check (unused skills, context budget, DB status)
-- `skill-kit analyze` - Scan session files and populate the analytics database
-- `skill-kit install <source>` - Install a skill from URL or registry
-- `skill-kit uninstall <name>` - Remove a skill
-- `skill-kit update` - Check for and apply skill updates
+- `skillkit scan` - Discover installed skills and index session data
+- `skillkit list` - List installed skills with size and context budget
+- `skillkit stats` - Show usage analytics with sparklines (last 30 days)
+- `skillkit health` - Health check: unused skills, context budget, DB status
+- `skillkit prune` - List unused skills. Add `--yes` to confirm deletion
 
 ## When to Use
 
-- User asks "which skills am I using the most?"
-- User asks "are there any unused skills?"
-- User wants to see skill analytics or usage trends
-- User wants to check skill health or context budget
-- User wants to install, uninstall, or update skills
+- User asks "which skills do I use the most?"
+- User asks "are there unused skills?" or "clean up my skills"
+- User wants to see skill analytics, usage trends, or context budget
+- User wants to optimize their skill setup
+- User asks about context window usage from skills
+
+## Decision Guide
+
+1. First time? Run `skillkit scan` to discover and index everything
+2. Want trends? Run `skillkit stats` for sparkline analytics
+3. Want cleanup? Run `skillkit health` then `skillkit prune --yes`
+4. Quick overview? Run `skillkit list` for installed skills with sizes
 
 ## How It Works
 
-SkillKit scans Claude Code session JSONL files at `~/.claude/projects/` to extract skill invocations. Data is stored in a local SQLite database at `~/.skill-kit/analytics.db`. No data leaves your machine.
+Scans `~/.claude/skills/` for installed skills and `~/.claude/projects/**/*.jsonl` for session files. Extracts `Skill` tool_use blocks and stores analytics in `~/.skillkit/analytics.db`. All data is local.
