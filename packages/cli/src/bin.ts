@@ -5,61 +5,30 @@ const VERSION = "0.1.0";
 
 function printHelp(): void {
 	console.log(`
-  ${bold("skill-kit")} ${dim(`v${VERSION}`)} - Analytics & management for AI agent skills
+  ${bold("skill-kit")} ${dim(`v${VERSION}`)} - Analytics for AI agent skills
 
   ${bold("USAGE")}
     skill-kit <command> [args]
 
-  ${bold("ANALYTICS")} ${dim("(local-first)")}
+  ${bold("COMMANDS")}
     ${cyan("scan")}        Discover installed skills and index session data
     ${cyan("list")}        List installed skills with size & context budget
     ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
     ${cyan("health")}      Health check: unused skills, context budget, DB
-
-  ${bold("MANAGEMENT")} ${dim("(powered by skills.sh)")}
-    ${cyan("install")}     Install a skill ${dim("(skill-kit install owner/repo)")}
-    ${cyan("uninstall")}   Remove a skill ${dim("(skill-kit uninstall name)")}
-    ${cyan("update")}      Update all skills to latest
-    ${cyan("find")}        Search the skills.sh registry
-
-  ${bold("OTHER")}
     ${cyan("version")}     Print version
     ${cyan("help")}        Show this help message
+
+  ${dim("Install skills via skills.sh: npx skills add <owner/repo>")}
 `);
 }
 
 async function main(): Promise<void> {
 	const cmd = process.argv[2];
-	const args = process.argv.slice(3);
 
 	switch (cmd) {
 		case "scan": {
 			const { runScan } = await import("./commands/scan");
 			await runScan();
-			break;
-		}
-		case "install":
-		case "add": {
-			const { runInstall } = await import("./commands/install");
-			runInstall(args);
-			break;
-		}
-		case "uninstall":
-		case "remove": {
-			const { runUninstall } = await import("./commands/uninstall");
-			runUninstall(args);
-			break;
-		}
-		case "update":
-		case "upgrade": {
-			const { runUpdate } = await import("./commands/update");
-			runUpdate();
-			break;
-		}
-		case "find":
-		case "search": {
-			const { runFind } = await import("./commands/find");
-			runFind(args);
 			break;
 		}
 		case "list":
