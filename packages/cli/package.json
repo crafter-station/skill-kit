@@ -1,0 +1,24 @@
+{
+	"name": "@skill-kit/cli",
+	"version": "0.0.1",
+	"type": "module",
+	"bin": {
+		"skill-kit": "./src/bin.ts"
+	},
+	"exports": {
+		".": {
+			"bun": "./src/index.ts",
+			"import": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"dev": "bun run src/bin.ts",
+		"build": "bun build src/bin.ts --compile --outfile dist/skill-kit",
+		"test": "bun test src/",
+		"type-check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.14",
+		"typescript": "^5.9.3"
+	}
+}

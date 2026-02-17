@@ -1,0 +1,10 @@
+node_modules/
+.next/
+dist/
+build/
+.vercel/
+*.tsbuildinfo
+.DS_Store
+.env
+.env.local
+bun.lock

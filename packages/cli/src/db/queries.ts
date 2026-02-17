@@ -1,0 +1,110 @@
+import type { Database } from "bun:sqlite";
+
+interface TopSkillRow {
+	skill_name: string;
+	total: number;
+}
+
+interface StatsRow {
+	total: number;
+	unique_skills: number;
+}
+
+interface DailyRow {
+	date: string;
+	count: number;
+}
+
+interface InstalledSkillRow {
+	name: string;
+	path: string;
+	installed_at: string;
+	source: string | null;
+	version: string | null;
+	size_bytes: number | null;
+}
+
+export function getTopSkills(db: Database, days = 30): TopSkillRow[] {
+	const cutoff = new Date(
+		Date.now() - days * 24 * 60 * 60 * 1000,
+	).toISOString();
+	return db
+		.query<TopSkillRow, [string]>(
+			"SELECT skill_name, COUNT(*) as total FROM skill_invocations WHERE timestamp >= ? GROUP BY skill_name ORDER BY total DESC LIMIT 20",
+		)
+		.all(cutoff);
+}
+
+export function getSkillStats(db: Database, days = 30): StatsRow {
+	const cutoff = new Date(
+		Date.now() - days * 24 * 60 * 60 * 1000,
+	).toISOString();
+	return (
+		db
+			.query<StatsRow, [string]>(
+				"SELECT COUNT(*) as total, COUNT(DISTINCT skill_name) as unique_skills FROM skill_invocations WHERE timestamp >= ?",
+			)
+			.get(cutoff) ?? { total: 0, unique_skills: 0 }
+	);
+}
+
+export function getDailyUsage(
+	db: Database,
+	skillName: string,
+	days = 30,
+): DailyRow[] {
+	const cutoff = new Date(
+		Date.now() - days * 24 * 60 * 60 * 1000,
+	).toISOString();
+	return db
+		.query<DailyRow, [string, string]>(
+			"SELECT date(timestamp) as date, COUNT(*) as count FROM skill_invocations WHERE skill_name = ? AND timestamp >= ? GROUP BY date(timestamp) ORDER BY date ASC",
+		)
+		.all(skillName, cutoff);
+}
+
+export function getInstalledSkills(db: Database): InstalledSkillRow[] {
+	return db
+		.query<InstalledSkillRow, []>(
+			"SELECT * FROM installed_skills ORDER BY name ASC",
+		)
+		.all();
+}
+
+export function recordInvocation(
+	db: Database,
+	skillName: string,
+	sessionId?: string,
+	project?: string,
+): void {
+	db.run(
+		"INSERT INTO skill_invocations (skill_name, timestamp, session_id, project) VALUES (?, ?, ?, ?)",
+		[skillName, new Date().toISOString(), sessionId ?? null, project ?? null],
+	);
+	const date = new Date().toISOString().slice(0, 10);
+	db.run(
+		"INSERT INTO skill_daily_stats (date, skill_name, count) VALUES (?, ?, 1) ON CONFLICT(date, skill_name) DO UPDATE SET count = count + 1",
+		[date, skillName],
+	);
+}
+
+export function upsertInstalledSkill(
+	db: Database,
+	name: string,
+	path: string,
+	source?: string,
+	version?: string,
+	sizeBytes?: number,
+): void {
+	db.run(
+		"INSERT INTO installed_skills (name, path, installed_at, source, version, size_bytes) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(name) DO UPDATE SET path = excluded.path, source = excluded.source, version = excluded.version, size_bytes = excluded.size_bytes",
+		[
+			name,
+			path,
+			new Date().toISOString(),
+			source ?? null,
+			version ?? null,
+			sizeBytes ?? null,
+		],
+	);
+}
