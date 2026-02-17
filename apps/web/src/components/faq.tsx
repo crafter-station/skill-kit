@@ -64,8 +64,12 @@ export function FAQ() {
 						>
 							<summary className="flex items-center justify-between gap-4 px-6 py-5 text-sm font-medium text-[#ccc] cursor-pointer select-none list-none hover:text-white transition-colors">
 								{item.question}
-								<span className="text-[#444] group-open:text-white transition-colors shrink-0 text-base leading-none">
-									+
+								<span
+									className="text-[#444] group-open:text-white transition-colors shrink-0 text-base leading-none"
+									aria-hidden="true"
+								>
+									<span className="group-open:hidden">+</span>
+									<span className="hidden group-open:inline">&minus;</span>
 								</span>
 							</summary>
 							<p className="px-6 pb-5 text-sm text-[#888] leading-relaxed border-t border-[#222] pt-4">

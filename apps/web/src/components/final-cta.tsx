@@ -23,46 +23,29 @@ export function FinalCTA() {
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true }}
 					transition={{ duration: 0.5 }}
-					className="flex flex-col items-center gap-8"
+					className="flex flex-col items-center gap-6"
 				>
 					<h2 className="text-4xl md:text-5xl font-serif italic text-white leading-tight">
 						Stop guessing. Start measuring.
 					</h2>
-					<div className="w-full max-w-lg">
-						<div className="flex items-center justify-between gap-3 rounded-lg border border-[#222] bg-[#0a0a0a] px-4 py-3 font-mono text-sm">
-							<span className="text-[#888] truncate">{INSTALL_CMD}</span>
-							<button
-								type="button"
-								onClick={handleCopy}
-								className="shrink-0 text-[#555] hover:text-white transition-colors"
-								aria-label="Copy install command"
-							>
-								{copied ? (
-									<Check className="w-4 h-4 text-white" />
-								) : (
-									<Copy className="w-4 h-4" />
-								)}
-							</button>
-						</div>
-					</div>
-					<div className="flex flex-wrap items-center justify-center gap-3">
-						<a
-							href="https://github.com/crafter-station/skill-kit#readme"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="px-6 py-2.5 rounded-md bg-white text-black font-medium text-sm hover:bg-white/90 transition-colors"
-						>
-							Get Started
-						</a>
-						<a
-							href="https://github.com/crafter-station/skill-kit"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="px-6 py-2.5 rounded-md border border-[#333] text-[#ccc] font-medium text-sm hover:border-[#555] hover:text-white transition-colors"
-						>
-							View Source
-						</a>
-					</div>
+					<p className="text-[#555] text-sm">
+						One command. No signup. No telemetry.
+					</p>
+					<button
+						type="button"
+						onClick={handleCopy}
+						className="group flex items-center gap-3 rounded-lg border border-[#222] hover:border-[#444] bg-[#0a0a0a] px-5 py-3.5 font-mono text-sm transition-colors"
+					>
+						<span className="text-[#555]">$</span>
+						<span className="text-white">{INSTALL_CMD}</span>
+						<span className="ml-2 text-[#333] group-hover:text-[#666] transition-colors">
+							{copied ? (
+								<Check className="w-4 h-4 text-white" />
+							) : (
+								<Copy className="w-4 h-4" />
+							)}
+						</span>
+					</button>
 				</motion.div>
 			</div>
 		</section>

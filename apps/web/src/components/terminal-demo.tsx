@@ -255,7 +255,7 @@ export function TerminalDemo() {
 					className="flex items-center justify-between px-4 py-1.5 border-t border-[#222] text-[10px] font-mono text-[#444]"
 					style={{ background: "#0e0e0e" }}
 				>
-					<span>-- INSERT --</span>
+					<span>-- NORMAL --</span>
 					<span>skillkit v0.1.0</span>
 					<span>utf-8</span>
 				</div>

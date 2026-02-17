@@ -28,7 +28,7 @@ export function AgentLogoBelt() {
 					{AGENTS.map((agent) => (
 						<span
 							key={agent}
-							className="px-4 py-2 rounded-full border border-[#222] font-mono text-sm text-[#555] hover:text-white hover:border-[#444] transition-colors cursor-default"
+							className="px-4 py-2 rounded-full border border-[#222] font-mono text-sm text-[#555]"
 						>
 							{agent}
 						</span>

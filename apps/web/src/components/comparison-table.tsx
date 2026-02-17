@@ -15,11 +15,16 @@ type Row = {
 const ROWS: Row[] = [
 	{
 		feature: "Install / update skills",
-		skillkit: true,
+		skillkit: false,
 		skillssh: true,
 		manual: false,
 	},
-	{ feature: "Registry search", skillkit: true, skillssh: true, manual: false },
+	{
+		feature: "Registry search",
+		skillkit: false,
+		skillssh: true,
+		manual: false,
+	},
 	{
 		feature: "Usage analytics",
 		skillkit: true,
@@ -33,6 +38,12 @@ const ROWS: Row[] = [
 		manual: false,
 	},
 	{ feature: "Health checks", skillkit: true, skillssh: false, manual: false },
+	{
+		feature: "Unused skill pruning",
+		skillkit: true,
+		skillssh: false,
+		manual: false,
+	},
 	{
 		feature: "Session JSONL scanning",
 		skillkit: true,
@@ -88,6 +99,9 @@ export function ComparisonTable() {
 					className="rounded-xl border border-[#222] bg-[#0a0a0a] overflow-hidden"
 				>
 					<table className="w-full text-sm">
+						<caption className="sr-only">
+							Comparison of SkillKit, skills.sh, and manual skill management
+						</caption>
 						<thead>
 							<tr className="border-b border-[#222]">
 								<th className="text-left px-6 py-4 text-[#555] font-medium">

@@ -1,10 +1,15 @@
 {
 	"name": "@crafter/skillkit",
 	"version": "0.1.0",
+	"description": "Local-first analytics for AI agent skills. Track usage, measure context budget, and prune what you don't use.",
 	"type": "module",
 	"bin": {
 		"skillkit": "./src/bin.ts"
 	},
+	"files": [
+		"src",
+		"README.md"
+	],
 	"exports": {
 		".": {
 			"bun": "./src/index.ts",
@@ -16,6 +21,30 @@
 		"build": "bun build src/bin.ts --compile --outfile dist/skillkit",
 		"test": "bun test src/",
 		"type-check": "tsc --noEmit"
+	},
+	"keywords": [
+		"skillkit",
+		"skills",
+		"analytics",
+		"claude-code",
+		"cursor",
+		"ai-agent",
+		"context-window",
+		"cli"
+	],
+	"author": "Crafter Station <the.crafter.station@gmail.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/crafter-station/skill-kit.git",
+		"directory": "packages/cli"
+	},
+	"homepage": "https://github.com/crafter-station/skill-kit#readme",
+	"bugs": {
+		"url": "https://github.com/crafter-station/skill-kit/issues"
+	},
+	"engines": {
+		"bun": ">=1.0.0"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.14",

@@ -4,14 +4,23 @@ import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 
+const INSTALL_CMD = "npx @crafter/skillkit";
+
 export function Navbar() {
 	const [scrolled, setScrolled] = useState(false);
+	const [copied, setCopied] = useState(false);
 
 	useEffect(() => {
 		const onScroll = () => setScrolled(window.scrollY > 8);
 		window.addEventListener("scroll", onScroll, { passive: true });
 		return () => window.removeEventListener("scroll", onScroll);
 	}, []);
+
+	const handleCopy = async () => {
+		await navigator.clipboard.writeText(INSTALL_CMD);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	};
 
 	return (
 		<header
@@ -40,14 +49,13 @@ export function Navbar() {
 						<Star className="w-3.5 h-3.5" aria-hidden="true" />
 						GitHub
 					</a>
-					<a
-						href="https://github.com/crafter-station/skill-kit#readme"
-						target="_blank"
-						rel="noopener noreferrer"
+					<button
+						type="button"
+						onClick={handleCopy}
 						className="ml-2 px-4 py-1.5 text-sm font-medium rounded-md bg-white text-black hover:bg-white/90 transition-colors"
 					>
-						Get Started
-					</a>
+						{copied ? "Copied!" : "npx @crafter/skillkit"}
+					</button>
 				</nav>
 			</div>
 		</header>
