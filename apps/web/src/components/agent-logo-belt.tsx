@@ -1,22 +1,49 @@
 "use client";
 
 import { motion } from "motion/react";
+import type { ComponentType } from "react";
+import {
+	ClaudeLogo,
+	CursorLogo,
+	GeminiLogo,
+	GithubLogo,
+	OpenAILogo,
+} from "./logos/agent-logos";
 
-const SUPPORTED = ["Claude Code", "OpenCode"];
+type AgentEntry = {
+	name: string;
+	logo?: ComponentType<{ className?: string }>;
+	supported?: boolean;
+};
 
-const PLANNED = [
-	"Cursor",
-	"Codex",
-	"Windsurf",
-	"Gemini CLI",
-	"Cline",
-	"Roo Code",
-	"GitHub Copilot",
-	"OpenHands",
-	"Goose",
-	"Kilo Code",
-	"Trae",
+const AGENTS: AgentEntry[] = [
+	{ name: "Claude Code", logo: ClaudeLogo, supported: true },
+	{ name: "OpenCode", supported: true },
+	{ name: "Cursor", logo: CursorLogo },
+	{ name: "Codex", logo: OpenAILogo },
+	{ name: "Windsurf" },
+	{ name: "Gemini CLI", logo: GeminiLogo },
+	{ name: "Cline" },
+	{ name: "Roo Code" },
+	{ name: "GitHub Copilot", logo: GithubLogo },
+	{ name: "OpenHands" },
+	{ name: "Goose" },
+	{ name: "Kilo Code" },
+	{ name: "Trae" },
 ];
+
+function AgentInitial({ name }: { name: string }) {
+	const initial = name
+		.split(" ")
+		.map((w) => w[0])
+		.join("")
+		.slice(0, 2);
+	return (
+		<span className="w-4 h-4 flex items-center justify-center text-[10px] font-mono font-medium">
+			{initial}
+		</span>
+	);
+}
 
 export function AgentLogoBelt() {
 	return (
@@ -32,25 +59,26 @@ export function AgentLogoBelt() {
 					transition={{ duration: 0.5 }}
 					className="flex flex-wrap items-center justify-center gap-3"
 				>
-					{SUPPORTED.map((agent) => (
-						<span
-							key={agent}
-							className="px-4 py-2 rounded-full border border-[#333] font-mono text-sm text-white"
-						>
-							{agent}
-						</span>
-					))}
-					{PLANNED.map((agent) => (
-						<span
-							key={agent}
-							className="px-4 py-2 rounded-full border border-[#1a1a1a] font-mono text-sm text-[#333]"
-						>
-							{agent}
-						</span>
-					))}
-					<span className="px-4 py-2 font-mono text-xs text-[#444]">
-						+30 more planned
-					</span>
+					{AGENTS.map((agent) => {
+						const Logo = agent.logo;
+						return (
+							<span
+								key={agent.name}
+								className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border font-mono text-sm ${
+									agent.supported
+										? "border-[#333] text-white"
+										: "border-[#1a1a1a] text-[#444]"
+								}`}
+							>
+								{Logo ? (
+									<Logo className="w-4 h-4" />
+								) : (
+									<AgentInitial name={agent.name} />
+								)}
+								{agent.name}
+							</span>
+						);
+					})}
 				</motion.div>
 			</div>
 		</section>
