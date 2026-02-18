@@ -45,6 +45,7 @@ export default async function Image() {
 						fontSize: 32,
 						color: "#999999",
 						letterSpacing: "0.08em",
+						fontFamily: "Geist",
 					}}
 				>
 					Analytics for AI agent skills
@@ -60,7 +61,7 @@ export default async function Image() {
 						background: "#141414",
 					}}
 				>
-					<span style={{ fontSize: 24, color: "#666666" }}>$</span>
+					<span style={{ fontSize: 24, color: "#666666", fontFamily: "Geist Mono" }}>$</span>
 					<span
 						tw="text-white"
 						style={{ fontSize: 24, fontFamily: "Geist Mono" }}
@@ -71,7 +72,7 @@ export default async function Image() {
 			</div>
 
 			<div tw="absolute bottom-9 flex items-center" style={{ gap: 8 }}>
-				<span style={{ fontSize: 18, color: "#555555" }}>
+				<span style={{ fontSize: 18, color: "#555555", fontFamily: "Geist" }}>
 					Powered by skills.sh
 				</span>
 			</div>
