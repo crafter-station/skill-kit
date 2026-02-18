@@ -6,7 +6,7 @@ export const size = { width: 1200, height: 600 };
 export const contentType = "image/png";
 
 const serifUrl =
-	"https://fonts.gstatic.com/s/sourceserif4/v8/vEFy2_tTDB4M7-auWDN0ahZJW3IX2ih5nk3AucvUHf6OAVIhskWw9Ota.woff";
+	"https://raw.githubusercontent.com/google/fonts/main/ofl/sourceserif4/SourceSerif4-Italic%5Bopsz%2Cwght%5D.ttf";
 
 export default async function Image() {
 	const serifData = await fetch(serifUrl).then((r) => r.arrayBuffer());
