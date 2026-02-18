@@ -27,7 +27,7 @@ export default async function Image() {
 					right: 0,
 					bottom: 0,
 					background:
-						"radial-gradient(circle at 50% 50%, #141414 0%, #0a0a0a 70%)",
+						"radial-gradient(circle at 50% 50%, #181818 0%, #0a0a0a 70%)",
 					display: "flex",
 				}}
 			/>
@@ -37,13 +37,13 @@ export default async function Image() {
 					display: "flex",
 					flexDirection: "column",
 					alignItems: "center",
-					gap: 24,
+					gap: 28,
 					zIndex: 1,
 				}}
 			>
 				<span
 					style={{
-						fontSize: 96,
+						fontSize: 120,
 						fontStyle: "italic",
 						color: "#fafafa",
 						fontFamily: "Georgia, serif",
@@ -55,35 +55,35 @@ export default async function Image() {
 
 				<div
 					style={{
-						fontSize: 28,
-						color: "#a3a3a3",
+						fontSize: 32,
+						color: "#999999",
 						fontFamily: "system-ui, sans-serif",
 						letterSpacing: "0.08em",
 						textTransform: "uppercase",
 					}}
 				>
-					Local analytics for AI agent skills
+					Analytics for AI agent skills
 				</div>
 
 				<div
 					style={{
 						display: "flex",
 						alignItems: "center",
-						gap: 8,
-						marginTop: 32,
-						padding: "14px 28px",
-						border: "1px solid #222222",
-						borderRadius: 8,
+						gap: 10,
+						marginTop: 36,
+						padding: "16px 32px",
+						border: "1px solid #333333",
+						borderRadius: 10,
 						background: "#141414",
 					}}
 				>
 					<span
-						style={{ fontSize: 20, color: "#555555", fontFamily: "monospace" }}
+						style={{ fontSize: 24, color: "#666666", fontFamily: "monospace" }}
 					>
 						$
 					</span>
 					<span
-						style={{ fontSize: 20, color: "#fafafa", fontFamily: "monospace" }}
+						style={{ fontSize: 24, color: "#fafafa", fontFamily: "monospace" }}
 					>
 						npx @crafter/skillkit
 					</span>
@@ -93,7 +93,7 @@ export default async function Image() {
 			<div
 				style={{
 					position: "absolute",
-					bottom: 32,
+					bottom: 36,
 					display: "flex",
 					alignItems: "center",
 					gap: 8,
@@ -101,8 +101,8 @@ export default async function Image() {
 			>
 				<span
 					style={{
-						fontSize: 16,
-						color: "#333333",
+						fontSize: 18,
+						color: "#555555",
 						fontFamily: "system-ui, sans-serif",
 					}}
 				>
