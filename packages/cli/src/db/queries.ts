@@ -76,16 +76,51 @@ export function recordInvocation(
 	skillName: string,
 	sessionId?: string,
 	project?: string,
+	timestamp?: string,
 ): void {
+	const ts = timestamp ?? new Date().toISOString();
 	db.run(
 		"INSERT INTO skill_invocations (skill_name, timestamp, session_id, project) VALUES (?, ?, ?, ?)",
-		[skillName, new Date().toISOString(), sessionId ?? null, project ?? null],
+		[skillName, ts, sessionId ?? null, project ?? null],
 	);
-	const date = new Date().toISOString().slice(0, 10);
+	const date = ts.slice(0, 10);
 	db.run(
 		"INSERT INTO skill_daily_stats (date, skill_name, count) VALUES (?, ?, 1) ON CONFLICT(date, skill_name) DO UPDATE SET count = count + 1",
 		[date, skillName],
 	);
+}
+
+export function deduplicateInvocations(db: Database): number {
+	const before = db
+		.query<{ count: number }, []>(
+			"SELECT COUNT(*) as count FROM skill_invocations",
+		)
+		.get()?.count ?? 0;
+
+	db.run(`
+		DELETE FROM skill_invocations WHERE id NOT IN (
+			SELECT MIN(id) FROM skill_invocations
+			GROUP BY skill_name, session_id, timestamp
+		)
+	`);
+
+	const after = db
+		.query<{ count: number }, []>(
+			"SELECT COUNT(*) as count FROM skill_invocations",
+		)
+		.get()?.count ?? 0;
+
+	if (before !== after) {
+		db.run("DELETE FROM skill_daily_stats");
+		db.run(`
+			INSERT INTO skill_daily_stats (date, skill_name, count)
+			SELECT date(timestamp), skill_name, COUNT(*)
+			FROM skill_invocations
+			GROUP BY date(timestamp), skill_name
+		`);
+	}
+
+	return before - after;
 }
 
 export function upsertInstalledSkill(

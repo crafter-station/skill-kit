@@ -35,7 +35,7 @@ export function recordNewInvocations(
 	for (const inv of invocations) {
 		const key = `${inv.sessionId}::${inv.timestamp}`;
 		if (!trackedSet.has(key)) {
-			recordInvocation(db, inv.skillName, inv.sessionId);
+			recordInvocation(db, inv.skillName, inv.sessionId, undefined, inv.timestamp);
 			trackedSet.add(key);
 			count++;
 		}
@@ -43,10 +43,13 @@ export function recordNewInvocations(
 	return count;
 }
 
-export async function scanAllSessions(db: Database): Promise<number> {
+export async function scanAllSessions(
+	db: Database,
+	knownSkills: Set<string> = new Set(),
+): Promise<number> {
 	const trackedSet = getTrackedSet(db);
 	let total = 0;
-	total += await scanClaudeSessions(db, trackedSet);
+	total += await scanClaudeSessions(db, trackedSet, knownSkills);
 	total += scanOpenCodeSessions(db, trackedSet);
 	return total;
 }

@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { bold, cyan, dim, yellow } from "./tui/colors";
 
-const VERSION = "0.1.8";
+const pkg = JSON.parse(
+	readFileSync(join(dirname(import.meta.dir), "package.json"), "utf-8"),
+);
+const VERSION: string = pkg.version;
 
 function printHelp(): void {
 	console.log(`
@@ -18,6 +23,10 @@ function printHelp(): void {
     ${cyan("prune")}       Remove unused skills to reclaim context budget
     ${cyan("version")}     Print version
     ${cyan("help")}        Show this help message
+
+  ${bold("FLAGS")}
+    ${dim("scan")}  ${cyan("--include-commands")}  Also track slash commands (not just skills)
+    ${dim("stats")} ${cyan("--days N")}             Time range in days (default: 30)
 
   ${dim("Install skills via skills.sh: npx skills add <owner/repo>")}
 `);

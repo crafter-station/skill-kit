@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
-import { upsertInstalledSkill } from "../db/queries";
+import { homedir } from "node:os";
+import { basename, join } from "node:path";
+import { upsertInstalledSkill, deduplicateInvocations } from "../db/queries";
 import { getDb } from "../db/schema";
 import { countAllSessions, scanAllSessions } from "../scanner/index";
 import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
@@ -22,6 +23,7 @@ function detectSource(skillPath: string): "skills.sh" | "manual" {
 }
 
 export async function runScan(): Promise<void> {
+	const includeCommands = process.argv.includes("--include-commands");
 	const db = getDb();
 
 	const agents = getDetectedAgents();
@@ -86,10 +88,61 @@ export async function runScan(): Promise<void> {
 		} catch {}
 	}
 
+	const knownSkills = new Set<string>();
+	for (const skill of skills) {
+		knownSkills.add(skill.name);
+		knownSkills.add(basename(skill.path));
+	}
+	if (existsSync(localSkillsDir)) {
+		try {
+			for (const e of readdirSync(localSkillsDir)) {
+				try {
+					if (statSync(join(localSkillsDir, e)).isDirectory()) {
+						knownSkills.add(e);
+					}
+				} catch {}
+			}
+		} catch {}
+	}
+
+	if (includeCommands) {
+		const commandDirs = [
+			join(process.cwd(), ".claude", "commands"),
+			join(homedir(), ".claude", "commands"),
+		];
+		let commandCount = 0;
+		for (const dir of commandDirs) {
+			if (!existsSync(dir)) continue;
+			try {
+				for (const e of readdirSync(dir)) {
+					if (e.endsWith(".md")) {
+						knownSkills.add(e.slice(0, -3));
+						commandCount++;
+					} else {
+						try {
+							if (statSync(join(dir, e)).isDirectory()) {
+								knownSkills.add(e);
+								commandCount++;
+							}
+						} catch {}
+					}
+				}
+			} catch {}
+		}
+		if (commandCount > 0) {
+			console.log(dim(`  + ${commandCount} slash commands`));
+		}
+	}
+
+	const removed = deduplicateInvocations(db);
+	if (removed > 0) {
+		console.log(`  ${dim(`Cleaned ${removed} duplicate entries`)}`);
+	}
+
 	console.log(dim("  Scanning sessions..."));
 
 	const sessionCount = countAllSessions();
-	const newInvocations = await scanAllSessions(db);
+	const newInvocations = await scanAllSessions(db, knownSkills);
 	const totalRow = db
 		.query<{ count: number }, []>(
 			"SELECT COUNT(*) as count FROM skill_invocations",
