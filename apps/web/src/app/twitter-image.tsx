@@ -1,10 +1,19 @@
+import type { Font } from "@takumi-rs/core";
 import { ImageResponse } from "@takumi-rs/image-response";
 
 export const alt = "SkillKit - Analytics for AI Agent Skills";
 export const size = { width: 1200, height: 600 };
 export const contentType = "image/png";
 
-export default function Image() {
+const serifUrl =
+	"https://fonts.gstatic.com/s/sourceserif4/v8/vEFy2_tTDB4M7-auWDN0ahZJW3IX2ih5nk3AucvUHf6OAVIhskWw9Ota.woff";
+
+export default async function Image() {
+	const serifData = await fetch(serifUrl).then((r) => r.arrayBuffer());
+	const fonts: Font[] = [
+		{ name: "Serif", data: serifData, style: "italic", weight: 400 },
+	];
+
 	return new ImageResponse(
 		<div
 			tw="flex h-full w-full flex-col items-center justify-center relative"
@@ -23,9 +32,8 @@ export default function Image() {
 					tw="text-white italic"
 					style={{
 						fontSize: 120,
-						fontFamily: "Geist",
+						fontFamily: "Serif",
 						letterSpacing: "-0.02em",
-						fontVariationSettings: "'wght' 400",
 					}}
 				>
 					skillkit
@@ -62,6 +70,6 @@ export default function Image() {
 				</div>
 			</div>
 		</div>,
-		{ ...size },
+		{ ...size, fonts },
 	);
 }
