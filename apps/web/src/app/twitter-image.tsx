@@ -1,89 +1,61 @@
-import { ImageResponse } from "next/og";
+import { ImageResponse } from "@takumi-rs/image-response";
 
-export const runtime = "edge";
-export const alt = "SkillKit - Local-First Analytics for AI Agent Skills";
+export const alt = "SkillKit - Analytics for AI Agent Skills";
 export const size = { width: 1200, height: 600 };
 export const contentType = "image/png";
 
-export default async function Image() {
+export default function Image() {
 	return new ImageResponse(
 		<div
-			style={{
-				width: "100%",
-				height: "100%",
-				display: "flex",
-				flexDirection: "column",
-				justifyContent: "center",
-				alignItems: "center",
-				background: "#0a0a0a",
-				position: "relative",
-			}}
+			tw="flex h-full w-full flex-col items-center justify-center relative"
+			style={{ background: "#0a0a0a" }}
 		>
 			<div
+				tw="absolute inset-0"
 				style={{
-					position: "absolute",
-					top: 0,
-					left: 0,
-					right: 0,
-					bottom: 0,
 					background:
 						"radial-gradient(circle at 50% 50%, #181818 0%, #0a0a0a 70%)",
-					display: "flex",
 				}}
 			/>
 
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-					gap: 28,
-					zIndex: 1,
-				}}
-			>
+			<div tw="flex flex-col items-center z-10" style={{ gap: 28 }}>
 				<span
+					tw="text-white italic"
 					style={{
 						fontSize: 120,
-						fontStyle: "italic",
-						color: "#fafafa",
-						fontFamily: "Georgia, serif",
+						fontFamily: "Geist",
 						letterSpacing: "-0.02em",
+						fontVariationSettings: "'wght' 400",
 					}}
 				>
 					skillkit
 				</span>
 
-				<div
+				<span
+					tw="uppercase"
 					style={{
 						fontSize: 32,
 						color: "#999999",
-						fontFamily: "system-ui, sans-serif",
 						letterSpacing: "0.08em",
-						textTransform: "uppercase",
 					}}
 				>
 					Analytics for AI agent skills
-				</div>
+				</span>
 
 				<div
+					tw="flex items-center mt-8"
 					style={{
-						display: "flex",
-						alignItems: "center",
 						gap: 10,
-						marginTop: 32,
 						padding: "16px 32px",
 						border: "1px solid #333333",
 						borderRadius: 10,
 						background: "#141414",
 					}}
 				>
+					<span style={{ fontSize: 24, color: "#666666" }}>$</span>
 					<span
-						style={{ fontSize: 24, color: "#666666", fontFamily: "monospace" }}
-					>
-						$
-					</span>
-					<span
-						style={{ fontSize: 24, color: "#fafafa", fontFamily: "monospace" }}
+						tw="text-white"
+						style={{ fontSize: 24, fontFamily: "Geist Mono" }}
 					>
 						npx @crafter/skillkit
 					</span>

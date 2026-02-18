@@ -48,9 +48,7 @@ function AgentInitial({ name }: { name: string }) {
 	);
 }
 
-function AgentIcon({
-	agent,
-}: { agent: AgentEntry }) {
+function AgentIcon({ agent }: { agent: AgentEntry }) {
 	const Logo = agent.logo;
 	if (Logo) return <Logo className="w-4 h-4" />;
 	return <AgentInitial name={agent.name} />;

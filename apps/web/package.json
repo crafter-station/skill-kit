@@ -10,14 +10,15 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@takumi-rs/image-response": "^0.68.5",
+		"clsx": "^2.1.1",
+		"geist": "^1.4.1",
+		"lucide-react": "^0.513.0",
+		"motion": "^12.12.1",
 		"next": "^15.3.3",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
-		"geist": "^1.4.1",
-		"motion": "^12.12.1",
-		"clsx": "^2.1.1",
-		"tailwind-merge": "^3.3.1",
-		"lucide-react": "^0.513.0"
+		"tailwind-merge": "^3.3.1"
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4.1.8",
