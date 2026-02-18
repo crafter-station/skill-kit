@@ -10,26 +10,29 @@ import {
 	OpenAILogo,
 } from "./logos/agent-logos";
 
+const REPO = "https://github.com/crafter-station/skill-kit/issues";
+
 type AgentEntry = {
 	name: string;
 	logo?: ComponentType<{ className?: string }>;
 	supported?: boolean;
+	issue?: number;
 };
 
 const AGENTS: AgentEntry[] = [
 	{ name: "Claude Code", logo: ClaudeLogo, supported: true },
 	{ name: "OpenCode", supported: true },
-	{ name: "Cursor", logo: CursorLogo },
-	{ name: "Codex", logo: OpenAILogo },
-	{ name: "Windsurf" },
-	{ name: "Gemini CLI", logo: GeminiLogo },
-	{ name: "Cline" },
-	{ name: "Roo Code" },
-	{ name: "GitHub Copilot", logo: GithubLogo },
-	{ name: "OpenHands" },
-	{ name: "Goose" },
-	{ name: "Kilo Code" },
-	{ name: "Trae" },
+	{ name: "Cursor", logo: CursorLogo, issue: 1 },
+	{ name: "Codex", logo: OpenAILogo, issue: 2 },
+	{ name: "Windsurf", issue: 3 },
+	{ name: "Gemini CLI", logo: GeminiLogo, issue: 4 },
+	{ name: "Cline", issue: 5 },
+	{ name: "Roo Code", issue: 6 },
+	{ name: "GitHub Copilot", logo: GithubLogo, issue: 8 },
+	{ name: "OpenHands", issue: 9 },
+	{ name: "Goose", issue: 11 },
+	{ name: "Kilo Code", issue: 12 },
+	{ name: "Trae", issue: 13 },
 ];
 
 function AgentInitial({ name }: { name: string }) {
@@ -45,41 +48,66 @@ function AgentInitial({ name }: { name: string }) {
 	);
 }
 
+function AgentIcon({
+	agent,
+}: { agent: AgentEntry }) {
+	const Logo = agent.logo;
+	if (Logo) return <Logo className="w-4 h-4" />;
+	return <AgentInitial name={agent.name} />;
+}
+
 export function AgentLogoBelt() {
+	const supported = AGENTS.filter((a) => a.supported);
+	const planned = AGENTS.filter((a) => !a.supported);
+
 	return (
 		<section className="py-16 px-6 border-y border-[#1a1a1a]">
-			<div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
-				<p className="text-xs text-[#555] uppercase tracking-widest font-medium">
-					Works with your agent
-				</p>
-				<motion.div
-					initial={{ opacity: 0, y: 12 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.5 }}
-					className="flex flex-wrap items-center justify-center gap-3"
-				>
-					{AGENTS.map((agent) => {
-						const Logo = agent.logo;
-						return (
+			<div className="max-w-6xl mx-auto flex flex-col items-center gap-10">
+				<div className="flex flex-col items-center gap-4">
+					<p className="text-xs text-[#555] uppercase tracking-widest font-medium">
+						Supported agents
+					</p>
+					<div className="flex flex-wrap items-center justify-center gap-3">
+						{supported.map((agent) => (
 							<span
 								key={agent.name}
-								className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border font-mono text-sm ${
-									agent.supported
-										? "border-[#333] text-white"
-										: "border-[#1a1a1a] text-[#444]"
-								}`}
+								className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#333] text-white font-mono text-sm"
 							>
-								{Logo ? (
-									<Logo className="w-4 h-4" />
-								) : (
-									<AgentInitial name={agent.name} />
-								)}
+								<AgentIcon agent={agent} />
 								{agent.name}
 							</span>
-						);
-					})}
-				</motion.div>
+						))}
+					</div>
+				</div>
+
+				<div className="flex flex-col items-center gap-4">
+					<p className="text-xs text-[#333] uppercase tracking-widest font-medium">
+						Coming soon
+					</p>
+					<motion.div
+						initial={{ opacity: 0, y: 12 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.5 }}
+						className="flex flex-wrap items-center justify-center gap-2"
+					>
+						{planned.map((agent) => (
+							<a
+								key={agent.name}
+								href={`${REPO}/${agent.issue}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1a1a1a] text-[#333] font-mono text-xs transition-colors hover:border-[#333] hover:text-[#888]"
+							>
+								<AgentIcon agent={agent} />
+								{agent.name}
+								<span className="opacity-0 group-hover:opacity-100 transition-opacity text-[#555]">
+									+1
+								</span>
+							</a>
+						))}
+					</motion.div>
+				</div>
 			</div>
 		</section>
 	);
