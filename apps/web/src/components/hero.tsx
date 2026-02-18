@@ -1,11 +1,9 @@
 "use client";
 
-import { ArrowRight, Check, Copy } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { InstallCommand } from "./install-command";
 import { TerminalDemo } from "./terminal-demo";
-
-const INSTALL_CMD = "npx @crafter/skillkit";
 
 const fadeUp = {
 	hidden: { opacity: 0, y: 24 },
@@ -21,14 +19,6 @@ const fadeUp = {
 };
 
 export function Hero() {
-	const [copied, setCopied] = useState(false);
-
-	const handleCopy = async () => {
-		await navigator.clipboard.writeText(INSTALL_CMD);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
-
 	return (
 		<section className="relative pt-32 pb-20 px-6 overflow-hidden">
 			<div className="max-w-6xl mx-auto flex flex-col items-center text-center gap-6">
@@ -77,22 +67,7 @@ export function Hero() {
 					variants={fadeUp}
 					className="flex flex-col items-center gap-4"
 				>
-					<div className="flex items-center gap-2 rounded-lg border border-[#222] bg-[#0a0a0a] px-4 py-3 font-mono text-sm">
-						<span className="text-[#555] select-none">$</span>
-						<span className="text-white">{INSTALL_CMD}</span>
-						<button
-							type="button"
-							onClick={handleCopy}
-							className="ml-3 shrink-0 text-[#555] hover:text-white transition-colors"
-							aria-label="Copy install command"
-						>
-							{copied ? (
-								<Check className="w-4 h-4 text-white" />
-							) : (
-								<Copy className="w-4 h-4" />
-							)}
-						</button>
-					</div>
+					<InstallCommand location="hero" />
 					<a
 						href="https://github.com/crafter-station/skill-kit"
 						target="_blank"
