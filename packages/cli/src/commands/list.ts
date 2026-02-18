@@ -20,11 +20,6 @@ export function runList(): void {
 		return;
 	}
 
-	const agentCounts = new Map<string, number>();
-	for (const s of skills) {
-		agentCounts.set(s.agent, (agentCounts.get(s.agent) ?? 0) + 1);
-	}
-
 	const totalSize = skills.reduce((acc, s) => acc + s.size, 0);
 
 	console.log(`\n  ${bold(`INSTALLED SKILLS (${skills.length})`)}\n`);
@@ -45,10 +40,7 @@ export function runList(): void {
 		console.log(`  ${name}${desc}${size}`);
 	}
 
-	const agentSummary = [...agentCounts.entries()]
-		.map(([a, c]) => `${a} (${c})`)
-		.join(", ");
 	console.log(
-		`\n  ${dim(`Total: ${skills.length} skills | ${formatSize(totalSize)} | ${agentSummary}`)}\n`,
+		`\n  ${dim(`Total: ${skills.length} skills | ${formatSize(totalSize)}`)}\n`,
 	);
 }

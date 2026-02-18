@@ -45,7 +45,7 @@ const ROWS: Row[] = [
 		manual: false,
 	},
 	{
-		feature: "Session JSONL scanning",
+		feature: "Session analytics (Claude Code + OpenCode)",
 		skillkit: true,
 		skillssh: false,
 		manual: false,

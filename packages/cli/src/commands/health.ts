@@ -115,8 +115,10 @@ export async function runHealth(): Promise<void> {
 	console.log(`\n  ${bold("SKILLKIT HEALTH REPORT")}\n`);
 
 	const agents = getDetectedAgents();
-	console.log(check(`${skills.length} skills across ${agents.length} agents`));
-	console.log(dim(`    ${agents.join(", ")}`));
+	console.log(check(`${skills.length} skills installed`));
+	if (agents.length > 0) {
+		console.log(dim(`    ${agents.join(" + ")}`));
+	}
 
 	if (dbExists && hasDbData) {
 		console.log(

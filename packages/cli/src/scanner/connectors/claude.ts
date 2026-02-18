@@ -51,8 +51,7 @@ export function parseSessionFile(filePath: string): Invocation[] {
 		const msg = obj.message as
 			| { content: Array<Record<string, unknown>> }
 			| undefined;
-		const msgContent =
-			obj.type === "assistant" && msg ? msg.content : null;
+		const msgContent = obj.type === "assistant" && msg ? msg.content : null;
 
 		if (!Array.isArray(msgContent)) continue;
 
@@ -63,9 +62,7 @@ export function parseSessionFile(filePath: string): Invocation[] {
 				block.type === "tool_use" &&
 				(block as unknown as ToolUseBlock).name === "Skill"
 			) {
-				const skillName = extractSkillName(
-					block as unknown as ToolUseBlock,
-				);
+				const skillName = extractSkillName(block as unknown as ToolUseBlock);
 				if (skillName) {
 					results.push({ skillName, timestamp, sessionId });
 				}

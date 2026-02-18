@@ -3,22 +3,23 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { InstalledSkill } from "../types";
 
-const AGENT_SKILL_PATHS: Array<{ agent: string; dir: string }> = [
+const SUPPORTED_AGENTS: Array<{ agent: string; dir: string }> = [
 	{ agent: "Claude Code", dir: join(homedir(), ".claude", "skills") },
-	{ agent: "Cursor", dir: join(homedir(), ".cursor", "skills") },
-	{ agent: "Codex", dir: join(homedir(), ".codex", "skills") },
-	{ agent: "Windsurf", dir: join(homedir(), ".codeium", "windsurf", "skills") },
-	{ agent: "Gemini CLI", dir: join(homedir(), ".gemini", "skills") },
-	{ agent: "Cline", dir: join(homedir(), ".cline", "skills") },
-	{ agent: "Roo Code", dir: join(homedir(), ".roo", "skills") },
-	{ agent: "Continue", dir: join(homedir(), ".continue", "skills") },
 	{ agent: "OpenCode", dir: join(homedir(), ".config", "opencode", "skills") },
-	{ agent: "GitHub Copilot", dir: join(homedir(), ".copilot", "skills") },
-	{ agent: "OpenHands", dir: join(homedir(), ".openhands", "skills") },
-	{ agent: "Amp", dir: join(homedir(), ".config", "agents", "skills") },
-	{ agent: "Goose", dir: join(homedir(), ".config", "goose", "skills") },
-	{ agent: "Kilo Code", dir: join(homedir(), ".kilocode", "skills") },
-	{ agent: "Trae", dir: join(homedir(), ".trae", "skills") },
+	// Planned — needs session connector to enable full analytics pipeline
+	// { agent: "Cursor", dir: join(homedir(), ".cursor", "skills") },                 // GH-1: injects skills as context rules, no discrete tool_use
+	// { agent: "Codex", dir: join(homedir(), ".codex", "skills") },                   // GH-2
+	// { agent: "Windsurf", dir: join(homedir(), ".codeium", "windsurf", "skills") },  // GH-3
+	// { agent: "Gemini CLI", dir: join(homedir(), ".gemini", "skills") },             // GH-4
+	// { agent: "Cline", dir: join(homedir(), ".cline", "skills") },                   // GH-5
+	// { agent: "Roo Code", dir: join(homedir(), ".roo", "skills") },                  // GH-6
+	// { agent: "Continue", dir: join(homedir(), ".continue", "skills") },             // GH-7
+	// { agent: "GitHub Copilot", dir: join(homedir(), ".copilot", "skills") },        // GH-8
+	// { agent: "OpenHands", dir: join(homedir(), ".openhands", "skills") },           // GH-9
+	// { agent: "Amp", dir: join(homedir(), ".config", "agents", "skills") },          // GH-10
+	// { agent: "Goose", dir: join(homedir(), ".config", "goose", "skills") },         // GH-11
+	// { agent: "Kilo Code", dir: join(homedir(), ".kilocode", "skills") },            // GH-12
+	// { agent: "Trae", dir: join(homedir(), ".trae", "skills") },                     // GH-13
 ];
 
 function parseYamlFrontmatter(content: string): Record<string, string> {
@@ -56,10 +57,7 @@ function getDirSize(dirPath: string): number {
 	return total;
 }
 
-function scanSkillsDir(
-	skillsDir: string,
-	agent: string,
-): InstalledSkill[] {
+function scanSkillsDir(skillsDir: string, agent: string): InstalledSkill[] {
 	if (!existsSync(skillsDir)) return [];
 
 	const skills: InstalledSkill[] = [];
@@ -125,7 +123,7 @@ export function scanInstalledSkills(): InstalledSkill[] {
 	const allSkills: InstalledSkill[] = [];
 	const seen = new Set<string>();
 
-	for (const { agent, dir } of AGENT_SKILL_PATHS) {
+	for (const { agent, dir } of SUPPORTED_AGENTS) {
 		const skills = scanSkillsDir(dir, agent);
 		for (const skill of skills) {
 			try {
@@ -143,7 +141,7 @@ export function scanInstalledSkills(): InstalledSkill[] {
 
 export function getDetectedAgents(): string[] {
 	const agents: string[] = [];
-	for (const { agent, dir } of AGENT_SKILL_PATHS) {
+	for (const { agent, dir } of SUPPORTED_AGENTS) {
 		if (existsSync(dir)) agents.push(agent);
 	}
 	return agents;

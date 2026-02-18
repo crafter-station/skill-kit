@@ -1,10 +1,10 @@
-import { Database as BunDatabase } from "bun:sqlite";
 import type { Database } from "bun:sqlite";
+import { Database as BunDatabase } from "bun:sqlite";
 import { existsSync } from "node:fs";
 import { homedir, platform } from "node:os";
 import { join } from "node:path";
-import { recordNewInvocations } from "../index";
 import type { Invocation } from "../index";
+import { recordNewInvocations } from "../index";
 
 function getDbPath(): string | null {
 	const os = platform();
@@ -48,9 +48,7 @@ export function countOpenCodeSessions(): number {
 
 	try {
 		const row = ocDb
-			.query<{ count: number }, []>(
-				"SELECT COUNT(*) as count FROM session",
-			)
+			.query<{ count: number }, []>("SELECT COUNT(*) as count FROM session")
 			.get();
 		return row?.count ?? 0;
 	} catch {
@@ -70,7 +68,7 @@ export function scanOpenCodeSessions(
 	try {
 		const rows = ocDb
 			.query<PartRow, []>(
-				"SELECT p.session_id, p.time_created, p.data FROM part p WHERE p.data LIKE '%\"tool\":\"skill\"%'",
+				'SELECT p.session_id, p.time_created, p.data FROM part p WHERE p.data LIKE \'%"tool":"skill"%\'',
 			)
 			.all();
 

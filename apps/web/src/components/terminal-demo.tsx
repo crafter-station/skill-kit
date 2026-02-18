@@ -17,7 +17,7 @@ const STEPS: Step[] = [
 		command: "skillkit scan",
 		output: [
 			{
-				text: "  Scanning ~/.claude/skills/ ...",
+				text: "  Scanning Claude Code + OpenCode",
 				type: "output",
 			},
 			{
@@ -258,7 +258,7 @@ export function TerminalDemo() {
 					style={{ background: "#0e0e0e" }}
 				>
 					<span>-- NORMAL --</span>
-					<span>skillkit v0.1.4</span>
+					<span>skillkit v0.1.8</span>
 					<span>utf-8</span>
 				</div>
 			</div>

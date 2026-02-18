@@ -1,9 +1,9 @@
 import type { Database } from "bun:sqlite";
 import { recordInvocation } from "../db/queries";
-import { scanClaudeSessions, countClaudeSessions } from "./connectors/claude";
+import { countClaudeSessions, scanClaudeSessions } from "./connectors/claude";
 import {
-	scanOpenCodeSessions,
 	countOpenCodeSessions,
+	scanOpenCodeSessions,
 } from "./connectors/opencode";
 
 interface AlreadyTracked {

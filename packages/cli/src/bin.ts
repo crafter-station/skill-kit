@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { bold, cyan, dim, yellow } from "./tui/colors";
 
-const VERSION = "0.1.7";
+const VERSION = "0.1.8";
 
 function printHelp(): void {
 	console.log(`

@@ -44,11 +44,11 @@ Then ask your agent things like "which skills do I use the most?" or "clean up u
 
 ### Scan
 
-Discovers skills from `~/.claude/skills/` and indexes session files from `~/.claude/projects/`. Detects whether each skill was installed via skills.sh or manually.
+Discovers skills across all detected agents and indexes session data from supported connectors. Detects whether each skill was installed via skills.sh or manually.
 
 ```
 $ skillkit scan
-  Scanning ~/.claude/skills/ ...
+  Scanning 3 agents: Claude Code, Cursor, OpenCode
   Found 12 skills (8 via skills.sh, 4 manual)
   Scanning sessions...
   Indexed 211 sessions · 1,847 invocations
@@ -58,7 +58,7 @@ $ skillkit scan
 
 ### Stats
 
-Parses JSONL session files for `Skill` tool_use blocks and shows sparkline trends.
+Parses session data from supported connectors (Claude Code JSONL, OpenCode SQLite) and shows sparkline trends.
 
 ```
 $ skillkit stats
@@ -99,18 +99,34 @@ All data stays on your machine:
 | Path | Purpose |
 |------|---------|
 | `~/.skillkit/analytics.db` | SQLite database with invocation history |
-| `~/.claude/skills/` | Installed skills (read-only) |
-| `~/.claude/projects/**/*.jsonl` | Session files (read-only) |
+| `~/.{agent}/skills/` | Installed skills per agent (read-only) |
+| `~/.claude/projects/**/*.jsonl` | Claude Code sessions (read-only) |
+| `~/Library/Application Support/opencode/opencode.db` | OpenCode sessions (read-only) |
 
 ## Supported Agents
 
-Scans skill directories for 15+ agents automatically:
+### Skill Discovery (15 agents)
+
+Scans skill directories for all major agents:
 
 - Claude Code, Cursor, Codex, Windsurf, Gemini CLI
 - Cline, Roo Code, Continue, OpenCode, GitHub Copilot
 - OpenHands, Amp, Goose, Kilo Code, Trae
 
 Skills installed via [skills.sh](https://skills.sh) symlinks are deduplicated across agents.
+
+### Usage Analytics (2 connectors)
+
+Session scanning and invocation tracking:
+
+- **Claude Code** — JSONL sessions (`~/.claude/projects/`)
+- **OpenCode** — SQLite database (`opencode.db`)
+
+More connectors coming as agents standardize session formats.
+
+### Why not all agents?
+
+Most agents (Cursor, Windsurf, Copilot, etc.) load skills as context rules injected into the prompt — there's no discrete "Skill" tool invocation in their session data. Claude Code and OpenCode are the only agents that invoke skills through a trackable tool call, which is what makes usage analytics possible. If other agents adopt a similar pattern, adding a connector is straightforward.
 
 ## Project Structure
 

@@ -30,7 +30,7 @@ const cards = [
 		icon: Database,
 		title: "Session Scanning",
 		description:
-			"Extracts real invocation data from JSONL session files. Local SQLite database, zero telemetry, your data stays on your machine.",
+			"Extracts real invocation data from agent sessions. Supports Claude Code (JSONL) and OpenCode (SQLite), with more connectors coming. Zero telemetry.",
 	},
 ];
 

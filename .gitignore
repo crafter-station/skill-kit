@@ -8,3 +8,4 @@ build/
 .env
 .env.local
 bun.lock
+.vercel

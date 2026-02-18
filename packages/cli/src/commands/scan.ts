@@ -2,7 +2,7 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { upsertInstalledSkill } from "../db/queries";
 import { getDb } from "../db/schema";
-import { scanAllSessions, countAllSessions } from "../scanner/index";
+import { countAllSessions, scanAllSessions } from "../scanner/index";
 import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
 import { bold, cyan, dim } from "../tui/colors";
 
@@ -26,10 +26,12 @@ export async function runScan(): Promise<void> {
 
 	const agents = getDetectedAgents();
 	if (agents.length === 0) {
-		console.log(`\n  ${dim("No agent skill directories found.")}\n`);
+		console.log(
+			`\n  ${dim("No supported agents found (Claude Code, OpenCode).")}\n`,
+		);
 		return;
 	}
-	console.log(`\n  ${dim(`Scanning ${agents.length} agents: ${agents.join(", ")}`)}`);
+	console.log(`\n  ${dim(`Scanning ${agents.join(" + ")}`)}`);
 
 	const skills = scanInstalledSkills();
 

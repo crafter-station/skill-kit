@@ -12,8 +12,8 @@ export {
 	upsertInstalledSkill,
 } from "./db/queries";
 export { getDb } from "./db/schema";
-export { scanAllSessions, countAllSessions } from "./scanner/index";
 export { parseSessionFile } from "./scanner/connectors/claude";
+export { countAllSessions, scanAllSessions } from "./scanner/index";
 export { getDetectedAgents, scanInstalledSkills } from "./scanner/skills";
 export type {
 	InstalledSkill,

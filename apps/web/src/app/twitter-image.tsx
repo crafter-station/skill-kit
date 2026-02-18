@@ -77,10 +77,14 @@ export default async function Image() {
 						background: "#141414",
 					}}
 				>
-					<span style={{ fontSize: 20, color: "#555555", fontFamily: "monospace" }}>
+					<span
+						style={{ fontSize: 20, color: "#555555", fontFamily: "monospace" }}
+					>
 						$
 					</span>
-					<span style={{ fontSize: 20, color: "#fafafa", fontFamily: "monospace" }}>
+					<span
+						style={{ fontSize: 20, color: "#fafafa", fontFamily: "monospace" }}
+					>
 						npx @crafter/skillkit
 					</span>
 				</div>

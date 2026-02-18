@@ -44,10 +44,7 @@ export function HowItWorks() {
 							</div>
 							<div className="mt-3 pt-3 border-t border-[#1a1a1a] space-y-0.5">
 								<div className="text-[#555] leading-7">
-									Scanning ~/.claude/skills/ ...
-								</div>
-								<div className="text-[#555] leading-7">
-									Scanning .claude/skills/ ...
+									Scanning 3 agents: Claude Code, Cursor, OpenCode
 								</div>
 								<div className="text-white leading-7">
 									Found 12 skills (8 via skills.sh, 4 manual)
@@ -154,7 +151,10 @@ export function HowItWorks() {
 									<span className="text-white">[████████</span>
 									<span className="text-[#333]">░░</span>
 									<span className="text-white">] 78%</span>
-									<span className="text-[#555]"> metadata budget (12.5K / 16.0K)</span>
+									<span className="text-[#555]">
+										{" "}
+										metadata budget (12.5K / 16.0K)
+									</span>
 								</div>
 								<div className="border-t border-[#1a1a1a] pt-2 space-y-0.5">
 									<div className="text-[#555] leading-7">

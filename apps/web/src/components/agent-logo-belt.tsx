@@ -2,8 +2,9 @@
 
 import { motion } from "motion/react";
 
-const AGENTS = [
-	"Claude Code",
+const SUPPORTED = ["Claude Code", "OpenCode"];
+
+const PLANNED = [
 	"Cursor",
 	"Codex",
 	"Windsurf",
@@ -13,6 +14,8 @@ const AGENTS = [
 	"GitHub Copilot",
 	"OpenHands",
 	"Goose",
+	"Kilo Code",
+	"Trae",
 ];
 
 export function AgentLogoBelt() {
@@ -20,7 +23,7 @@ export function AgentLogoBelt() {
 		<section className="py-16 px-6 border-y border-[#1a1a1a]">
 			<div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
 				<p className="text-xs text-[#555] uppercase tracking-widest font-medium">
-					Works with the tools you already use
+					Works with your agent
 				</p>
 				<motion.div
 					initial={{ opacity: 0, y: 12 }}
@@ -29,16 +32,24 @@ export function AgentLogoBelt() {
 					transition={{ duration: 0.5 }}
 					className="flex flex-wrap items-center justify-center gap-3"
 				>
-					{AGENTS.map((agent) => (
+					{SUPPORTED.map((agent) => (
 						<span
 							key={agent}
-							className="px-4 py-2 rounded-full border border-[#222] font-mono text-sm text-[#555]"
+							className="px-4 py-2 rounded-full border border-[#333] font-mono text-sm text-white"
 						>
 							{agent}
 						</span>
 					))}
-					<span className="px-4 py-2 font-mono text-sm text-[#333]">
-						+30 more
+					{PLANNED.map((agent) => (
+						<span
+							key={agent}
+							className="px-4 py-2 rounded-full border border-[#1a1a1a] font-mono text-sm text-[#333]"
+						>
+							{agent}
+						</span>
+					))}
+					<span className="px-4 py-2 font-mono text-xs text-[#444]">
+						+30 more planned
 					</span>
 				</motion.div>
 			</div>
