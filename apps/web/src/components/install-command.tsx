@@ -6,18 +6,21 @@ import { useState } from "react";
 
 type PackageManager = "bun" | "npm" | "pnpm";
 
-const COMMANDS: Record<PackageManager, { tryIt: string; global: string }> = {
+const COMMANDS: Record<
+	PackageManager,
+	{ tryIt: { display: string; copy: string }; global: { display: string; copy: string } }
+> = {
 	bun: {
-		tryIt: "bunx @crafter/skillkit@latest",
-		global: "bun add -g @crafter/skillkit",
+		tryIt: { display: "bunx @crafter/skillkit", copy: "bunx @crafter/skillkit@latest" },
+		global: { display: "bun add -g @crafter/skillkit", copy: "bun add -g @crafter/skillkit" },
 	},
 	npm: {
-		tryIt: "npx @crafter/skillkit@latest",
-		global: "npm install -g @crafter/skillkit",
+		tryIt: { display: "npx @crafter/skillkit", copy: "npx @crafter/skillkit@latest" },
+		global: { display: "npm install -g @crafter/skillkit", copy: "npm install -g @crafter/skillkit" },
 	},
 	pnpm: {
-		tryIt: "pnpm dlx @crafter/skillkit@latest",
-		global: "pnpm add -g @crafter/skillkit",
+		tryIt: { display: "pnpm dlx @crafter/skillkit", copy: "pnpm dlx @crafter/skillkit@latest" },
+		global: { display: "pnpm add -g @crafter/skillkit", copy: "pnpm add -g @crafter/skillkit" },
 	},
 };
 
@@ -34,10 +37,10 @@ export function InstallCommand({ location }: { location: "hero" | "cta" }) {
 	const [mode, setMode] = useState<InstallMode>("try");
 	const [copied, setCopied] = useState(false);
 
-	const command = mode === "try" ? COMMANDS[pm].tryIt : COMMANDS[pm].global;
+	const { display, copy } = mode === "try" ? COMMANDS[pm].tryIt : COMMANDS[pm].global;
 
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(command);
+		await navigator.clipboard.writeText(copy);
 		setCopied(true);
 		track("install_copy", { pm, mode, location });
 		setTimeout(() => setCopied(false), 2000);
@@ -100,7 +103,7 @@ export function InstallCommand({ location }: { location: "hero" | "cta" }) {
 				className="group flex items-center gap-2 rounded-lg border border-[#222] hover:border-[#444] bg-[#0a0a0a] px-4 py-3 font-mono text-sm transition-colors w-full justify-center"
 			>
 				<span className="text-[#555] select-none">$</span>
-				<span className="text-white">{command}</span>
+				<span className="text-white">{display}</span>
 				<span className="ml-2 shrink-0 text-[#333] group-hover:text-[#666] transition-colors">
 					{copied ? (
 						<Check className="w-4 h-4 text-white" />
