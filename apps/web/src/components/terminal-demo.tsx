@@ -168,13 +168,6 @@ export function TerminalDemo() {
 				await delay(STEP_PAUSE);
 			}
 
-			if (!cancelled) {
-				setLines((prev) => [
-					...prev,
-					{ kind: "separator" },
-					{ kind: "prompt", command: "", cursor: true },
-				]);
-			}
 		};
 
 		run();
