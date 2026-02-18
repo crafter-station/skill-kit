@@ -4,10 +4,18 @@ import { motion } from "motion/react";
 import type { ComponentType } from "react";
 import {
 	ClaudeLogo,
+	ClineLogo,
 	CursorLogo,
 	GeminiLogo,
-	GithubLogo,
+	GithubCopilotLogo,
+	GooseLogo,
+	KiloCodeLogo,
 	OpenAILogo,
+	OpenCodeLogo,
+	OpenHandsLogo,
+	RooCodeLogo,
+	TraeLogo,
+	WindsurfLogo,
 } from "./logos/agent-logos";
 
 const REPO = "https://github.com/crafter-station/skill-kit/issues";
@@ -21,18 +29,18 @@ type AgentEntry = {
 
 const AGENTS: AgentEntry[] = [
 	{ name: "Claude Code", logo: ClaudeLogo, supported: true },
-	{ name: "OpenCode", supported: true },
+	{ name: "OpenCode", logo: OpenCodeLogo, supported: true },
 	{ name: "Cursor", logo: CursorLogo, issue: 1 },
 	{ name: "Codex", logo: OpenAILogo, issue: 2 },
-	{ name: "Windsurf", issue: 3 },
+	{ name: "Windsurf", logo: WindsurfLogo, issue: 3 },
 	{ name: "Gemini CLI", logo: GeminiLogo, issue: 4 },
-	{ name: "Cline", issue: 5 },
-	{ name: "Roo Code", issue: 6 },
-	{ name: "GitHub Copilot", logo: GithubLogo, issue: 8 },
-	{ name: "OpenHands", issue: 9 },
-	{ name: "Goose", issue: 11 },
-	{ name: "Kilo Code", issue: 12 },
-	{ name: "Trae", issue: 13 },
+	{ name: "Cline", logo: ClineLogo, issue: 5 },
+	{ name: "Roo Code", logo: RooCodeLogo, issue: 6 },
+	{ name: "GitHub Copilot", logo: GithubCopilotLogo, issue: 8 },
+	{ name: "OpenHands", logo: OpenHandsLogo, issue: 9 },
+	{ name: "Goose", logo: GooseLogo, issue: 11 },
+	{ name: "Kilo Code", logo: KiloCodeLogo, issue: 12 },
+	{ name: "Trae", logo: TraeLogo, issue: 13 },
 ];
 
 function AgentInitial({ name }: { name: string }) {
