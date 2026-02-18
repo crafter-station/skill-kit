@@ -4,13 +4,9 @@ import { track } from "@vercel/analytics";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
-type PackageManager = "npx" | "bun" | "npm" | "pnpm";
+type PackageManager = "bun" | "npm" | "pnpm";
 
 const COMMANDS: Record<PackageManager, { tryIt: string; global: string }> = {
-	npx: {
-		tryIt: "npx @crafter/skillkit@latest",
-		global: "npx @crafter/skillkit@latest",
-	},
 	bun: {
 		tryIt: "bunx @crafter/skillkit@latest",
 		global: "bun add -g @crafter/skillkit",
@@ -26,7 +22,6 @@ const COMMANDS: Record<PackageManager, { tryIt: string; global: string }> = {
 };
 
 const PM_LABELS: { id: PackageManager; label: string }[] = [
-	{ id: "npx", label: "npx" },
 	{ id: "bun", label: "bun" },
 	{ id: "npm", label: "npm" },
 	{ id: "pnpm", label: "pnpm" },
@@ -35,7 +30,7 @@ const PM_LABELS: { id: PackageManager; label: string }[] = [
 type InstallMode = "try" | "global";
 
 export function InstallCommand({ location }: { location: "hero" | "cta" }) {
-	const [pm, setPm] = useState<PackageManager>("npx");
+	const [pm, setPm] = useState<PackageManager>("npm");
 	const [mode, setMode] = useState<InstallMode>("try");
 	const [copied, setCopied] = useState(false);
 
