@@ -24,11 +24,12 @@ export function runList(): void {
 
 	console.log(`\n  ${bold(`INSTALLED SKILLS (${skills.length})`)}\n`);
 
-	const nameWidth = 24;
+	const nameWidth = Math.max(24, ...skills.map((s) => s.name.length));
+	const gap = 2;
 	const descWidth = 42;
 	const sizeWidth = 10;
 
-	const header = `  ${"NAME".padEnd(nameWidth)}${"DESCRIPTION".padEnd(descWidth)}${"SIZE".padStart(sizeWidth)}`;
+	const header = `  ${"NAME".padEnd(nameWidth)}${" ".repeat(gap)}${"DESCRIPTION".padEnd(descWidth)}${"SIZE".padStart(sizeWidth)}`;
 	console.log(dim(header));
 
 	for (const skill of skills) {
@@ -37,7 +38,7 @@ export function runList(): void {
 			truncate(skill.description || "", descWidth).padEnd(descWidth),
 		);
 		const size = formatSize(skill.size).padStart(sizeWidth);
-		console.log(`  ${name}${desc}${size}`);
+		console.log(`  ${name}${" ".repeat(gap)}${desc}${size}`);
 	}
 
 	console.log(
