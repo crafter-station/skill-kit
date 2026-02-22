@@ -9,18 +9,18 @@ Analytics for AI agent skills. Tracks usage, measures context budget, and prunes
 
 ## Commands
 
-Run via terminal (requires Bun):
+SkillKit is an npm CLI. Run commands with `npx @crafter/skillkit <command>` or install globally first (`npm i -g @crafter/skillkit`).
 
-- `skillkit scan` - Discover installed skills and index session data
-- `skillkit scan --include-commands` - Also track slash commands (not just skills)
-- `skillkit list` - List installed skills with size and context budget
-- `skillkit stats` - Top 10 skills with sparklines (last 30 days)
-- `skillkit stats --all` - Show all skills, not just top 10
-- `skillkit stats --days N` - Change time range (default: 30)
-- `skillkit stats --all --days 90` - Full list over 90 days
-- `skillkit health` - Health check: unused skills, context budget, DB status
-- `skillkit prune` - List unused skills. Add `--yes` to confirm deletion
-- `skillkit version` - Print current version
+- `npx @crafter/skillkit stats` - Usage analytics with sparklines (auto-scans on first run)
+- `npx @crafter/skillkit stats --all` - Show all skills, not just top 10
+- `npx @crafter/skillkit stats --days N` - Change time range (default: 30)
+- `npx @crafter/skillkit stats --all --days 90` - Full list over 90 days
+- `npx @crafter/skillkit list` - List installed skills with size and context budget
+- `npx @crafter/skillkit health` - Health check: unused skills, context budget, DB status
+- `npx @crafter/skillkit prune` - List unused skills. Add `--yes` to confirm deletion
+- `npx @crafter/skillkit scan` - Force re-scan (runs automatically, rarely needed)
+- `npx @crafter/skillkit scan --include-commands` - Also track slash commands
+- Any command with `--claude` or `--opencode` to filter by agent
 
 ## When to Use
 
@@ -33,12 +33,12 @@ Run via terminal (requires Bun):
 
 ## Decision Guide
 
-1. First time? Run `skillkit scan` to discover and index everything
-2. Want trends? Run `skillkit stats` for sparkline analytics
-3. Full picture? Run `skillkit stats --all --days 90`
-4. Want cleanup? Run `skillkit health` then `skillkit prune --yes`
-5. Quick overview? Run `skillkit list` for installed skills with sizes
+1. First time? Run `npx @crafter/skillkit stats` - it auto-discovers and indexes everything
+2. Full picture? Run `npx @crafter/skillkit stats --all --days 90`
+3. Want cleanup? Run `npx @crafter/skillkit health` then `npx @crafter/skillkit prune --yes`
+4. Quick overview? Run `npx @crafter/skillkit list` for installed skills with sizes
+5. Filter by agent? Add `--claude` or `--opencode` to any command
 
 ## How It Works
 
-Scans `~/.claude/skills/` and project-local `.claude/skills/` for installed skills. Indexes `~/.claude/projects/**/*.jsonl` session files (including subagent sessions). Extracts `Skill` tool_use blocks from assistant messages and `<command-name>` tags from user messages. Auto-deduplicates on every scan. All data stored locally in `~/.skillkit/analytics.db`.
+Discovers skills for Claude Code and OpenCode. Scans skill directories and project-local `.claude/skills/` for installed skills. Indexes Claude Code JSONL sessions and OpenCode SQLite sessions. Extracts `Skill` tool_use blocks from assistant messages and `<command-name>` tags from user messages. Auto-deduplicates on every scan. All data stored locally in `~/.skillkit/analytics.db`.
