@@ -8,22 +8,37 @@ import { recordNewInvocations } from "../index";
 
 function getDbPath(): string | null {
 	const os = platform();
-	let dataDir: string;
+	const candidates: string[] = [];
+
 	if (os === "darwin") {
-		dataDir = join(homedir(), "Library", "Application Support", "opencode");
+		candidates.push(
+			join(
+				process.env.XDG_DATA_HOME || join(homedir(), ".local", "share"),
+				"opencode",
+			),
+			join(homedir(), "Library", "Application Support", "opencode"),
+		);
 	} else if (os === "win32") {
-		dataDir = join(
-			process.env.LOCALAPPDATA || join(homedir(), "AppData", "Local"),
-			"opencode",
+		candidates.push(
+			join(
+				process.env.LOCALAPPDATA || join(homedir(), "AppData", "Local"),
+				"opencode",
+			),
 		);
 	} else {
-		dataDir = join(
-			process.env.XDG_DATA_HOME || join(homedir(), ".local", "share"),
-			"opencode",
+		candidates.push(
+			join(
+				process.env.XDG_DATA_HOME || join(homedir(), ".local", "share"),
+				"opencode",
+			),
 		);
 	}
-	const dbPath = join(dataDir, "opencode.db");
-	return existsSync(dbPath) ? dbPath : null;
+
+	for (const dataDir of candidates) {
+		const dbPath = join(dataDir, "opencode.db");
+		if (existsSync(dbPath)) return dbPath;
+	}
+	return null;
 }
 
 function openDb(): InstanceType<typeof BunDatabase> | null {
