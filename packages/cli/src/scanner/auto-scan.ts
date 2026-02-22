@@ -26,16 +26,17 @@ export async function performScan(
 	options: {
 		includeCommands?: boolean;
 		quiet?: boolean;
+		agentFilter?: string;
 	} = {},
 ): Promise<{ skillCount: number; invocationCount: number }> {
-	const { includeCommands = false, quiet = false } = options;
+	const { includeCommands = false, quiet = false, agentFilter } = options;
 
-	const agents = getDetectedAgents();
+	const agents = getDetectedAgents(agentFilter);
 	if (agents.length === 0) {
 		return { skillCount: 0, invocationCount: 0 };
 	}
 
-	const skills = scanInstalledSkills();
+	const skills = scanInstalledSkills(agentFilter);
 
 	for (const skill of skills) {
 		const source = detectSource(skill.path);
@@ -97,7 +98,7 @@ export async function performScan(
 
 	deduplicateInvocations(db);
 
-	const newInvocations = await scanAllSessions(db, knownSkills);
+	const newInvocations = await scanAllSessions(db, knownSkills, agentFilter);
 
 	return { skillCount: skills.length, invocationCount: newInvocations };
 }

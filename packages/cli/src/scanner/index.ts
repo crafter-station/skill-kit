@@ -46,14 +46,26 @@ export function recordNewInvocations(
 export async function scanAllSessions(
 	db: Database,
 	knownSkills: Set<string> = new Set(),
+	agentFilter?: string,
 ): Promise<number> {
 	const trackedSet = getTrackedSet(db);
 	let total = 0;
-	total += await scanClaudeSessions(db, trackedSet, knownSkills);
-	total += scanOpenCodeSessions(db, trackedSet);
+	if (!agentFilter || agentFilter === "claude") {
+		total += await scanClaudeSessions(db, trackedSet, knownSkills);
+	}
+	if (!agentFilter || agentFilter === "opencode") {
+		total += scanOpenCodeSessions(db, trackedSet);
+	}
 	return total;
 }
 
-export function countAllSessions(): number {
-	return countClaudeSessions() + countOpenCodeSessions();
+export function countAllSessions(agentFilter?: string): number {
+	let total = 0;
+	if (!agentFilter || agentFilter === "claude") {
+		total += countClaudeSessions();
+	}
+	if (!agentFilter || agentFilter === "opencode") {
+		total += countOpenCodeSessions();
+	}
+	return total;
 }
