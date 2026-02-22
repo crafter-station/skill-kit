@@ -2,21 +2,17 @@
 
 Local-first analytics for AI agent skills. Track usage, measure context budget, and prune what you don't use.
 
+```bash
+npx @crafter/skillkit stats
+```
+
+Auto-discovers your skills, indexes sessions, and shows what matters. No setup needed.
+
 ## Why
 
 AI coding agents load skills into their context window on every session. More skills = less room for your actual code. But which skills do you actually use? Which ones are wasting context budget?
 
 **skillkit** answers these questions by scanning your session files, tracking invocations, and surfacing actionable insights - all locally on your machine.
-
-## Quick Start
-
-```bash
-npx @crafter/skillkit stats
-npx @crafter/skillkit health
-npx @crafter/skillkit prune
-```
-
-`stats` auto-discovers your skills and indexes sessions on first run. No setup needed.
 
 ## Commands
 
