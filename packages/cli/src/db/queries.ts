@@ -24,15 +24,18 @@ interface InstalledSkillRow {
 	size_bytes: number | null;
 }
 
-export function getTopSkills(db: Database, days = 30): TopSkillRow[] {
+export function getTopSkills(
+	db: Database,
+	days = 30,
+	limit?: number,
+): TopSkillRow[] {
 	const cutoff = new Date(
 		Date.now() - days * 24 * 60 * 60 * 1000,
 	).toISOString();
-	return db
-		.query<TopSkillRow, [string]>(
-			"SELECT skill_name, COUNT(*) as total FROM skill_invocations WHERE timestamp >= ? GROUP BY skill_name ORDER BY total DESC LIMIT 20",
-		)
-		.all(cutoff);
+	const sql = limit
+		? `SELECT skill_name, COUNT(*) as total FROM skill_invocations WHERE timestamp >= ? GROUP BY skill_name ORDER BY total DESC LIMIT ${limit}`
+		: "SELECT skill_name, COUNT(*) as total FROM skill_invocations WHERE timestamp >= ? GROUP BY skill_name ORDER BY total DESC";
+	return db.query<TopSkillRow, [string]>(sql).all(cutoff);
 }
 
 export function getSkillStats(db: Database, days = 30): StatsRow {

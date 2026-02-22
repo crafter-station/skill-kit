@@ -1,5 +1,11 @@
-import { getDailyUsage, getSkillStats, getTopSkills } from "../db/queries";
+import {
+	getDailyUsage,
+	getInstalledSkills,
+	getSkillStats,
+	getTopSkills,
+} from "../db/queries";
 import { getDb } from "../db/schema";
+import { performScan } from "../scanner/auto-scan";
 import { scanAllSessions } from "../scanner/index";
 import { bold, cyan, dim, yellow } from "../tui/colors";
 import { sparkline } from "../tui/sparkline";
@@ -42,10 +48,24 @@ export async function runStats(): Promise<void> {
 	const db = getDb();
 	const days = parseDays(process.argv.slice(3));
 
-	console.log("\n  Scanning sessions...");
-	const newCount = await scanAllSessions(db);
-	if (newCount > 0) {
-		console.log(`  Found ${newCount} new invocations.\n`);
+	const installedSkills = getInstalledSkills(db);
+
+	if (installedSkills.length === 0) {
+		console.log("\n  First run detected, scanning skills...");
+		const result = await performScan(db);
+		if (result.skillCount > 0) {
+			console.log(`  Found ${result.skillCount} skills.\n`);
+		} else {
+			console.log(`\n  ${yellow("No skills found.")}`);
+			console.log(`  ${dim("Skills will be scanned automatically on next run.")}\n`);
+			return;
+		}
+	} else {
+		console.log("\n  Scanning sessions...");
+		const newCount = await scanAllSessions(db);
+		if (newCount > 0) {
+			console.log(`  Found ${newCount} new invocations.\n`);
+		}
 	}
 
 	const stats = getSkillStats(db, days);
@@ -56,7 +76,8 @@ export async function runStats(): Promise<void> {
 		return;
 	}
 
-	const topSkills = getTopSkills(db, days);
+	const showAll = process.argv.includes("--all");
+	const topSkills = getTopSkills(db, days, showAll ? undefined : 10);
 	const activeDay = getMostActiveDay(db);
 
 	const label =
@@ -66,17 +87,18 @@ export async function runStats(): Promise<void> {
 	console.log(`  Total invocations: ${bold(String(stats.total))}`);
 	console.log(`  Unique skills:     ${bold(String(stats.unique_skills))}`);
 	console.log(`  Most active day:   ${bold(activeDay)}\n`);
-	console.log(`  ${bold("TOP SKILLS")}\n`);
+	console.log(`  ${bold(showAll ? "ALL SKILLS" : "TOP SKILLS")}\n`);
 
 	const maxCount = topSkills.length > 0 ? (topSkills[0]?.total ?? 1) : 1;
+	const maxNameLen = Math.max(16, ...topSkills.map((s) => s.skill_name.length));
 	const barWidth = 20;
 
-	for (const skill of topSkills.slice(0, 10)) {
+	for (const skill of topSkills) {
 		const daily = getDailyUsage(db, skill.skill_name, days);
 		const filled = Math.round((skill.total / maxCount) * barWidth);
 		const bar = "█".repeat(filled);
 		const spark = sparkline(daily.map((d) => d.count));
-		const name = cyan(skill.skill_name.padEnd(16));
+		const name = cyan(skill.skill_name.padEnd(maxNameLen));
 		console.log(
 			`  ${name}  ${bar.padEnd(barWidth)}  ${String(skill.total).padStart(4)}  ${spark}`,
 		);
