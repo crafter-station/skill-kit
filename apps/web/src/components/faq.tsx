@@ -11,7 +11,7 @@ const ITEMS = [
 	{
 		question: "Which AI coding agents are supported?",
 		answer:
-			"Claude Code, Cursor, Codex, VS Code (via extensions), Windsurf, and Gemini CLI. SkillKit scans session JSONL files to extract skill invocations, so any agent that logs tool use is supported.",
+			"Claude Code and OpenCode. SkillKit discovers skills and tracks usage analytics for both. You can filter by agent with --claude or --opencode. More connectors coming as agents standardize their session formats.",
 	},
 	{
 		question: "Is SkillKit free?",
@@ -26,7 +26,7 @@ const ITEMS = [
 	{
 		question: "How does the session scanning work?",
 		answer:
-			"Run `skillkit scan` to discover installed skills and scan ~/.claude/projects/ for JSONL session files. It extracts Skill tool_use blocks and populates a local analytics database with invocation counts, timestamps, and patterns.",
+			"Run `skillkit stats` and it auto-discovers your skills and indexes sessions on first run. It parses Claude Code JSONL sessions and OpenCode SQLite sessions, extracts Skill tool_use blocks, and populates a local analytics database.",
 	},
 	{
 		question: "Can I use SkillKit without skills.sh?",
