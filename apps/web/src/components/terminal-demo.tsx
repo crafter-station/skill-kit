@@ -14,25 +14,20 @@ type Step = {
 
 const STEPS: Step[] = [
 	{
-		command: "skillkit scan",
+		command: "skillkit stats",
 		output: [
 			{
-				text: "  Scanning Claude Code + OpenCode",
+				text: "  First run detected, scanning skills...",
 				type: "output",
 			},
 			{
-				text: "  Found 12 skills (8 via skills.sh, 4 manual)",
-				type: "highlight",
-			},
-			{
-				text: "  Indexed 211 sessions · 1,847 invocations",
+				text: "  Found 12 skills across 3 agents.",
 				type: "output",
 			},
-		],
-	},
-	{
-		command: "skillkit stats --top 3",
-		output: [
+			{
+				text: "",
+				type: "empty",
+			},
 			{
 				text: "  SKILL       30d   TREND",
 				type: "header",
@@ -60,6 +55,23 @@ const STEPS: Step[] = [
 			},
 			{
 				text: "  ! 3 skills unused in 30d — run skillkit prune",
+				type: "highlight",
+			},
+		],
+	},
+	{
+		command: "skillkit prune",
+		output: [
+			{
+				text: "  × scaffold (0.9K)",
+				type: "output",
+			},
+			{
+				text: "  × lint (2.1K)",
+				type: "output",
+			},
+			{
+				text: "  Reclaimed 3.0K · 10 skills active",
 				type: "highlight",
 			},
 		],
@@ -251,7 +263,7 @@ export function TerminalDemo() {
 					style={{ background: "#0e0e0e" }}
 				>
 					<span>-- NORMAL --</span>
-					<span>skillkit v0.1.8</span>
+					<span>skillkit v0.2.6</span>
 					<span>utf-8</span>
 				</div>
 			</div>
