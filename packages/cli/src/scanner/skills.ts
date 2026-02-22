@@ -1,26 +1,46 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { homedir } from "node:os";
+import { homedir, platform } from "node:os";
 import { join } from "node:path";
 import type { InstalledSkill } from "../types";
 
-const SUPPORTED_AGENTS: Array<{ agent: string; dir: string }> = [
-	{ agent: "Claude Code", dir: join(homedir(), ".claude", "skills") },
-	{ agent: "OpenCode", dir: join(homedir(), ".config", "opencode", "skills") },
-	// Planned — needs session connector to enable full analytics pipeline
-	// { agent: "Cursor", dir: join(homedir(), ".cursor", "skills") },                 // GH-1: injects skills as context rules, no discrete tool_use
-	// { agent: "Codex", dir: join(homedir(), ".codex", "skills") },                   // GH-2
-	// { agent: "Windsurf", dir: join(homedir(), ".codeium", "windsurf", "skills") },  // GH-3
-	// { agent: "Gemini CLI", dir: join(homedir(), ".gemini", "skills") },             // GH-4
-	// { agent: "Cline", dir: join(homedir(), ".cline", "skills") },                   // GH-5
-	// { agent: "Roo Code", dir: join(homedir(), ".roo", "skills") },                  // GH-6
-	// { agent: "Continue", dir: join(homedir(), ".continue", "skills") },             // GH-7
-	// { agent: "GitHub Copilot", dir: join(homedir(), ".copilot", "skills") },        // GH-8
-	// { agent: "OpenHands", dir: join(homedir(), ".openhands", "skills") },           // GH-9
-	// { agent: "Amp", dir: join(homedir(), ".config", "agents", "skills") },          // GH-10
-	// { agent: "Goose", dir: join(homedir(), ".config", "goose", "skills") },         // GH-11
-	// { agent: "Kilo Code", dir: join(homedir(), ".kilocode", "skills") },            // GH-12
-	// { agent: "Trae", dir: join(homedir(), ".trae", "skills") },                     // GH-13
-];
+interface AgentDef {
+	agent: string;
+	id: string;
+	dirs: string[];
+}
+
+function getSupportedAgents(): AgentDef[] {
+	const os = platform();
+	const home = homedir();
+
+	const agents: AgentDef[] = [
+		{ agent: "Claude Code", id: "claude", dirs: [join(home, ".claude", "skills")] },
+	];
+
+	if (os === "win32") {
+		const localAppData = process.env.LOCALAPPDATA || join(home, "AppData", "Local");
+		agents.push({
+			agent: "OpenCode",
+			id: "opencode",
+			dirs: [
+				join(localAppData, "opencode", "skills"),
+				join(home, ".config", "opencode", "skills"),
+			],
+		});
+	} else {
+		const xdgData = process.env.XDG_DATA_HOME || join(home, ".local", "share");
+		agents.push({
+			agent: "OpenCode",
+			id: "opencode",
+			dirs: [
+				join(xdgData, "opencode", "skills"),
+				join(home, ".config", "opencode", "skills"),
+			],
+		});
+	}
+
+	return agents;
+}
 
 function parseYamlFrontmatter(content: string): Record<string, string> {
 	const match = content.match(/^---\n([\s\S]*?)\n---/);
@@ -119,30 +139,42 @@ function scanSkillsDir(skillsDir: string, agent: string): InstalledSkill[] {
 	return skills;
 }
 
-export function scanInstalledSkills(): InstalledSkill[] {
+export function scanInstalledSkills(agentFilter?: string): InstalledSkill[] {
 	const allSkills: InstalledSkill[] = [];
 	const seen = new Set<string>();
+	const agents = getSupportedAgents();
 
-	for (const { agent, dir } of SUPPORTED_AGENTS) {
-		const skills = scanSkillsDir(dir, agent);
-		for (const skill of skills) {
-			try {
-				const ino = statSync(skill.path).ino;
-				const key = `${ino}`;
-				if (seen.has(key)) continue;
-				seen.add(key);
-			} catch {}
-			allSkills.push(skill);
+	for (const { agent, id, dirs } of agents) {
+		if (agentFilter && id !== agentFilter) continue;
+		for (const dir of dirs) {
+			const skills = scanSkillsDir(dir, agent);
+			if (skills.length === 0) continue;
+			for (const skill of skills) {
+				try {
+					const ino = statSync(skill.path).ino;
+					const key = `${ino}`;
+					if (seen.has(key)) continue;
+					seen.add(key);
+				} catch {}
+				allSkills.push(skill);
+			}
+			break;
 		}
 	}
 
 	return allSkills.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function getDetectedAgents(): string[] {
-	const agents: string[] = [];
-	for (const { agent, dir } of SUPPORTED_AGENTS) {
-		if (existsSync(dir)) agents.push(agent);
+export function getDetectedAgents(agentFilter?: string): string[] {
+	const detected: string[] = [];
+	for (const { agent, id, dirs } of getSupportedAgents()) {
+		if (agentFilter && id !== agentFilter) continue;
+		for (const dir of dirs) {
+			if (existsSync(dir)) {
+				detected.push(agent);
+				break;
+			}
+		}
 	}
-	return agents;
+	return detected;
 }
