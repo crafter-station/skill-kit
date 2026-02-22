@@ -17,7 +17,8 @@ export function getDb(): Database {
 			timestamp TEXT NOT NULL,
 			session_id TEXT,
 			project TEXT,
-			success INTEGER DEFAULT 1
+			success INTEGER DEFAULT 1,
+			agent TEXT
 		)
 	`);
 	db.run(`
@@ -38,6 +39,14 @@ export function getDb(): Database {
 			size_bytes INTEGER
 		)
 	`);
+	try {
+		db.run("ALTER TABLE skill_invocations ADD COLUMN agent TEXT");
+		db.run("UPDATE skill_invocations SET agent = 'claude' WHERE agent IS NULL AND session_id IS NOT NULL AND session_id NOT LIKE 'oc:%'");
+		db.run("UPDATE skill_invocations SET agent = 'opencode' WHERE agent IS NULL AND session_id LIKE 'oc:%'");
+	} catch {}
+	db.run(
+		"CREATE INDEX IF NOT EXISTS idx_invocations_agent ON skill_invocations(agent)",
+	);
 	db.run(
 		"CREATE INDEX IF NOT EXISTS idx_invocations_skill ON skill_invocations(skill_name)",
 	);

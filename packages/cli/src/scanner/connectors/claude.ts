@@ -90,7 +90,7 @@ export function parseSessionFile(
 								.join("\n")
 						: "";
 			for (const name of extractCommandNames(text, knownSkills)) {
-				results.push({ skillName: name, timestamp, sessionId });
+				results.push({ skillName: name, timestamp, sessionId, agent: "claude" });
 			}
 			continue;
 		}
