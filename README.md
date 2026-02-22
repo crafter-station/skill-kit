@@ -11,61 +11,67 @@ AI coding agents load skills into their context window on every session. More sk
 ## Quick Start
 
 ```bash
-npx @crafter/skillkit scan
 npx @crafter/skillkit stats
 npx @crafter/skillkit health
+npx @crafter/skillkit prune
 ```
+
+`stats` auto-discovers your skills and indexes sessions on first run. No setup needed.
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `skillkit scan` | Discover installed skills and index session data |
-| `skillkit list` | List installed skills with size and context budget |
-| `skillkit stats` | Usage analytics with sparklines (last 30 days) |
-| `skillkit health` | Health check: unused skills, context budget, DB |
-| `skillkit prune` | Remove unused skills to reclaim context budget |
+| `stats` | Usage analytics with sparklines (auto-scans on first run) |
+| `list` | List installed skills with size and context budget |
+| `health` | Health check: unused skills, context budget, DB |
+| `prune` | Remove unused skills to reclaim context budget |
+| `scan` | Force re-scan (runs automatically, rarely needed) |
+
+### Flags
+
+| Flag | Applies to | Description |
+|------|-----------|-------------|
+| `--days N` | stats | Time range in days (default: 30) |
+| `--all` | stats | Show all skills, not just top 10 |
+| `--include-commands` | scan | Also track slash commands |
+| `--claude` | any | Only scan Claude Code |
+| `--opencode` | any | Only scan OpenCode |
 
 Install skills via [skills.sh](https://skills.sh): `npx skills add <owner/repo>`
 
-Already using skills.sh? Run `skillkit scan` to pick up everything you've installed and start tracking usage.
-
 ## Use as a Skill
 
-Install skillkit as a Claude Code skill so the agent can run analytics commands for you:
+Install skillkit as a skill so the agent can run analytics commands for you:
 
 ```bash
-npx skills add crafter-station/skill-kit
+npx skills add crafter-station/skills --skill skillkit
 ```
 
 Then ask your agent things like "which skills do I use the most?" or "clean up unused skills" and it will run the right commands.
 
 ## How It Works
 
-### Scan
-
-Discovers skills across all detected agents and indexes session data from supported connectors. Detects whether each skill was installed via skills.sh or manually.
-
-```
-$ skillkit scan
-  Scanning 3 agents: Claude Code, Cursor, OpenCode
-  Found 12 skills (8 via skills.sh, 4 manual)
-  Scanning sessions...
-  Indexed 211 sessions · 1,847 invocations
-
-  Ready. Run skillkit stats to see usage.
-```
-
 ### Stats
 
-Parses session data from supported connectors (Claude Code JSONL, OpenCode SQLite) and shows sparkline trends.
+Auto-discovers skills on first run, parses session data from supported connectors, and shows sparkline trends.
 
 ```
-$ skillkit stats
-  SKILL           ████████████████████  42  ▂▃▅▇█▆▅▇█
-  commit          ████████████████████  42  ▂▃▅▇█▆▅▇█
-  review          ████████████████      38  ▁▃▅▆▇▇▆▅▃
-  deploy          ████████████          27  ▁▁▂▃▅▇█▇▅
+$ npx @crafter/skillkit stats
+  First run detected, scanning skills...
+  Found 12 skills.
+
+  SKILL-KIT ANALYTICS (last 30 days)
+
+  Total invocations: 419
+  Unique skills:     66
+  Most active day:   Monday
+
+  TOP SKILLS
+
+  react-best-practices  ████████████████████   109  ▁▅▂▁▂▂█▅▁▂
+  agent-browser         ██████████              56  ▂█▇▃▁▁▁▂▁▁▃▂▂▃▂
+  pulse                 ██████                  32  ▁▁█▁▁▁▁▁
 ```
 
 ### Health
@@ -73,9 +79,9 @@ $ skillkit stats
 Checks context budget usage and flags unused skills.
 
 ```
-$ skillkit health
+$ npx @crafter/skillkit health
   [████████░░] 78% metadata budget (12.5K / 16.0K)
-  ! 3 skills unused in 30d — run skillkit prune
+  ! 3 skills unused in 30d - run skillkit prune
 ```
 
 ### Prune
@@ -83,11 +89,11 @@ $ skillkit health
 Removes skills that haven't been used in the last 30 days.
 
 ```
-$ skillkit prune
-  × scaffold (0.9K)
-  × lint (2.1K)
+$ npx @crafter/skillkit prune
+  x scaffold (0.9K)
+  x lint (2.1K)
 
-  2 skills · 3.0K context reclaimable
+  2 skills - 3.0K context reclaimable
 
   Run with --yes to confirm deletion.
 ```
@@ -99,34 +105,23 @@ All data stays on your machine:
 | Path | Purpose |
 |------|---------|
 | `~/.skillkit/analytics.db` | SQLite database with invocation history |
-| `~/.{agent}/skills/` | Installed skills per agent (read-only) |
+| `~/.claude/skills/` | Claude Code skills (read-only) |
+| `~/.local/share/opencode/skills/` | OpenCode skills (read-only) |
 | `~/.claude/projects/**/*.jsonl` | Claude Code sessions (read-only) |
-| `~/Library/Application Support/opencode/opencode.db` | OpenCode sessions (read-only) |
+| `~/.local/share/opencode/opencode.db` | OpenCode sessions (read-only) |
+
+On Windows, OpenCode paths use `%LOCALAPPDATA%\opencode\`.
 
 ## Supported Agents
 
-### Skill Discovery (15 agents)
+Discovers and tracks skills for **Claude Code** and **OpenCode**.
 
-Scans skill directories for all major agents:
+- **Claude Code** - JSONL sessions (`~/.claude/projects/`)
+- **OpenCode** - SQLite database (`opencode.db`)
 
-- Claude Code, Cursor, Codex, Windsurf, Gemini CLI
-- Cline, Roo Code, Continue, OpenCode, GitHub Copilot
-- OpenHands, Amp, Goose, Kilo Code, Trae
+Filter by agent with `--claude` or `--opencode`.
 
-Skills installed via [skills.sh](https://skills.sh) symlinks are deduplicated across agents.
-
-### Usage Analytics (2 connectors)
-
-Session scanning and invocation tracking:
-
-- **Claude Code** — JSONL sessions (`~/.claude/projects/`)
-- **OpenCode** — SQLite database (`opencode.db`)
-
-More connectors coming as agents standardize session formats.
-
-### Why not all agents?
-
-Most agents (Cursor, Windsurf, Copilot, etc.) load skills as context rules injected into the prompt — there's no discrete "Skill" tool invocation in their session data. Claude Code and OpenCode are the only agents that invoke skills through a trackable tool call, which is what makes usage analytics possible. If other agents adopt a similar pattern, adding a connector is straightforward.
+**Why only two?** Most agents (Cursor, Windsurf, Copilot, etc.) load skills as context rules injected into the prompt - there's no discrete "Skill" tool invocation in their session data. Claude Code and OpenCode are the only agents that invoke skills through a trackable tool call. If other agents adopt this pattern, adding a connector is straightforward.
 
 ## Project Structure
 
@@ -134,7 +129,7 @@ Most agents (Cursor, Windsurf, Copilot, etc.) load skills as context rules injec
 skill-kit/
 ├── apps/web/          # Landing page (Next.js)
 ├── packages/cli/      # CLI tool (Bun, zero deps)
-└── packages/skill/    # Claude Code skill (SKILL.md)
+└── packages/skill/    # Skill definition (SKILL.md)
 ```
 
 ## Development
@@ -143,7 +138,7 @@ skill-kit/
 bun install
 
 # Run CLI locally
-bun run packages/cli/src/bin.ts scan
+bun run packages/cli/src/bin.ts stats
 
 # Run landing page
 bun run --filter '@crafter/skillkit-web' dev
