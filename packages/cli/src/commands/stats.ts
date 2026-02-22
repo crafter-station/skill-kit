@@ -10,12 +10,14 @@ import { scanAllSessions } from "../scanner/index";
 import { bold, cyan, dim, yellow } from "../tui/colors";
 import { sparkline } from "../tui/sparkline";
 
-function getMostActiveDay(db: ReturnType<typeof getDb>): string {
+function getMostActiveDay(db: ReturnType<typeof getDb>, agent?: string): string {
+	const agentClause = agent ? " WHERE agent = ?" : "";
+	const params = agent ? [agent] : [];
 	const row = db
-		.query<{ day: string; count: number }, []>(
-			"SELECT strftime('%w', timestamp) as day, COUNT(*) as count FROM skill_invocations GROUP BY day ORDER BY count DESC LIMIT 1",
+		.query<{ day: string; count: number }, string[]>(
+			`SELECT strftime('%w', timestamp) as day, COUNT(*) as count FROM skill_invocations${agentClause} GROUP BY day ORDER BY count DESC LIMIT 1`,
 		)
-		.get();
+		.get(...params);
 	if (!row) return "N/A";
 	const days = [
 		"Sunday",
@@ -76,7 +78,7 @@ export async function runStats(): Promise<void> {
 		}
 	}
 
-	const stats = getSkillStats(db, days);
+	const stats = getSkillStats(db, days, agentFilter);
 
 	if (stats.total === 0) {
 		console.log(`\n  ${yellow("No analytics data yet.")}`);
@@ -85,8 +87,8 @@ export async function runStats(): Promise<void> {
 	}
 
 	const showAll = process.argv.includes("--all");
-	const topSkills = getTopSkills(db, days, showAll ? undefined : 10);
-	const activeDay = getMostActiveDay(db);
+	const topSkills = getTopSkills(db, days, showAll ? undefined : 10, agentFilter);
+	const activeDay = getMostActiveDay(db, agentFilter);
 
 	const label =
 		days === 30 ? "last 30 days" : days === 7 ? "last 7 days" : `last ${days} days`;
@@ -102,7 +104,7 @@ export async function runStats(): Promise<void> {
 	const barWidth = 20;
 
 	for (const skill of topSkills) {
-		const daily = getDailyUsage(db, skill.skill_name, days);
+		const daily = getDailyUsage(db, skill.skill_name, days, agentFilter);
 		const filled = Math.round((skill.total / maxCount) * barWidth);
 		const bar = "█".repeat(filled);
 		const spark = sparkline(daily.map((d) => d.count));

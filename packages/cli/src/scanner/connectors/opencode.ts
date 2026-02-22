@@ -117,6 +117,7 @@ export function scanOpenCodeSessions(
 				skillName,
 				timestamp: new Date(row.time_created).toISOString(),
 				sessionId: `oc:${row.session_id}`,
+				agent: "opencode",
 			});
 		}
 

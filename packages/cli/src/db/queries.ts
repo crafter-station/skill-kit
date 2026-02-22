@@ -28,26 +28,30 @@ export function getTopSkills(
 	db: Database,
 	days = 30,
 	limit?: number,
+	agent?: string,
 ): TopSkillRow[] {
 	const cutoff = new Date(
 		Date.now() - days * 24 * 60 * 60 * 1000,
 	).toISOString();
-	const sql = limit
-		? `SELECT skill_name, COUNT(*) as total FROM skill_invocations WHERE timestamp >= ? GROUP BY skill_name ORDER BY total DESC LIMIT ${limit}`
-		: "SELECT skill_name, COUNT(*) as total FROM skill_invocations WHERE timestamp >= ? GROUP BY skill_name ORDER BY total DESC";
-	return db.query<TopSkillRow, [string]>(sql).all(cutoff);
+	const agentClause = agent ? " AND agent = ?" : "";
+	const params = agent ? [cutoff, agent] : [cutoff];
+	const limitClause = limit ? ` LIMIT ${limit}` : "";
+	const sql = `SELECT skill_name, COUNT(*) as total FROM skill_invocations WHERE timestamp >= ?${agentClause} GROUP BY skill_name ORDER BY total DESC${limitClause}`;
+	return db.query<TopSkillRow, string[]>(sql).all(...params);
 }
 
-export function getSkillStats(db: Database, days = 30): StatsRow {
+export function getSkillStats(db: Database, days = 30, agent?: string): StatsRow {
 	const cutoff = new Date(
 		Date.now() - days * 24 * 60 * 60 * 1000,
 	).toISOString();
+	const agentClause = agent ? " AND agent = ?" : "";
+	const params = agent ? [cutoff, agent] : [cutoff];
 	return (
 		db
-			.query<StatsRow, [string]>(
-				"SELECT COUNT(*) as total, COUNT(DISTINCT skill_name) as unique_skills FROM skill_invocations WHERE timestamp >= ?",
+			.query<StatsRow, string[]>(
+				`SELECT COUNT(*) as total, COUNT(DISTINCT skill_name) as unique_skills FROM skill_invocations WHERE timestamp >= ?${agentClause}`,
 			)
-			.get(cutoff) ?? { total: 0, unique_skills: 0 }
+			.get(...params) ?? { total: 0, unique_skills: 0 }
 	);
 }
 
@@ -55,15 +59,18 @@ export function getDailyUsage(
 	db: Database,
 	skillName: string,
 	days = 30,
+	agent?: string,
 ): DailyRow[] {
 	const cutoff = new Date(
 		Date.now() - days * 24 * 60 * 60 * 1000,
 	).toISOString();
+	const agentClause = agent ? " AND agent = ?" : "";
+	const params = agent ? [skillName, cutoff, agent] : [skillName, cutoff];
 	return db
-		.query<DailyRow, [string, string]>(
-			"SELECT date(timestamp) as date, COUNT(*) as count FROM skill_invocations WHERE skill_name = ? AND timestamp >= ? GROUP BY date(timestamp) ORDER BY date ASC",
+		.query<DailyRow, string[]>(
+			`SELECT date(timestamp) as date, COUNT(*) as count FROM skill_invocations WHERE skill_name = ? AND timestamp >= ?${agentClause} GROUP BY date(timestamp) ORDER BY date ASC`,
 		)
-		.all(skillName, cutoff);
+		.all(...params);
 }
 
 export function getInstalledSkills(db: Database): InstalledSkillRow[] {
@@ -80,11 +87,12 @@ export function recordInvocation(
 	sessionId?: string,
 	project?: string,
 	timestamp?: string,
+	agent?: string,
 ): void {
 	const ts = timestamp ?? new Date().toISOString();
 	db.run(
-		"INSERT INTO skill_invocations (skill_name, timestamp, session_id, project) VALUES (?, ?, ?, ?)",
-		[skillName, ts, sessionId ?? null, project ?? null],
+		"INSERT INTO skill_invocations (skill_name, timestamp, session_id, project, agent) VALUES (?, ?, ?, ?, ?)",
+		[skillName, ts, sessionId ?? null, project ?? null, agent ?? null],
 	);
 	const date = ts.slice(0, 10);
 	db.run(

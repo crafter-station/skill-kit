@@ -24,6 +24,7 @@ export interface Invocation {
 	skillName: string;
 	timestamp: string;
 	sessionId: string;
+	agent?: string;
 }
 
 export function recordNewInvocations(
@@ -35,7 +36,7 @@ export function recordNewInvocations(
 	for (const inv of invocations) {
 		const key = `${inv.sessionId}::${inv.timestamp}`;
 		if (!trackedSet.has(key)) {
-			recordInvocation(db, inv.skillName, inv.sessionId, undefined, inv.timestamp);
+			recordInvocation(db, inv.skillName, inv.sessionId, undefined, inv.timestamp, inv.agent);
 			trackedSet.add(key);
 			count++;
 		}
