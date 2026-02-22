@@ -1,9 +1,8 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
-import { homedir } from "node:os";
-import { basename, join } from "node:path";
-import { upsertInstalledSkill, deduplicateInvocations } from "../db/queries";
+import { join } from "node:path";
 import { getDb } from "../db/schema";
-import { countAllSessions, scanAllSessions } from "../scanner/index";
+import { performScan } from "../scanner/auto-scan";
+import { countAllSessions } from "../scanner/index";
 import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
 import { bold, cyan, dim } from "../tui/colors";
 
@@ -37,6 +36,11 @@ export async function runScan(): Promise<void> {
 
 	const skills = scanInstalledSkills();
 
+	if (skills.length === 0) {
+		console.log(dim("  No skills found.\n"));
+		return;
+	}
+
 	let skillsShCount = 0;
 	let manualCount = 0;
 
@@ -44,20 +48,6 @@ export async function runScan(): Promise<void> {
 		const source = detectSource(skill.path);
 		if (source === "skills.sh") skillsShCount++;
 		else manualCount++;
-
-		upsertInstalledSkill(
-			db,
-			skill.name,
-			skill.path,
-			source,
-			undefined,
-			skill.size,
-		);
-	}
-
-	if (skills.length === 0) {
-		console.log(dim("  No skills found.\n"));
-		return;
 	}
 
 	const parts: string[] = [];
@@ -88,61 +78,9 @@ export async function runScan(): Promise<void> {
 		} catch {}
 	}
 
-	const knownSkills = new Set<string>();
-	for (const skill of skills) {
-		knownSkills.add(skill.name);
-		knownSkills.add(basename(skill.path));
-	}
-	if (existsSync(localSkillsDir)) {
-		try {
-			for (const e of readdirSync(localSkillsDir)) {
-				try {
-					if (statSync(join(localSkillsDir, e)).isDirectory()) {
-						knownSkills.add(e);
-					}
-				} catch {}
-			}
-		} catch {}
-	}
-
-	if (includeCommands) {
-		const commandDirs = [
-			join(process.cwd(), ".claude", "commands"),
-			join(homedir(), ".claude", "commands"),
-		];
-		let commandCount = 0;
-		for (const dir of commandDirs) {
-			if (!existsSync(dir)) continue;
-			try {
-				for (const e of readdirSync(dir)) {
-					if (e.endsWith(".md")) {
-						knownSkills.add(e.slice(0, -3));
-						commandCount++;
-					} else {
-						try {
-							if (statSync(join(dir, e)).isDirectory()) {
-								knownSkills.add(e);
-								commandCount++;
-							}
-						} catch {}
-					}
-				}
-			} catch {}
-		}
-		if (commandCount > 0) {
-			console.log(dim(`  + ${commandCount} slash commands`));
-		}
-	}
-
-	const removed = deduplicateInvocations(db);
-	if (removed > 0) {
-		console.log(`  ${dim(`Cleaned ${removed} duplicate entries`)}`);
-	}
-
-	console.log(dim("  Scanning sessions..."));
+	const result = await performScan(db, { includeCommands });
 
 	const sessionCount = countAllSessions();
-	const newInvocations = await scanAllSessions(db, knownSkills);
 	const totalRow = db
 		.query<{ count: number }, []>(
 			"SELECT COUNT(*) as count FROM skill_invocations",
@@ -154,8 +92,8 @@ export async function runScan(): Promise<void> {
 		`  ${dim("Indexed")} ${bold(String(sessionCount))} ${dim("sessions")} ${cyan("·")} ${bold(totalInvocations.toLocaleString())} ${dim("invocations")}`,
 	);
 
-	if (newInvocations > 0) {
-		console.log(dim(`  (${newInvocations} new)`));
+	if (result.invocationCount > 0) {
+		console.log(dim(`  (${result.invocationCount} new)`));
 	}
 
 	console.log(
