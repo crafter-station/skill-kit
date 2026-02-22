@@ -44,15 +44,23 @@ function parseDays(args: string[]): number {
 	return 30;
 }
 
+function parseAgentFilter(args: string[]): string | undefined {
+	if (args.includes("--claude")) return "claude";
+	if (args.includes("--opencode")) return "opencode";
+	return undefined;
+}
+
 export async function runStats(): Promise<void> {
 	const db = getDb();
-	const days = parseDays(process.argv.slice(3));
+	const args = process.argv.slice(3);
+	const days = parseDays(args);
+	const agentFilter = parseAgentFilter(args);
 
 	const installedSkills = getInstalledSkills(db);
 
 	if (installedSkills.length === 0) {
 		console.log("\n  First run detected, scanning skills...");
-		const result = await performScan(db);
+		const result = await performScan(db, { agentFilter });
 		if (result.skillCount > 0) {
 			console.log(`  Found ${result.skillCount} skills.\n`);
 		} else {
@@ -62,7 +70,7 @@ export async function runStats(): Promise<void> {
 		}
 	} else {
 		console.log("\n  Scanning sessions...");
-		const newCount = await scanAllSessions(db);
+		const newCount = await scanAllSessions(db, new Set(), agentFilter);
 		if (newCount > 0) {
 			console.log(`  Found ${newCount} new invocations.\n`);
 		}

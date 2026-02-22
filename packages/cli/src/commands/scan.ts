@@ -21,11 +21,19 @@ function detectSource(skillPath: string): "skills.sh" | "manual" {
 	return "manual";
 }
 
+function parseAgentFilter(args: string[]): string | undefined {
+	if (args.includes("--claude")) return "claude";
+	if (args.includes("--opencode")) return "opencode";
+	return undefined;
+}
+
 export async function runScan(): Promise<void> {
-	const includeCommands = process.argv.includes("--include-commands");
+	const args = process.argv.slice(3);
+	const includeCommands = args.includes("--include-commands");
+	const agentFilter = parseAgentFilter(args);
 	const db = getDb();
 
-	const agents = getDetectedAgents();
+	const agents = getDetectedAgents(agentFilter);
 	if (agents.length === 0) {
 		console.log(
 			`\n  ${dim("No supported agents found (Claude Code, OpenCode).")}\n`,
@@ -34,7 +42,7 @@ export async function runScan(): Promise<void> {
 	}
 	console.log(`\n  ${dim(`Scanning ${agents.join(" + ")}`)}`);
 
-	const skills = scanInstalledSkills();
+	const skills = scanInstalledSkills(agentFilter);
 
 	if (skills.length === 0) {
 		console.log(dim("  No skills found.\n"));
@@ -78,9 +86,9 @@ export async function runScan(): Promise<void> {
 		} catch {}
 	}
 
-	const result = await performScan(db, { includeCommands });
+	const result = await performScan(db, { includeCommands, agentFilter });
 
-	const sessionCount = countAllSessions();
+	const sessionCount = countAllSessions(agentFilter);
 	const totalRow = db
 		.query<{ count: number }, []>(
 			"SELECT COUNT(*) as count FROM skill_invocations",
