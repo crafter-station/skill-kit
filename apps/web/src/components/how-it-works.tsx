@@ -19,7 +19,7 @@ export function HowItWorks() {
 				</motion.div>
 
 				<div className="flex flex-col gap-24">
-					{/* 01 — Scan */}
+					{/* 01 — Measure */}
 					<motion.div
 						initial={{ opacity: 0, y: 24 }}
 						whileInView={{ opacity: 1, y: 0 }}
@@ -31,57 +31,26 @@ export function HowItWorks() {
 								01
 							</span>
 							<h3 className="text-3xl md:text-4xl font-serif italic text-white mt-1">
-								Scan
-							</h3>
-							<p className="text-sm text-[#555] mt-2">
-								Already have skills installed? One command picks them all up.
-							</p>
-						</div>
-						<div className="rounded-lg border border-[#222] bg-[#0a0a0a] p-4 font-mono text-sm">
-							<div className="flex items-start gap-2 leading-7">
-								<span className="text-[#555] select-none">$</span>
-								<span className="text-white">skillkit scan</span>
-							</div>
-							<div className="mt-3 pt-3 border-t border-[#1a1a1a] space-y-0.5">
-								<div className="text-[#555] leading-7">
-									Scanning 3 agents: Claude Code, Cursor, OpenCode
-								</div>
-								<div className="text-white leading-7">
-									Found 12 skills (8 via skills.sh, 4 manual)
-								</div>
-								<div className="text-[#555] leading-7">
-									Indexed 211 sessions · 1,847 invocations
-								</div>
-								<div className="text-white leading-7">
-									Ready. Run skillkit stats to see usage.
-								</div>
-							</div>
-						</div>
-					</motion.div>
-
-					{/* 02 — Measure */}
-					<motion.div
-						initial={{ opacity: 0, y: 24 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 0.5 }}
-					>
-						<div className="mb-8">
-							<span className="text-4xl md:text-5xl font-serif italic text-[#222] leading-none">
-								02
-							</span>
-							<h3 className="text-3xl md:text-4xl font-serif italic text-white mt-1">
 								Measure
 							</h3>
 							<p className="text-sm text-[#555] mt-2">
-								See which skills you actually use. Real data from your sessions.
+								One command. Auto-discovers your skills and shows real usage data.
 							</p>
 						</div>
 						<div className="rounded-lg border border-[#222] bg-[#0a0a0a] font-mono text-sm overflow-hidden">
 							<div className="p-4">
 								<div className="flex items-start gap-2 leading-7">
 									<span className="text-[#555] select-none">$</span>
-									<span className="text-white">skillkit stats --top 5</span>
+									<span className="text-white">skillkit stats</span>
+								</div>
+							</div>
+							<div className="border-t border-[#1a1a1a]" />
+							<div className="p-4 space-y-0.5">
+								<div className="text-[#555] leading-7">
+									First run detected, scanning skills...
+								</div>
+								<div className="text-white leading-7">
+									Found 12 skills across 3 agents.
 								</div>
 							</div>
 							<div className="border-t border-[#1a1a1a]" />
@@ -120,7 +89,7 @@ export function HowItWorks() {
 						</div>
 					</motion.div>
 
-					{/* 03 — Optimize */}
+					{/* 02 — Analyze */}
 					<motion.div
 						initial={{ opacity: 0, y: 24 }}
 						whileInView={{ opacity: 1, y: 0 }}
@@ -129,13 +98,13 @@ export function HowItWorks() {
 					>
 						<div className="mb-8">
 							<span className="text-4xl md:text-5xl font-serif italic text-[#222] leading-none">
-								03
+								02
 							</span>
 							<h3 className="text-3xl md:text-4xl font-serif italic text-white mt-1">
-								Optimize
+								Analyze
 							</h3>
 							<p className="text-sm text-[#555] mt-2">
-								Drop what you don't use. Reclaim context budget.
+								See where your context budget goes. Spot the waste.
 							</p>
 						</div>
 						<div className="rounded-lg border border-[#222] bg-[#0a0a0a] font-mono text-sm overflow-hidden">
@@ -165,19 +134,43 @@ export function HowItWorks() {
 									</div>
 								</div>
 							</div>
-							<div className="border-t border-[#1a1a1a]" />
+						</div>
+					</motion.div>
+
+					{/* 03 — Optimize */}
+					<motion.div
+						initial={{ opacity: 0, y: 24 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.5 }}
+					>
+						<div className="mb-8">
+							<span className="text-4xl md:text-5xl font-serif italic text-[#222] leading-none">
+								03
+							</span>
+							<h3 className="text-3xl md:text-4xl font-serif italic text-white mt-1">
+								Optimize
+							</h3>
+							<p className="text-sm text-[#555] mt-2">
+								Drop what you don't use. Reclaim context budget.
+							</p>
+						</div>
+						<div className="rounded-lg border border-[#222] bg-[#0a0a0a] font-mono text-sm overflow-hidden">
 							<div className="p-4">
 								<div className="flex items-start gap-2 leading-7">
 									<span className="text-[#555] select-none">$</span>
 									<span className="text-white">skillkit prune</span>
 								</div>
+							</div>
+							<div className="border-t border-[#1a1a1a]" />
+							<div className="p-4">
+								<div className="text-[#555] leading-7">
+									× scaffold (0.9K)
+								</div>
+								<div className="text-[#555] leading-7">
+									× lint (2.1K)
+								</div>
 								<div className="mt-2 pt-2 border-t border-[#1a1a1a]">
-									<div className="text-[#555] leading-7">
-										Removed scaffold (0.9K)
-									</div>
-									<div className="text-[#555] leading-7">
-										Removed lint (2.1K)
-									</div>
 									<div className="text-white leading-7">
 										Reclaimed 3.0K · 10 skills active · 9.5K / 16.0K
 									</div>
