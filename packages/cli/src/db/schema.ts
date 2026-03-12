@@ -3,7 +3,6 @@ import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { ensureConflictTable } from "../conflicts/store";
-import { ensureBenchmarkTable } from "../eval/store";
 import { ensureTraceTable } from "../trace/store";
 
 const DB_DIR = join(homedir(), ".skillkit");
@@ -60,7 +59,6 @@ export function getDb(): Database {
 		"CREATE INDEX IF NOT EXISTS idx_daily_date ON skill_daily_stats(date DESC)",
 	);
 	ensureTraceTable(db);
-	ensureBenchmarkTable(db);
 	ensureConflictTable(db);
 	return db;
 }

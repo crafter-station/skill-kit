@@ -17,7 +17,6 @@ export { countAllSessions, scanAllSessions } from "./scanner/index";
 export { getDetectedAgents, scanInstalledSkills } from "./scanner/skills";
 export { runConflictsCommand } from "./commands/conflicts";
 export { runCoverageCommand } from "./commands/coverage";
-export { runTestCommand } from "./commands/test";
 export { runTraceCommand } from "./commands/trace";
 export { runBurnCommand } from "./commands/burn";
 export { analyzeCollision, summarizeConflicts } from "./conflicts/analyzer";
@@ -33,20 +32,6 @@ export type { ReferenceFile, SkillSection, SkillStructure } from "./coverage/par
 export { renderCoverageJson, renderCoverageReport } from "./coverage/report";
 export { analyzeCoverage } from "./coverage/scanner";
 export type { CoverageResult, FileUsage } from "./coverage/scanner";
-export { aggregateBenchmark, compareBenchmarks } from "./eval/benchmark";
-export type { BenchmarkDelta, BenchmarkStats } from "./eval/benchmark";
-export { gradeExpectations } from "./eval/grader";
-export type { EvalGrade, GradeResult } from "./eval/grader";
-export { loadEvalSuite, resolveEvalsPath } from "./eval/loader";
-export type { EvalCase, EvalSuite } from "./eval/loader";
-export {
-	renderBenchmarkJson,
-	renderBenchmarkTable,
-	renderComparisonTable,
-	renderEvalResults,
-} from "./eval/report";
-export { getBenchmarkById, getRecentBenchmarks, saveBenchmark } from "./eval/store";
-export type { BenchmarkRow } from "./eval/store";
 export { runTrace } from "./trace/engine";
 export type { ToolCall, TraceResult } from "./trace/engine";
 export {

@@ -21,7 +21,6 @@ function printHelp(): void {
     ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
     ${cyan("health")}      Health check: unused skills, context budget, DB
     ${cyan("trace")}       Run and record skill execution traces
-    ${cyan("test")}        Run eval suite against a skill
     ${cyan("conflicts")}   Test skills for trigger collisions
     ${cyan("coverage")}    Analyze dead weight in a skill
     ${cyan("prune")}       Remove unused skills to reclaim context budget
@@ -36,8 +35,6 @@ function printHelp(): void {
     ${dim("trace")} ${cyan("--list")}               List recent traces
     ${dim("trace")} ${cyan("--show <id>")}          Show trace details
     ${dim("trace")} ${cyan("--model <model>")}      Model to use for trace
-    ${dim("test")}  ${cyan("--suite <path>")}       Path to evals.json
-    ${dim("test")}  ${cyan("--compare <path>")}     Compare two skill versions
     ${dim("burn")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("burn")} ${cyan("--plan N")}             Monthly plan cost in USD (default: 200)
     ${dim("burn")} ${cyan("--json")}               JSON output
@@ -76,11 +73,6 @@ async function main(): Promise<void> {
 		case "trace": {
 			const { runTraceCommand } = await import("./commands/trace");
 			await runTraceCommand();
-			break;
-		}
-		case "test": {
-			const { runTestCommand } = await import("./commands/test");
-			await runTestCommand();
 			break;
 		}
 		case "conflicts": {
