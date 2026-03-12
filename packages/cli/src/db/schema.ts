@@ -2,6 +2,9 @@ import { Database } from "bun:sqlite";
 import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { ensureConflictTable } from "../conflicts/store";
+import { ensureBenchmarkTable } from "../eval/store";
+import { ensureTraceTable } from "../trace/store";
 
 const DB_DIR = join(homedir(), ".skillkit");
 const DB_PATH = join(DB_DIR, "analytics.db");
@@ -56,5 +59,8 @@ export function getDb(): Database {
 	db.run(
 		"CREATE INDEX IF NOT EXISTS idx_daily_date ON skill_daily_stats(date DESC)",
 	);
+	ensureTraceTable(db);
+	ensureBenchmarkTable(db);
+	ensureConflictTable(db);
 	return db;
 }

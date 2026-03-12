@@ -20,7 +20,12 @@ function printHelp(): void {
     ${cyan("list")}        List installed skills with size & context budget
     ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
     ${cyan("health")}      Health check: unused skills, context budget, DB
+    ${cyan("trace")}       Run and record skill execution traces
+    ${cyan("test")}        Run eval suite against a skill
+    ${cyan("conflicts")}   Test skills for trigger collisions
+    ${cyan("coverage")}    Analyze dead weight in a skill
     ${cyan("prune")}       Remove unused skills to reclaim context budget
+    ${cyan("burn")}        Subscription burn rate analysis (cost, models, daily)
     ${cyan("version")}     Print version
     ${cyan("help")}        Show this help message
 
@@ -28,6 +33,14 @@ function printHelp(): void {
     ${dim("scan")}  ${cyan("--include-commands")}  Also track slash commands (not just skills)
     ${dim("stats")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("stats")} ${cyan("--all")}               Show all skills, not just top 10
+    ${dim("trace")} ${cyan("--list")}               List recent traces
+    ${dim("trace")} ${cyan("--show <id>")}          Show trace details
+    ${dim("trace")} ${cyan("--model <model>")}      Model to use for trace
+    ${dim("test")}  ${cyan("--suite <path>")}       Path to evals.json
+    ${dim("test")}  ${cyan("--compare <path>")}     Compare two skill versions
+    ${dim("burn")} ${cyan("--days N")}             Time range in days (default: 30)
+    ${dim("burn")} ${cyan("--plan N")}             Monthly plan cost in USD (default: 200)
+    ${dim("burn")} ${cyan("--json")}               JSON output
     ${dim("any")}   ${cyan("--claude")}             Only scan Claude Code
     ${dim("any")}   ${cyan("--opencode")}           Only scan OpenCode
 
@@ -60,9 +73,34 @@ async function main(): Promise<void> {
 			await runHealth();
 			break;
 		}
+		case "trace": {
+			const { runTraceCommand } = await import("./commands/trace");
+			await runTraceCommand();
+			break;
+		}
+		case "test": {
+			const { runTestCommand } = await import("./commands/test");
+			await runTestCommand();
+			break;
+		}
+		case "conflicts": {
+			const { runConflictsCommand } = await import("./commands/conflicts");
+			await runConflictsCommand();
+			break;
+		}
+		case "coverage": {
+			const { runCoverageCommand } = await import("./commands/coverage");
+			await runCoverageCommand();
+			break;
+		}
 		case "prune": {
 			const { runPrune } = await import("./commands/prune");
 			await runPrune();
+			break;
+		}
+		case "burn": {
+			const { runBurnCommand } = await import("./commands/burn");
+			await runBurnCommand();
 			break;
 		}
 		case "version":
