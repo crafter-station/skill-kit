@@ -34,12 +34,12 @@ function getMostActiveDay(db: ReturnType<typeof getDb>, agent?: string): string 
 function parseDays(args: string[]): number {
 	for (let i = 0; i < args.length; i++) {
 		if (args[i] === "--days" && args[i + 1]) {
-			const n = parseInt(args[i + 1], 10);
+			const n = parseInt(args[i + 1]!, 10);
 			if (!isNaN(n) && n > 0) return n;
 		}
 		const match = args[i]?.match(/^--days=(\d+)$/);
 		if (match) {
-			const n = parseInt(match[1], 10);
+			const n = parseInt(match[1]!, 10);
 			if (!isNaN(n) && n > 0) return n;
 		}
 	}

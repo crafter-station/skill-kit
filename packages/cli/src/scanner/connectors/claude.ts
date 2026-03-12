@@ -28,7 +28,7 @@ function extractCommandNames(
 	const names: string[] = [];
 	let match: RegExpExecArray | null;
 	while ((match = COMMAND_NAME_RE.exec(text)) !== null) {
-		const name = match[1];
+		const name = match[1]!;
 		if (knownSkills.has(name)) {
 			names.push(name);
 		}
