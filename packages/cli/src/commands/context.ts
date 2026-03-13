@@ -202,7 +202,7 @@ function getSkillSources(): { metadata: ContextSource[]; bodies: ContextSource[]
 export async function runContextCommand(): Promise<void> {
 	const args = process.argv.slice(3);
 	const isJson = args.includes("--json");
-	const model = args.includes("--opus") ? "opus" : args.includes("--haiku") ? "haiku" : "sonnet";
+	const model = args.includes("--sonnet") ? "sonnet" : args.includes("--haiku") ? "haiku" : "opus";
 	const turnsFlag = args.indexOf("--turns");
 	const avgTurns = turnsFlag >= 0 && args[turnsFlag + 1] ? Number(args[turnsFlag + 1]) : 40;
 
