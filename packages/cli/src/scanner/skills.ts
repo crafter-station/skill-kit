@@ -168,10 +168,11 @@ export function scanInstalledSkills(agentFilter?: string): InstalledSkill[] {
 			for (const skill of skills) {
 				try {
 					const ino = statSync(skill.path).ino;
-					const key = `${ino}`;
-					if (seen.has(key)) continue;
-					seen.add(key);
+					if (seen.has(`ino:${ino}`)) continue;
+					seen.add(`ino:${ino}`);
 				} catch {}
+				if (seen.has(`name:${skill.name}`)) continue;
+				seen.add(`name:${skill.name}`);
 				allSkills.push(skill);
 			}
 			break;
