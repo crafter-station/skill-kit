@@ -1,6 +1,6 @@
 {
 	"name": "@crafter/skillkit",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"description": "Local-first analytics for AI agent skills. Track usage, measure context budget, and prune what you don't use.",
 	"type": "module",
 	"bin": {
