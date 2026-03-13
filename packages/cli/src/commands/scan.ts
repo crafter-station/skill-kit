@@ -4,6 +4,7 @@ import { getDb } from "../db/schema";
 import { performScan } from "../scanner/auto-scan";
 import { countAllSessions } from "../scanner/index";
 import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
+import { parseAgentFilter } from "../tui/args";
 import { bold, cyan, dim } from "../tui/colors";
 
 function detectSource(skillPath: string): "skills.sh" | "manual" {
@@ -19,12 +20,6 @@ function detectSource(skillPath: string): "skills.sh" | "manual" {
 		} catch {}
 	}
 	return "manual";
-}
-
-function parseAgentFilter(args: string[]): string | undefined {
-	if (args.includes("--claude")) return "claude";
-	if (args.includes("--opencode")) return "opencode";
-	return undefined;
 }
 
 export async function runScan(): Promise<void> {

@@ -7,6 +7,7 @@ import {
 import { getDb } from "../db/schema";
 import { performScan } from "../scanner/auto-scan";
 import { scanAllSessions } from "../scanner/index";
+import { parseAgentFilter } from "../tui/args";
 import { bold, cyan, dim, yellow } from "../tui/colors";
 import { sparkline } from "../tui/sparkline";
 
@@ -46,11 +47,6 @@ function parseDays(args: string[]): number {
 	return 30;
 }
 
-function parseAgentFilter(args: string[]): string | undefined {
-	if (args.includes("--claude")) return "claude";
-	if (args.includes("--opencode")) return "opencode";
-	return undefined;
-}
 
 export async function runStats(): Promise<void> {
 	const db = getDb();
