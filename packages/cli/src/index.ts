@@ -13,6 +13,9 @@ export {
 } from "./db/queries";
 export { getDb } from "./db/schema";
 export { parseSessionFile } from "./scanner/connectors/claude";
+export { parseCursorSessionFile } from "./scanner/connectors/cursor";
+export { parseCodexSessionFile } from "./scanner/connectors/codex";
+export { parseGeminiSessionFile } from "./scanner/connectors/gemini";
 export { countAllSessions, scanAllSessions } from "./scanner/index";
 export { getDetectedAgents, scanInstalledSkills } from "./scanner/skills";
 export { runConflictsCommand } from "./commands/conflicts";

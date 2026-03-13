@@ -1,6 +1,9 @@
 import type { Database } from "bun:sqlite";
 import { recordInvocation } from "../db/queries";
 import { countClaudeSessions, scanClaudeSessions } from "./connectors/claude";
+import { countCodexSessions, scanCodexSessions } from "./connectors/codex";
+import { countCursorSessions, scanCursorSessions } from "./connectors/cursor";
+import { countGeminiSessions, scanGeminiSessions } from "./connectors/gemini";
 import {
 	countOpenCodeSessions,
 	scanOpenCodeSessions,
@@ -57,6 +60,15 @@ export async function scanAllSessions(
 	if (!agentFilter || agentFilter === "opencode") {
 		total += scanOpenCodeSessions(db, trackedSet);
 	}
+	if (!agentFilter || agentFilter === "cursor") {
+		total += await scanCursorSessions(db, trackedSet, knownSkills);
+	}
+	if (!agentFilter || agentFilter === "codex") {
+		total += await scanCodexSessions(db, trackedSet, knownSkills);
+	}
+	if (!agentFilter || agentFilter === "gemini") {
+		total += await scanGeminiSessions(db, trackedSet, knownSkills);
+	}
 	return total;
 }
 
@@ -67,6 +79,15 @@ export function countAllSessions(agentFilter?: string): number {
 	}
 	if (!agentFilter || agentFilter === "opencode") {
 		total += countOpenCodeSessions();
+	}
+	if (!agentFilter || agentFilter === "cursor") {
+		total += countCursorSessions();
+	}
+	if (!agentFilter || agentFilter === "codex") {
+		total += countCodexSessions();
+	}
+	if (!agentFilter || agentFilter === "gemini") {
+		total += countGeminiSessions();
 	}
 	return total;
 }

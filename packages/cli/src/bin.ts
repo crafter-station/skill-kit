@@ -43,6 +43,9 @@ function printHelp(): void {
     ${dim("context")} ${cyan("--turns N")}          Avg turns per session (default: 40)
     ${dim("context")} ${cyan("--json")}             JSON output
     ${dim("any")}   ${cyan("--claude")}             Only scan Claude Code
+    ${dim("any")}   ${cyan("--cursor")}             Only scan Cursor
+    ${dim("any")}   ${cyan("--codex")}              Only scan Codex
+    ${dim("any")}   ${cyan("--gemini")}             Only scan Gemini CLI
     ${dim("any")}   ${cyan("--opencode")}           Only scan OpenCode
 
   ${dim("Install skills via skills.sh: npx skills add <owner/repo>")}
