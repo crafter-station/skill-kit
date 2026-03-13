@@ -25,6 +25,7 @@ function printHelp(): void {
     ${cyan("coverage")}    Analyze dead weight in a skill
     ${cyan("prune")}       Remove unused skills to reclaim context budget
     ${cyan("burn")}        Subscription burn rate analysis (cost, models, daily)
+    ${cyan("context")}     Context tax: tokens + cost loaded every API call
     ${cyan("version")}     Print version
     ${cyan("help")}        Show this help message
 
@@ -38,6 +39,9 @@ function printHelp(): void {
     ${dim("burn")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("burn")} ${cyan("--plan N")}             Monthly plan cost in USD (default: 200)
     ${dim("burn")} ${cyan("--json")}               JSON output
+    ${dim("context")} ${cyan("--opus/--haiku")}      Model pricing (default: sonnet)
+    ${dim("context")} ${cyan("--turns N")}          Avg turns per session (default: 40)
+    ${dim("context")} ${cyan("--json")}             JSON output
     ${dim("any")}   ${cyan("--claude")}             Only scan Claude Code
     ${dim("any")}   ${cyan("--opencode")}           Only scan OpenCode
 
@@ -93,6 +97,12 @@ async function main(): Promise<void> {
 		case "burn": {
 			const { runBurnCommand } = await import("./commands/burn");
 			await runBurnCommand();
+			break;
+		}
+		case "context":
+		case "ctx": {
+			const { runContextCommand } = await import("./commands/context");
+			await runContextCommand();
 			break;
 		}
 		case "version":

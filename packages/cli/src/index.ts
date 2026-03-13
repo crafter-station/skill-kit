@@ -19,6 +19,7 @@ export { runConflictsCommand } from "./commands/conflicts";
 export { runCoverageCommand } from "./commands/coverage";
 export { runTraceCommand } from "./commands/trace";
 export { runBurnCommand } from "./commands/burn";
+export { runContextCommand } from "./commands/context";
 export { analyzeCollision, summarizeConflicts } from "./conflicts/analyzer";
 export type { CollisionResult, ConflictSummary } from "./conflicts/analyzer";
 export { discoverAllSkills, findOverlappingPairs } from "./conflicts/discovery";

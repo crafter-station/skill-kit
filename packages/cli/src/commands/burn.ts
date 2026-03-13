@@ -6,7 +6,10 @@ import { bold, cyan, dim, green, red, yellow } from "../tui/colors";
 const MODEL_PRICING: Record<string, { input: number; output: number; cacheCreate: number; cacheRead: number }> = {
 	"claude-opus-4": { input: 15, output: 75, cacheCreate: 18.75, cacheRead: 1.5 },
 	"claude-sonnet-4": { input: 3, output: 15, cacheCreate: 3.75, cacheRead: 0.30 },
-	"claude-haiku-4": { input: 0.8, output: 4, cacheCreate: 1, cacheRead: 0.08 },
+	"claude-haiku-4": { input: 0.80, output: 4, cacheCreate: 1, cacheRead: 0.08 },
+	"claude-3-5-sonnet": { input: 3, output: 15, cacheCreate: 3.75, cacheRead: 0.30 },
+	"claude-3-5-haiku": { input: 0.80, output: 4, cacheCreate: 1, cacheRead: 0.08 },
+	"claude-3-opus": { input: 15, output: 75, cacheCreate: 18.75, cacheRead: 1.5 },
 };
 
 function getPricing(model: string) {
