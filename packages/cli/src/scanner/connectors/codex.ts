@@ -5,12 +5,27 @@ import { basename, join } from "node:path";
 import type { Invocation } from "../index";
 import { recordNewInvocations } from "../index";
 
+const CODEX_INTERNAL_TOOLS = new Set([
+	"exec_command",
+	"spawn_agent",
+	"write_stdin",
+	"multi_tool_use.parallel",
+]);
+
+const SKILL_PATH_RE = /skills\/([^/]+)\/SKILL\.md/;
+
+function extractSkillFromArgs(args: string): string | null {
+	const match = SKILL_PATH_RE.exec(args);
+	return match ? match[1] : null;
+}
+
 export function parseCodexSessionFile(
 	filePath: string,
 	knownSkills: Set<string> = new Set(),
 ): Invocation[] {
 	const results: Invocation[] = [];
 	const sessionId = `codex:${basename(filePath, ".jsonl")}`;
+	const seenSkills = new Set<string>();
 
 	let content: string;
 	try {
@@ -32,7 +47,10 @@ export function parseCodexSessionFile(
 		if (typeof entry !== "object" || entry === null) continue;
 		const obj = entry as Record<string, unknown>;
 
-		const timestamp = typeof obj.timestamp === "string" ? obj.timestamp : new Date().toISOString();
+		const timestamp =
+			typeof obj.timestamp === "string"
+				? obj.timestamp
+				: new Date().toISOString();
 		const type = obj.type as string | undefined;
 
 		if (type === "response_item") {
@@ -41,19 +59,59 @@ export function parseCodexSessionFile(
 
 			if (payload.type === "function_call") {
 				const name = payload.name as string | undefined;
-				if (name && (knownSkills.size === 0 || knownSkills.has(name))) {
-					results.push({ skillName: name, timestamp, sessionId, agent: "codex" });
+				if (!name) continue;
+
+				if (name === "exec_command") {
+					const args = (payload.arguments as string) ?? "";
+					const skillName = extractSkillFromArgs(args);
+					if (skillName && !seenSkills.has(skillName)) {
+						seenSkills.add(skillName);
+						results.push({
+							skillName,
+							timestamp,
+							sessionId,
+							agent: "codex",
+						});
+					}
+					continue;
+				}
+
+				if (CODEX_INTERNAL_TOOLS.has(name)) continue;
+
+				if (knownSkills.size === 0 || knownSkills.has(name)) {
+					results.push({
+						skillName: name,
+						timestamp,
+						sessionId,
+						agent: "codex",
+					});
 				}
 			}
 
 			if (payload.type === "message" && payload.role === "assistant") {
-				const content = payload.content as Array<Record<string, unknown>> | undefined;
+				const content = payload.content as
+					| Array<Record<string, unknown>>
+					| undefined;
 				if (!Array.isArray(content)) continue;
 				for (const block of content) {
-					if (block.type === "tool_use" || block.type === "function_call") {
-						const name = (block.name ?? block.skill) as string | undefined;
-						if (name && (knownSkills.size === 0 || knownSkills.has(name))) {
-							results.push({ skillName: name, timestamp, sessionId, agent: "codex" });
+					if (
+						block.type === "tool_use" ||
+						block.type === "function_call"
+					) {
+						const name = (block.name ?? block.skill) as
+							| string
+							| undefined;
+						if (!name || CODEX_INTERNAL_TOOLS.has(name)) continue;
+						if (
+							knownSkills.size === 0 ||
+							knownSkills.has(name)
+						) {
+							results.push({
+								skillName: name,
+								timestamp,
+								sessionId,
+								agent: "codex",
+							});
 						}
 					}
 				}
