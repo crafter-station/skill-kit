@@ -53,23 +53,28 @@ export async function runStats(): Promise<void> {
 	const args = process.argv.slice(3);
 	const days = parseDays(args);
 	const agentFilter = parseAgentFilter(args);
+	const isJson = args.includes("--json");
 
 	const installedSkills = getInstalledSkills(db);
 
 	if (installedSkills.length === 0) {
-		console.log("\n  First run detected, scanning skills...");
+		if (!isJson) console.log("\n  First run detected, scanning skills...");
 		const result = await performScan(db, { agentFilter });
 		if (result.skillCount > 0) {
-			console.log(`  Found ${result.skillCount} skills.\n`);
+			if (!isJson) console.log(`  Found ${result.skillCount} skills.\n`);
 		} else {
-			console.log(`\n  ${yellow("No skills found.")}`);
-			console.log(`  ${dim("Skills will be scanned automatically on next run.")}\n`);
+			if (isJson) {
+				console.log(JSON.stringify({ error: "no_skills_found" }));
+			} else {
+				console.log(`\n  ${yellow("No skills found.")}`);
+				console.log(`  ${dim("Skills will be scanned automatically on next run.")}\n`);
+			}
 			return;
 		}
 	} else {
-		console.log("\n  Scanning sessions...");
+		if (!isJson) console.log("\n  Scanning sessions...");
 		const newCount = await scanAllSessions(db, new Set(), agentFilter);
-		if (newCount > 0) {
+		if (newCount > 0 && !isJson) {
 			console.log(`  Found ${newCount} new invocations.\n`);
 		}
 	}
@@ -77,14 +82,37 @@ export async function runStats(): Promise<void> {
 	const stats = getSkillStats(db, days, agentFilter);
 
 	if (stats.total === 0) {
-		console.log(`\n  ${yellow("No analytics data yet.")}`);
-		console.log(`  ${dim("Run: skillkit scan")}\n`);
+		if (isJson) {
+			console.log(JSON.stringify({ error: "no_data", total: 0 }));
+		} else {
+			console.log(`\n  ${yellow("No analytics data yet.")}`);
+			console.log(`  ${dim("Run: skillkit scan")}\n`);
+		}
 		return;
 	}
 
 	const showAll = process.argv.includes("--all");
 	const topSkills = getTopSkills(db, days, showAll ? undefined : 10, agentFilter);
 	const activeDay = getMostActiveDay(db, agentFilter);
+
+	if (isJson) {
+		const output = {
+			period: { days },
+			total_invocations: stats.total,
+			unique_skills: stats.unique_skills,
+			most_active_day: activeDay,
+			top_skills: topSkills.map((skill) => {
+				const daily = getDailyUsage(db, skill.skill_name, days, agentFilter);
+				return {
+					name: skill.skill_name,
+					total: skill.total,
+					daily: daily.map((d) => ({ date: d.date, count: d.count })),
+				};
+			}),
+		};
+		console.log(JSON.stringify(output, null, 2));
+		return;
+	}
 
 	const label =
 		days === 30 ? "last 30 days" : days === 7 ? "last 7 days" : `last ${days} days`;

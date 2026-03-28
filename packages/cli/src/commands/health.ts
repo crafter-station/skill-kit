@@ -48,6 +48,9 @@ function parseFrontmatter(content: string): {
 }
 
 export async function runHealth(): Promise<void> {
+	const args = process.argv.slice(3);
+	const isJson = args.includes("--json");
+
 	const skills = scanInstalledSkills();
 	const dbPath = join(homedir(), ".skillkit", "analytics.db");
 	const dbExists = existsSync(dbPath);
@@ -112,9 +115,40 @@ export async function runHealth(): Promise<void> {
 		Math.round((totalMetadataChars / METADATA_BUDGET) * 100),
 	);
 
+	const agents = getDetectedAgents();
+
+	if (isJson) {
+		const output = {
+			installed: skills.length,
+			agents,
+			db: {
+				exists: dbExists,
+				events: eventCount,
+			},
+			usage: {
+				used_30d: skills.length - neverUsed.length,
+				unused_30d: neverUsed.length,
+				never_used: neverUsed,
+			},
+			metadata: {
+				total_chars: totalMetadataChars,
+				budget: METADATA_BUDGET,
+				pct: metadataPct,
+			},
+			content: {
+				total_chars: totalBodyChars,
+			},
+			warnings: {
+				oversized: oversizedSkills,
+				long_descriptions: longDescSkills,
+			},
+		};
+		console.log(JSON.stringify(output, null, 2));
+		return;
+	}
+
 	console.log(`\n  ${bold("SKILLKIT HEALTH REPORT")}\n`);
 
-	const agents = getDetectedAgents();
 	console.log(check(`${skills.length} skills installed`));
 	if (agents.length > 0) {
 		console.log(dim(`    ${agents.join(" + ")}`));

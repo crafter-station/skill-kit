@@ -33,6 +33,8 @@ function printHelp(): void {
     ${dim("scan")}  ${cyan("--include-commands")}  Also track slash commands (not just skills)
     ${dim("stats")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("stats")} ${cyan("--all")}               Show all skills, not just top 10
+    ${dim("stats")} ${cyan("--json")}              JSON output
+    ${dim("health")} ${cyan("--json")}             JSON output
     ${dim("trace")} ${cyan("--list")}               List recent traces
     ${dim("trace")} ${cyan("--show <id>")}          Show trace details
     ${dim("trace")} ${cyan("--model <model>")}      Model to use for trace
