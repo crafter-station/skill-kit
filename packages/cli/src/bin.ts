@@ -36,8 +36,11 @@ function printHelp(): void {
     ${dim("stats")} ${cyan("--json")}              JSON output
     ${dim("health")} ${cyan("--json")}             JSON output
     ${dim("trace")} ${cyan("--list")}               List recent traces
+    ${dim("trace")} ${cyan("--list --json")}        List recent traces as JSON
     ${dim("trace")} ${cyan("--show <id>")}          Show trace details
     ${dim("trace")} ${cyan("--model <model>")}      Model to use for trace
+    ${dim("prune")} ${cyan("--skill <name>")}       Prune a single skill
+    ${dim("prune")} ${cyan("--yes --json")}         Confirm and output JSON
     ${dim("burn")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("burn")} ${cyan("--plan N")}             Monthly plan cost in USD (default: 200)
     ${dim("burn")} ${cyan("--json")}               JSON output

@@ -62,24 +62,47 @@ export async function runPrune(): Promise<void> {
 	);
 
 	const args = process.argv.slice(3);
+
+	const skillFlag = args.indexOf("--skill");
+	const targetSkill = skillFlag >= 0 ? args[skillFlag + 1] : undefined;
+
+	const targets = targetSkill
+		? candidates.filter((c) => c.name === targetSkill)
+		: candidates;
+
+	if (targetSkill && targets.length === 0) {
+		console.log(`\n  ${dim(`Skill "${targetSkill}" is not in the prune list (either used recently or not installed).`)}\n`);
+		return;
+	}
+
 	if (!args.includes("--yes") && !args.includes("-y")) {
+		if (targetSkill) {
+			console.log(`\n  ${dim("Will remove:")} ${bold(targetSkill)}`);
+		}
 		console.log(
 			`\n  ${dim("Run with")} ${cyan("--yes")} ${dim("to confirm deletion.")}\n`,
 		);
 		return;
 	}
 
+	const isJson = args.includes("--json");
 	let removed = 0;
-	for (const c of candidates) {
+	const removedNames: string[] = [];
+	for (const c of targets) {
 		try {
 			rmSync(c.path, { recursive: true, force: true });
 			removed++;
-		} catch {
-			console.log(`  ${yellow("!")} Failed to remove ${c.name}`);
+			removedNames.push(c.name);
+		} catch { /* empty */
+			if (!isJson) console.log(`  ${yellow("!")} Failed to remove ${c.name}`);
 		}
 	}
 
-	console.log(
-		`\n  ${bold(`Removed ${removed} skills`)} ${dim("·")} ${bold(`${(totalWaste / 1000).toFixed(1)}K`)} ${dim("reclaimed")}\n`,
-	);
+	if (isJson) {
+		console.log(JSON.stringify({ removed: removedNames, count: removed, reclaimed_chars: totalWaste }));
+	} else {
+		console.log(
+			`\n  ${bold(`Removed ${removed} skills`)} ${dim("·")} ${bold(`${(totalWaste / 1000).toFixed(1)}K`)} ${dim("reclaimed")}\n`,
+		);
+	}
 }

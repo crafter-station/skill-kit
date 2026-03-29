@@ -113,14 +113,33 @@ export async function runTraceCommand(): Promise<void> {
 	if (args.includes("--list")) {
 		const limit = parseLimit(args);
 		const skillFilter = parseSkillFilter(args);
+		const isJson = args.includes("--json");
 
 		const rows = skillFilter
 			? getTracesBySkill(db, skillFilter, limit)
 			: getRecentTraces(db, limit);
 
 		if (rows.length === 0) {
-			console.log(`\n  ${yellow("No traces found.")}`);
-			console.log(`  ${dim("Run: skillkit trace \"your prompt\"")}\n`);
+			if (isJson) {
+				console.log(JSON.stringify([]));
+			} else {
+				console.log(`\n  ${yellow("No traces found.")}`);
+				console.log(`  ${dim("Run: skillkit trace \"your prompt\"")}\n`);
+			}
+			return;
+		}
+
+		if (isJson) {
+			const output = rows.map((row) => ({
+				trace_id: row.trace_id,
+				skill_name: row.skill_name,
+				tokens_total: row.tokens_total,
+				cost_estimate: row.cost_estimate,
+				duration_ms: row.duration_ms,
+				model: row.model,
+				timestamp: row.timestamp,
+			}));
+			console.log(JSON.stringify(output, null, 2));
 			return;
 		}
 
