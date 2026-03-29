@@ -8,20 +8,30 @@ AI coding agents load skills into their context window on every session. More sk
 
 **skillkit** answers these questions with usage analytics, conflict detection, cost analysis, and context budget monitoring — all locally on your machine.
 
-## Quick Start
+## Prerequisites
+
+skillkit requires [Bun](https://bun.sh) as its runtime (for native SQLite and fast TypeScript execution).
 
 ```bash
-npx @crafter/skillkit scan
-npx @crafter/skillkit stats
-npx @crafter/skillkit health
+curl -fsSL https://bun.sh/install | bash
+```
+
+## Quick start
+
+```bash
+bunx @crafter/skillkit scan
+bunx @crafter/skillkit stats
+bunx @crafter/skillkit health
 ```
 
 Or install globally:
 
 ```bash
-npm i -g @crafter/skillkit
+bun add -g @crafter/skillkit
 skillkit scan
 ```
+
+> **Note:** `npm i -g` also works if bun is installed, since the bin entry uses bun as its runtime.
 
 ## Commands
 
