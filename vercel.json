@@ -1,4 +1,4 @@
 {
 	"installCommand": "bun install",
-	"buildCommand": "bun run build:web"
+	"buildCommand": "cd apps/web && bun run build"
 }
