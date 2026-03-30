@@ -23,6 +23,12 @@ export function runGraph(): void {
 		data.set(row.date, existing + row.cost_usd);
 	}
 
+	if (args.includes("--json")) {
+		const entries = [...data.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+		console.log(JSON.stringify(entries.map(([date, cost]) => ({ date, cost }))));
+		return;
+	}
+
 	const label = agentFilter ? `${agentFilter} activity` : "all agents";
 	console.log(`\n  ${bold("CONTRIBUTION GRAPH")} ${dim(`(${label})`)}\n`);
 	console.log(renderHeatmap(data));

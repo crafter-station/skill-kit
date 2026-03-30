@@ -98,11 +98,15 @@ export async function runStats(): Promise<void> {
 	const activeDay = getMostActiveDay(db, agentFilter);
 
 	if (isJson) {
+		const streak = getCurrentStreak(db, agentFilter);
+		const velocity = getWeeklyVelocity(db, agentFilter);
 		const output = {
 			period: { days },
 			total_invocations: stats.total,
 			unique_skills: stats.unique_skills,
 			most_active_day: activeDay,
+			streak: { current: streak.current, longest: streak.longest },
+			velocity: { this_week: velocity.thisWeek, last_week: velocity.lastWeek, change_pct: velocity.change },
 			top_skills: topSkills.map((skill) => {
 				const daily = getDailyUsage(db, skill.skill_name, days, agentFilter);
 				return {
