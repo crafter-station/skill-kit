@@ -9,53 +9,22 @@ type Row = {
 	feature: string;
 	skillkit: CellValue;
 	skillssh: CellValue;
+	straude: CellValue;
 	manual: CellValue;
 };
 
 const ROWS: Row[] = [
-	{
-		feature: "Install / update skills",
-		skillkit: false,
-		skillssh: true,
-		manual: false,
-	},
-	{
-		feature: "Registry search",
-		skillkit: false,
-		skillssh: true,
-		manual: false,
-	},
-	{
-		feature: "Usage analytics",
-		skillkit: true,
-		skillssh: false,
-		manual: false,
-	},
-	{
-		feature: "Context budget tracking",
-		skillkit: true,
-		skillssh: false,
-		manual: false,
-	},
-	{ feature: "Health checks", skillkit: true, skillssh: false, manual: false },
-	{
-		feature: "Unused skill pruning",
-		skillkit: true,
-		skillssh: false,
-		manual: false,
-	},
-	{
-		feature: "Session analytics (Claude Code + OpenCode)",
-		skillkit: true,
-		skillssh: false,
-		manual: false,
-	},
-	{
-		feature: "Local-first (no telemetry)",
-		skillkit: true,
-		skillssh: false,
-		manual: true,
-	},
+	{ feature: "Install / update skills", skillkit: false, skillssh: true, straude: false, manual: false },
+	{ feature: "Registry search", skillkit: false, skillssh: true, straude: false, manual: false },
+	{ feature: "Usage analytics + sparklines", skillkit: true, skillssh: false, straude: true, manual: false },
+	{ feature: "Burn rate (40+ models)", skillkit: true, skillssh: false, straude: true, manual: false },
+	{ feature: "Multi-agent (12 agents)", skillkit: true, skillssh: false, straude: false, manual: false },
+	{ feature: "Streaks & velocity", skillkit: true, skillssh: false, straude: true, manual: false },
+	{ feature: "Contribution heatmap", skillkit: true, skillssh: false, straude: true, manual: false },
+	{ feature: "Context budget tracking", skillkit: true, skillssh: false, straude: false, manual: false },
+	{ feature: "Trigger collision detection", skillkit: true, skillssh: false, straude: false, manual: false },
+	{ feature: "Auto-scan hooks", skillkit: true, skillssh: false, straude: true, manual: false },
+	{ feature: "Local-first (no telemetry)", skillkit: true, skillssh: false, straude: false, manual: true },
 ];
 
 function Cell({ value }: { value: CellValue }) {
@@ -100,7 +69,7 @@ export function ComparisonTable() {
 				>
 					<table className="w-full text-sm">
 						<caption className="sr-only">
-							Comparison of SkillKit, skills.sh, and manual skill management
+							Comparison of SkillKit, skills.sh, Straude, and manual skill management
 						</caption>
 						<thead>
 							<tr className="border-b border-[#222]">
@@ -113,6 +82,7 @@ export function ComparisonTable() {
 								<th className="text-center px-6 py-4 text-[#555] font-medium">
 									skills.sh
 								</th>
+								<th className="text-center px-6 py-4 text-[#555] font-medium">Straude</th>
 								<th className="text-center px-6 py-4 text-[#555] font-medium">
 									Manual Copy
 								</th>
@@ -132,6 +102,9 @@ export function ComparisonTable() {
 									</td>
 									<td className="px-6 py-4 text-center">
 										<Cell value={row.skillssh} />
+									</td>
+									<td className="px-6 py-4 text-center">
+										<Cell value={row.straude} />
 									</td>
 									<td className="px-6 py-4 text-center">
 										<Cell value={row.manual} />
