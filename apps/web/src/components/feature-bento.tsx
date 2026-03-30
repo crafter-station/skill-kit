@@ -1,22 +1,36 @@
 "use client";
 
-import { Activity, BarChart2, Database, Gauge } from "lucide-react";
+import { Activity, BarChart2, Calendar, Flame, Gauge, Zap } from "lucide-react";
 import { motion } from "motion/react";
 
 const cards = [
 	{
-		id: "analytics",
-		icon: BarChart2,
-		title: "Usage Sparklines",
+		id: "burn",
+		icon: Flame,
+		title: "Burn Rate Analysis",
 		description:
-			"30-day invocation trends for every skill. See at a glance which skills earn their context budget.",
+			"Track token spend across Claude, Cursor, Codex, and 9 more agents. Daily burn, model breakdown, and plan utilization.",
 	},
 	{
-		id: "health",
-		icon: Activity,
-		title: "Health Checks",
+		id: "sessions",
+		icon: BarChart2,
+		title: "Session Tracking",
 		description:
-			"Flag unused skills, detect context bloat, and get actionable recommendations to reclaim tokens.",
+			"Daily usage across all agents with per-session cost, tokens in/out, and model breakdown. Persisted locally in SQLite.",
+	},
+	{
+		id: "streaks",
+		icon: Activity,
+		title: "Streaks & Velocity",
+		description:
+			"Current streak, longest streak, and week-over-week cost velocity. Know your coding momentum at a glance.",
+	},
+	{
+		id: "graph",
+		icon: Calendar,
+		title: "Contribution Graph",
+		description:
+			"52-week GitHub-style heatmap of your AI coding activity. Filter by agent to see where you spend your time.",
 	},
 	{
 		id: "context",
@@ -26,11 +40,11 @@ const cards = [
 			"Track the token cost of each installed skill. Know exactly how much of your context window skills consume.",
 	},
 	{
-		id: "scanning",
-		icon: Database,
-		title: "Session Scanning",
+		id: "auto",
+		icon: Zap,
+		title: "Auto-Scan Hooks",
 		description:
-			"Extracts real invocation data from agent sessions. Supports Claude Code (JSONL) and OpenCode (SQLite), with more connectors coming. Zero telemetry.",
+			"Install a Claude Code SessionEnd hook to auto-index sessions. Zero-effort analytics that just work.",
 	},
 ];
 
@@ -49,7 +63,7 @@ export function FeatureBento() {
 						The observability layer for AI skills
 					</h2>
 				</motion.div>
-				<div className="grid md:grid-cols-2 gap-4">
+				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
 					{cards.map((card, i) => {
 						const Icon = card.icon;
 						return (
