@@ -29,11 +29,11 @@ type AgentEntry = {
 
 const AGENTS: AgentEntry[] = [
 	{ name: "Claude Code", logo: ClaudeLogo, supported: true },
+	{ name: "Cursor", logo: CursorLogo, supported: true },
+	{ name: "Codex", logo: OpenAILogo, supported: true },
+	{ name: "Gemini CLI", logo: GeminiLogo, supported: true },
 	{ name: "OpenCode", logo: OpenCodeLogo, supported: true },
-	{ name: "Cursor", logo: CursorLogo, issue: 1 },
-	{ name: "Codex", logo: OpenAILogo, issue: 2 },
 	{ name: "Windsurf", logo: WindsurfLogo, issue: 3 },
-	{ name: "Gemini CLI", logo: GeminiLogo, issue: 4 },
 	{ name: "Cline", logo: ClineLogo, issue: 5 },
 	{ name: "Roo Code", logo: RooCodeLogo, issue: 6 },
 	{ name: "GitHub Copilot", logo: GithubCopilotLogo, issue: 8 },
