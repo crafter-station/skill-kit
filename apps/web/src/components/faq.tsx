@@ -6,12 +6,17 @@ const ITEMS = [
 	{
 		question: "How is this different from skills.sh?",
 		answer:
-			"skills.sh handles skill distribution — install, update, search. SkillKit is the analytics layer on top: local-first usage tracking, health checks, context budget analysis, and pruning that skills.sh doesn't provide.",
+			"skills.sh handles skill distribution — install, update, search. SkillKit is the analytics layer on top: usage tracking, burn rate analysis, streaks, contribution graphs, and context budget optimization.",
+	},
+	{
+		question: "How is this different from Straude?",
+		answer:
+			"Straude tracks Claude Code usage and uploads it to a cloud leaderboard. SkillKit is local-first (your data never leaves your machine), supports 12 agents instead of just Claude, and focuses on efficiency rather than rewarding spend.",
 	},
 	{
 		question: "Which AI coding agents are supported?",
 		answer:
-			"Claude Code and OpenCode. SkillKit discovers skills and tracks usage analytics for both. You can filter by agent with --claude or --opencode. More connectors coming as agents standardize their session formats.",
+			"Claude Code, Cursor, Codex, Gemini CLI, Windsurf, OpenCode, Amp, Continue, Goose, Kiro, Roo Code, and Antigravity. Filter any command with --claude, --cursor, --codex, etc.",
 	},
 	{
 		question: "Is SkillKit free?",
@@ -21,17 +26,17 @@ const ITEMS = [
 	{
 		question: "What data does SkillKit collect?",
 		answer:
-			"None. All analytics are stored locally in a SQLite database at ~/.skillkit/analytics.db. SkillKit scans your local session files and never phones home.",
+			"None. All analytics are stored locally in SQLite at ~/.skillkit/analytics.db. SkillKit scans your local session files and never phones home.",
 	},
 	{
-		question: "How does the session scanning work?",
+		question: "How do I auto-track sessions?",
 		answer:
-			"Run `skillkit stats` and it auto-discovers your skills and indexes sessions on first run. It parses Claude Code JSONL sessions and OpenCode SQLite sessions, extracts Skill tool_use blocks, and populates a local analytics database.",
+			"Run `skillkit auto --on` to install a Claude Code SessionEnd hook. It runs `skillkit scan` after every session — zero-effort analytics.",
 	},
 	{
-		question: "Can I use SkillKit without skills.sh?",
+		question: "Does it work with Obsidian?",
 		answer:
-			"Yes. SkillKit is purely an analytics tool — scan, list, stats, and health all work independently. Use skills.sh (npx skills add) to install and manage skills, then use SkillKit to measure and optimize.",
+			"Yes — AgentFiles is an Obsidian plugin that manages AI skills directly from your vault. Install it to browse, enable, and organize skills without leaving Obsidian.",
 	},
 ];
 
