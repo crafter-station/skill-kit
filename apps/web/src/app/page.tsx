@@ -6,6 +6,7 @@ import { FinalCTA } from "@/components/final-cta";
 import { Hero } from "@/components/hero";
 import { HowItWorks } from "@/components/how-it-works";
 import { Navbar } from "@/components/navbar";
+import { ObsidianCTA } from "@/components/obsidian-cta";
 import { OpenSourceBlock } from "@/components/open-source-block";
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
 				<FeatureBento />
 				<ComparisonTable />
 				<OpenSourceBlock />
+				<ObsidianCTA />
 				<FAQ />
 				<FinalCTA />
 			</main>
