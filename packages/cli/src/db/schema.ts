@@ -90,12 +90,13 @@ export function getDb(): Database {
 function deduplicateInvocations(db: Database): void {
 	try {
 		const row = db.query<{ dupes: number }, []>(
-			"SELECT COUNT(*) - COUNT(DISTINCT skill_name || '::' || timestamp) as dupes FROM skill_invocations"
+			`SELECT COUNT(*) - COUNT(DISTINCT skill_name || '::' || REPLACE(timestamp, SUBSTR(timestamp, -5, 4), '')) as dupes FROM skill_invocations`
 		).get();
 		if (row && row.dupes > 0) {
 			db.run(`
 				DELETE FROM skill_invocations WHERE rowid NOT IN (
-					SELECT MIN(rowid) FROM skill_invocations GROUP BY skill_name, timestamp
+					SELECT MIN(rowid) FROM skill_invocations
+					GROUP BY skill_name, REPLACE(timestamp, SUBSTR(timestamp, -5, 4), '')
 				)
 			`);
 		}

@@ -14,13 +14,17 @@ interface AlreadyTracked {
 	timestamp: string;
 }
 
+function roundTs(ts: string): string {
+	return ts.replace(/\.\d{3}Z$/, "Z");
+}
+
 export function getTrackedSet(db: Database): Set<string> {
 	const tracked = db
 		.query<{ skill_name: string; timestamp: string }, []>(
 			"SELECT skill_name, timestamp FROM skill_invocations",
 		)
 		.all();
-	return new Set(tracked.map((r) => `${r.skill_name}::${r.timestamp}`));
+	return new Set(tracked.map((r) => `${r.skill_name}::${roundTs(r.timestamp)}`));
 }
 
 export interface Invocation {
@@ -37,7 +41,7 @@ export function recordNewInvocations(
 ): number {
 	let count = 0;
 	for (const inv of invocations) {
-		const key = `${inv.skillName}::${inv.timestamp}`;
+		const key = `${inv.skillName}::${roundTs(inv.timestamp)}`;
 		if (!trackedSet.has(key)) {
 			recordInvocation(db, inv.skillName, inv.sessionId, undefined, inv.timestamp, inv.agent);
 			trackedSet.add(key);
