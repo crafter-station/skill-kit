@@ -26,6 +26,9 @@ function printHelp(): void {
     ${cyan("prune")}       Remove unused skills to reclaim context budget
     ${cyan("burn")}        Subscription burn rate analysis (cost, models, daily)
     ${cyan("context")}     Context tax: tokens + cost loaded every API call
+    ${cyan("sessions")}    Daily usage across all agents
+    ${cyan("graph")}       52-week contribution heatmap
+    ${cyan("auto")}        Auto-scan after Claude Code sessions
     ${cyan("version")}     Print version
     ${cyan("help")}        Show this help message
 
@@ -105,6 +108,22 @@ async function main(): Promise<void> {
 		case "burn": {
 			const { runBurnCommand } = await import("./commands/burn");
 			await runBurnCommand();
+			break;
+		}
+		case "auto": {
+			const { runAuto } = await import("./commands/auto");
+			runAuto();
+			break;
+		}
+		case "sessions": {
+			const { runSessions } = await import("./commands/sessions");
+			runSessions();
+			break;
+		}
+		case "graph":
+		case "contrib": {
+			const { runGraph } = await import("./commands/graph");
+			runGraph();
 			break;
 		}
 		case "context":
