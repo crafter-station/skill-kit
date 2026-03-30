@@ -2,6 +2,8 @@ import { Database } from "bun:sqlite";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { upsertDailyUsage } from "../db/queries";
+import { getDb } from "../db/schema";
 import { parseAgentFilter } from "../tui/args";
 import { bold, cyan, dim, green, red, yellow } from "../tui/colors";
 
@@ -744,6 +746,26 @@ export async function runBurnCommand(): Promise<void> {
 	if (results.length === 0) {
 		console.error("  No burn data found.");
 		return;
+	}
+
+	const analyticsDb = getDb();
+	for (const data of results) {
+		for (const [, day] of data.dailyMap) {
+			upsertDailyUsage(
+				analyticsDb,
+				day.date,
+				data.agent,
+				day.inputTokens,
+				day.outputTokens,
+				day.cacheCreateTokens,
+				day.cacheReadTokens,
+				day.inputTokens + day.outputTokens + day.cacheCreateTokens + day.cacheReadTokens,
+				day.costUsd,
+				1,
+				[],
+				{},
+			);
+		}
 	}
 
 	if (isJson) {
