@@ -58,6 +58,29 @@ export function getDb(): Database {
 	db.run(
 		"CREATE INDEX IF NOT EXISTS idx_daily_date ON skill_daily_stats(date DESC)",
 	);
+	db.run(`
+		CREATE TABLE IF NOT EXISTS daily_usage (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			date TEXT NOT NULL,
+			agent TEXT NOT NULL,
+			input_tokens INTEGER DEFAULT 0,
+			output_tokens INTEGER DEFAULT 0,
+			cache_creation_tokens INTEGER DEFAULT 0,
+			cache_read_tokens INTEGER DEFAULT 0,
+			total_tokens INTEGER DEFAULT 0,
+			cost_usd REAL DEFAULT 0,
+			session_count INTEGER DEFAULT 0,
+			models TEXT,
+			model_breakdown TEXT,
+			UNIQUE(date, agent)
+		)
+	`);
+	db.run(
+		"CREATE INDEX IF NOT EXISTS idx_daily_usage_date ON daily_usage(date DESC)",
+	);
+	db.run(
+		"CREATE INDEX IF NOT EXISTS idx_daily_usage_agent ON daily_usage(agent)",
+	);
 	ensureTraceTable(db);
 	ensureConflictTable(db);
 	return db;

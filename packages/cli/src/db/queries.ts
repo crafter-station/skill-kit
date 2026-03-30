@@ -134,6 +134,179 @@ export function deduplicateInvocations(db: Database): number {
 	return before - after;
 }
 
+export interface DailyUsageRow {
+	id: number;
+	date: string;
+	agent: string;
+	input_tokens: number;
+	output_tokens: number;
+	cache_creation_tokens: number;
+	cache_read_tokens: number;
+	total_tokens: number;
+	cost_usd: number;
+	session_count: number;
+	models: string | null;
+	model_breakdown: string | null;
+}
+
+export function upsertDailyUsage(
+	db: Database,
+	date: string,
+	agent: string,
+	inputTokens: number,
+	outputTokens: number,
+	cacheCreationTokens: number,
+	cacheReadTokens: number,
+	totalTokens: number,
+	costUsd: number,
+	sessionCount: number,
+	models: string[],
+	modelBreakdown: Record<string, { apiCalls: number; costUsd: number }>,
+): void {
+	db.run(
+		`INSERT INTO daily_usage (date, agent, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens, total_tokens, cost_usd, session_count, models, model_breakdown)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(date, agent) DO UPDATE SET
+       input_tokens = excluded.input_tokens,
+       output_tokens = excluded.output_tokens,
+       cache_creation_tokens = excluded.cache_creation_tokens,
+       cache_read_tokens = excluded.cache_read_tokens,
+       total_tokens = excluded.total_tokens,
+       cost_usd = excluded.cost_usd,
+       session_count = excluded.session_count,
+       models = excluded.models,
+       model_breakdown = excluded.model_breakdown`,
+		[
+			date,
+			agent,
+			inputTokens,
+			outputTokens,
+			cacheCreationTokens,
+			cacheReadTokens,
+			totalTokens,
+			costUsd,
+			sessionCount,
+			JSON.stringify(models),
+			JSON.stringify(modelBreakdown),
+		],
+	);
+}
+
+export function getDailyUsageRows(
+	db: Database,
+	days = 30,
+	agent?: string,
+): DailyUsageRow[] {
+	const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+		.toISOString()
+		.slice(0, 10);
+	const agentClause = agent ? " AND agent = ?" : "";
+	const params = agent ? [cutoff, agent] : [cutoff];
+	return db
+		.query<DailyUsageRow, string[]>(
+			`SELECT * FROM daily_usage WHERE date >= ?${agentClause} ORDER BY date DESC`,
+		)
+		.all(...params);
+}
+
+export function getCurrentStreak(
+	db: Database,
+	agent?: string,
+): { current: number; longest: number } {
+	const agentClause = agent ? " WHERE agent = ?" : "";
+	const params = agent ? [agent] : [];
+	const rows = db
+		.query<{ date: string }, string[]>(
+			`SELECT DISTINCT date FROM daily_usage${agentClause} ORDER BY date DESC`,
+		)
+		.all(...params);
+
+	if (rows.length === 0) return { current: 0, longest: 0 };
+
+	const today = new Date().toISOString().slice(0, 10);
+	const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+	let current = 0;
+	let longest = 0;
+	let streak = 0;
+	let prevDate: Date | null = null;
+
+	for (const row of rows) {
+		const d = new Date(row.date + "T12:00:00");
+		if (prevDate === null) {
+			if (row.date !== today && row.date !== yesterday) {
+				current = 0;
+				streak = 1;
+			} else {
+				streak = 1;
+			}
+		} else {
+			const diff = (prevDate.getTime() - d.getTime()) / 86400000;
+			if (Math.abs(diff - 1) < 0.5) {
+				streak++;
+			} else {
+				if (
+					current === 0 &&
+					(rows[0]!.date === today || rows[0]!.date === yesterday)
+				) {
+					current = streak;
+				}
+				longest = Math.max(longest, streak);
+				streak = 1;
+			}
+		}
+		prevDate = d;
+	}
+
+	if (current === 0 && (rows[0]!.date === today || rows[0]!.date === yesterday)) {
+		current = streak;
+	}
+	longest = Math.max(longest, streak);
+
+	return { current, longest };
+}
+
+export function getWeeklyVelocity(
+	db: Database,
+	agent?: string,
+): { thisWeek: number; lastWeek: number; change: number } {
+	const now = new Date();
+	const startOfThisWeek = new Date(now);
+	startOfThisWeek.setDate(now.getDate() - now.getDay());
+	const startOfLastWeek = new Date(startOfThisWeek);
+	startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+
+	const thisWeekStr = startOfThisWeek.toISOString().slice(0, 10);
+	const lastWeekStr = startOfLastWeek.toISOString().slice(0, 10);
+	const todayStr = now.toISOString().slice(0, 10);
+
+	const agentClause = agent ? " AND agent = ?" : "";
+
+	const thisWeekParams = agent
+		? [thisWeekStr, todayStr, agent]
+		: [thisWeekStr, todayStr];
+	const thisWeekRow = db
+		.query<{ total: number }, string[]>(
+			`SELECT COALESCE(SUM(cost_usd), 0) as total FROM daily_usage WHERE date >= ? AND date <= ?${agentClause}`,
+		)
+		.get(...thisWeekParams);
+
+	const lastWeekParams = agent
+		? [lastWeekStr, thisWeekStr, agent]
+		: [lastWeekStr, thisWeekStr];
+	const lastWeekRow = db
+		.query<{ total: number }, string[]>(
+			`SELECT COALESCE(SUM(cost_usd), 0) as total FROM daily_usage WHERE date >= ? AND date < ?${agentClause}`,
+		)
+		.get(...lastWeekParams);
+
+	const thisWeek = thisWeekRow?.total ?? 0;
+	const lastWeek = lastWeekRow?.total ?? 0;
+	const change = lastWeek > 0 ? ((thisWeek - lastWeek) / lastWeek) * 100 : 0;
+
+	return { thisWeek, lastWeek, change };
+}
+
 export function upsertInstalledSkill(
 	db: Database,
 	name: string,
