@@ -1,14 +1,16 @@
 import {
 	getDailyUsage,
+	getCurrentStreak,
 	getInstalledSkills,
 	getSkillStats,
 	getTopSkills,
+	getWeeklyVelocity,
 } from "../db/queries";
 import { getDb } from "../db/schema";
 import { performScan } from "../scanner/auto-scan";
 import { scanAllSessions } from "../scanner/index";
 import { parseAgentFilter } from "../tui/args";
-import { bold, cyan, dim, yellow } from "../tui/colors";
+import { bold, cyan, dim, green, red, yellow } from "../tui/colors";
 import { sparkline } from "../tui/sparkline";
 
 function getMostActiveDay(db: ReturnType<typeof getDb>, agent?: string): string {
@@ -121,6 +123,27 @@ export async function runStats(): Promise<void> {
 	console.log(`  Total invocations: ${bold(String(stats.total))}`);
 	console.log(`  Unique skills:     ${bold(String(stats.unique_skills))}`);
 	console.log(`  Most active day:   ${bold(activeDay)}\n`);
+
+	const streak = getCurrentStreak(db, agentFilter);
+	const velocity = getWeeklyVelocity(db, agentFilter);
+
+	if (streak.current > 0) {
+		console.log(`  Current streak:    ${bold(`${streak.current} days`)} ${streak.current >= 7 ? "🔥" : ""}`);
+		console.log(`  Longest streak:    ${bold(`${streak.longest} days`)}`);
+	}
+
+	if (velocity.thisWeek > 0) {
+		const changeStr =
+			velocity.change > 0
+				? green(`+${velocity.change.toFixed(0)}%`)
+				: velocity.change < 0
+					? red(`${velocity.change.toFixed(0)}%`)
+					: dim("—");
+		console.log(`  This week:         ${bold(`$${velocity.thisWeek.toFixed(2)}`)} ${dim("vs last")} $${velocity.lastWeek.toFixed(2)} (${changeStr})`);
+	}
+
+	if (streak.current > 0 || velocity.thisWeek > 0) console.log();
+
 	console.log(`  ${bold(showAll ? "ALL SKILLS" : "TOP SKILLS")}\n`);
 
 	const maxCount = topSkills.length > 0 ? (topSkills[0]?.total ?? 1) : 1;
