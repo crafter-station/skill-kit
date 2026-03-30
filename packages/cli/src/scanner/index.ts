@@ -16,11 +16,11 @@ interface AlreadyTracked {
 
 export function getTrackedSet(db: Database): Set<string> {
 	const tracked = db
-		.query<AlreadyTracked, []>(
-			"SELECT session_id, timestamp FROM skill_invocations WHERE session_id IS NOT NULL",
+		.query<{ skill_name: string; timestamp: string }, []>(
+			"SELECT skill_name, timestamp FROM skill_invocations",
 		)
 		.all();
-	return new Set(tracked.map((r) => `${r.session_id}::${r.timestamp}`));
+	return new Set(tracked.map((r) => `${r.skill_name}::${r.timestamp}`));
 }
 
 export interface Invocation {
@@ -37,7 +37,7 @@ export function recordNewInvocations(
 ): number {
 	let count = 0;
 	for (const inv of invocations) {
-		const key = `${inv.sessionId}::${inv.timestamp}`;
+		const key = `${inv.skillName}::${inv.timestamp}`;
 		if (!trackedSet.has(key)) {
 			recordInvocation(db, inv.skillName, inv.sessionId, undefined, inv.timestamp, inv.agent);
 			trackedSet.add(key);
