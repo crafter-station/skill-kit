@@ -1,10 +1,80 @@
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { getTopSkills } from "../db/queries";
 import { getDb } from "../db/schema";
 import { scanInstalledSkills } from "../scanner/skills";
 import { bold, cyan, dim, red, yellow } from "../tui/colors";
+
+const HOME = homedir();
+const LOCK_PATH = join(HOME, ".agents", ".skill-lock.json");
+
+const AGENT_SKILL_DIRS = [
+	join(HOME, ".claude", "skills"),
+	join(HOME, ".cursor", "skills"),
+	join(HOME, ".codex", "skills"),
+	join(HOME, ".codeium", "windsurf", "skills"),
+	join(HOME, ".config", "amp", "skills"),
+	join(HOME, ".config", "opencode", "skills"),
+	join(HOME, ".copilot", "skills"),
+	join(HOME, ".pi", "agent", "skills"),
+	join(HOME, ".gemini", "antigravity", "skills"),
+];
+
+function removeFromLockFile(skillName: string): void {
+	if (!existsSync(LOCK_PATH)) return;
+	try {
+		const data = JSON.parse(readFileSync(LOCK_PATH, "utf-8"));
+		if (data.skills && data.skills[skillName]) {
+			delete data.skills[skillName];
+			writeFileSync(LOCK_PATH, JSON.stringify(data, null, 2) + "\n", "utf-8");
+		}
+	} catch { /* empty */ }
+}
+
+function removeSymlinks(skillName: string): number {
+	let cleaned = 0;
+	for (const agentDir of AGENT_SKILL_DIRS) {
+		const linkPath = join(agentDir, skillName);
+		if (!existsSync(linkPath)) continue;
+		try {
+			const stat = lstatSync(linkPath);
+			if (stat.isSymbolicLink()) {
+				unlinkSync(linkPath);
+				cleaned++;
+			}
+		} catch { /* empty */ }
+	}
+	return cleaned;
+}
+
+function isRegistrySkill(skillName: string): boolean {
+	if (!existsSync(LOCK_PATH)) return false;
+	try {
+		const data = JSON.parse(readFileSync(LOCK_PATH, "utf-8"));
+		return !!(data.skills && data.skills[skillName]);
+	} catch { /* empty */ }
+	return false;
+}
+
+function removeSkillClean(name: string, path: string): boolean {
+	try {
+		const isRegistry = isRegistrySkill(name);
+		if (isRegistry) {
+			removeSymlinks(name);
+			removeFromLockFile(name);
+		}
+		rmSync(path, { recursive: true, force: true });
+		if (isRegistry) {
+			const canonicalPath = join(HOME, ".agents", "skills", name);
+			if (existsSync(canonicalPath) && canonicalPath !== path) {
+				rmSync(canonicalPath, { recursive: true, force: true });
+			}
+		}
+		return true;
+	} catch { /* empty */ }
+	return false;
+}
 
 export async function runPrune(): Promise<void> {
 	const dbPath = join(homedir(), ".skillkit", "analytics.db");
@@ -42,7 +112,7 @@ export async function runPrune(): Promise<void> {
 		if (existsSync(skillMdPath)) {
 			try {
 				chars = readFileSync(skillMdPath, "utf-8").length;
-			} catch {}
+			} catch { /* empty */ }
 		}
 		totalWaste += chars;
 		candidates.push({ name: skill.name, path: skill.path, chars });
@@ -53,8 +123,9 @@ export async function runPrune(): Promise<void> {
 	);
 
 	for (const c of candidates) {
+		const registry = isRegistrySkill(c.name) ? dim(" (registry)") : "";
 		const size = c.chars > 0 ? dim(` (${(c.chars / 1000).toFixed(1)}K)`) : "";
-		console.log(`  ${red("×")} ${c.name}${size}`);
+		console.log(`  ${red("×")} ${c.name}${size}${registry}`);
 	}
 
 	console.log(
@@ -89,12 +160,11 @@ export async function runPrune(): Promise<void> {
 	let removed = 0;
 	const removedNames: string[] = [];
 	for (const c of targets) {
-		try {
-			rmSync(c.path, { recursive: true, force: true });
+		if (removeSkillClean(c.name, c.path)) {
 			removed++;
 			removedNames.push(c.name);
-		} catch { /* empty */
-			if (!isJson) console.log(`  ${yellow("!")} Failed to remove ${c.name}`);
+		} else if (!isJson) {
+			console.log(`  ${yellow("!")} Failed to remove ${c.name}`);
 		}
 	}
 
