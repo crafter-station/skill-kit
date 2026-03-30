@@ -16,64 +16,46 @@ const STEPS: Step[] = [
 	{
 		command: "skillkit stats",
 		output: [
-			{
-				text: "  First run detected, scanning skills...",
-				type: "output",
-			},
-			{
-				text: "  Found 12 skills across 3 agents.",
-				type: "output",
-			},
-			{
-				text: "",
-				type: "empty",
-			},
-			{
-				text: "  SKILL       30d   TREND",
-				type: "header",
-			},
-			{
-				text: "  commit      42    ▂▃▅▇█▆▅▇█",
-				type: "highlight",
-			},
-			{
-				text: "  review      38    ▁▃▅▆▇▇▆▅▃",
-				type: "output",
-			},
-			{
-				text: "  deploy      27    ▁▁▂▃▅▇█▇▅",
-				type: "output",
-			},
+			{ text: "  Scanning sessions...", type: "output" },
+			{ text: "", type: "empty" },
+			{ text: "  SKILL-KIT ANALYTICS (last 30 days)", type: "header" },
+			{ text: "", type: "empty" },
+			{ text: "  Total invocations: 1866", type: "output" },
+			{ text: "  Unique skills:     63", type: "output" },
+			{ text: "  Most active day:   Monday", type: "output" },
+			{ text: "", type: "empty" },
+			{ text: "  Current streak:    12 days 🔥", type: "highlight" },
+			{ text: "  Longest streak:    12 days", type: "output" },
+			{ text: "  This week:         $999.42 vs $6034 (-83%)", type: "output" },
 		],
 	},
 	{
-		command: "skillkit health",
+		command: "skillkit sessions --days 7",
 		output: [
-			{
-				text: "  [████████░░] 78% metadata budget (12.5K / 16.0K)",
-				type: "output",
-			},
-			{
-				text: "  ! 3 skills unused in 30d — run skillkit prune",
-				type: "highlight",
-			},
+			{ text: "  SESSIONS (last 7 days)", type: "header" },
+			{ text: "", type: "empty" },
+			{ text: "  Total: $6695.61  in 541K / 4.7M tokens", type: "highlight" },
+			{ text: "", type: "empty" },
+			{ text: "  2026-03-30 Mon   $535.97   claude", type: "output" },
+			{ text: "  2026-03-29 Sun   $463.45   claude", type: "output" },
+			{ text: "  2026-03-28 Sat   $976.39   claude", type: "output" },
+			{ text: "  2026-03-27 Fri  $1311.49   claude", type: "output" },
 		],
 	},
 	{
-		command: "skillkit prune",
+		command: "skillkit graph",
 		output: [
-			{
-				text: "  × scaffold (0.9K)",
-				type: "output",
-			},
-			{
-				text: "  × lint (2.1K)",
-				type: "output",
-			},
-			{
-				text: "  Reclaimed 3.0K · 10 skills active",
-				type: "highlight",
-			},
+			{ text: "  CONTRIBUTION GRAPH (all agents)", type: "header" },
+			{ text: "", type: "empty" },
+			{ text: "                              ▓▓", type: "output" },
+			{ text: "  Mon                       ░ █▓", type: "highlight" },
+			{ text: "                            ▒░▒", type: "output" },
+			{ text: "  Wed                         █", type: "highlight" },
+			{ text: "                            ░░▓", type: "output" },
+			{ text: "  Fri                       ░▒█", type: "highlight" },
+			{ text: "                            ▒▒█", type: "output" },
+			{ text: "", type: "empty" },
+			{ text: "  Active days: 18  Total: $7859", type: "output" },
 		],
 	},
 ];
@@ -263,7 +245,7 @@ export function TerminalDemo() {
 					style={{ background: "#0e0e0e" }}
 				>
 					<span>-- NORMAL --</span>
-					<span>skillkit v0.2.6</span>
+					<span>skillkit v0.9.0</span>
 					<span>utf-8</span>
 				</div>
 			</div>

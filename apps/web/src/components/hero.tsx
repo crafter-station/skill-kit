@@ -56,8 +56,8 @@ export function Hero() {
 					variants={fadeUp}
 					className="text-lg text-[#888] max-w-2xl leading-relaxed"
 				>
-					Local-first analytics for your AI agent skills. See what you use, what
-					wastes context, and what to drop.
+					Local-first analytics for 12 AI coding agents. Track sessions, burn rate,
+					streaks, and context budget — all offline.
 				</motion.p>
 
 				<motion.div
