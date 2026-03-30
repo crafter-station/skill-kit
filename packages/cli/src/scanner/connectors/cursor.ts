@@ -1,110 +1,9 @@
 import type { Database } from "bun:sqlite";
-import { Database as SqliteDb } from "bun:sqlite";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import type { Invocation } from "../index";
 import { recordNewInvocations } from "../index";
-
-const STATE_VSCDB = join(
-	homedir(),
-	"Library",
-	"Application Support",
-	"Cursor",
-	"User",
-	"globalStorage",
-	"state.vscdb",
-);
-
-interface BlobMessage {
-	role: string;
-	content:
-		| string
-		| Array<{
-				type: string;
-				toolName?: string;
-				args?: Record<string, unknown>;
-				arguments?: Record<string, unknown>;
-				input?: Record<string, unknown>;
-		  }>;
-}
-
-function extractSkillFromPath(path: string): string | null {
-	const match = path.match(/skills\/([^/]+)\/SKILL\.md/);
-	return match ? match[1]! : null;
-}
-
-function scanStateVscdb(_knownSkills: Set<string>): Invocation[] {
-	if (!existsSync(STATE_VSCDB)) return [];
-
-	const results: Invocation[] = [];
-
-	try {
-		const sdb = new SqliteDb(STATE_VSCDB, { readonly: true });
-
-		const rows = sdb
-			.query<{ key: string; value: Uint8Array | string }, []>(
-				`SELECT key, value FROM cursorDiskKV
-			 WHERE key LIKE 'agentKv:blob:%'
-			 AND hex(substr(value, 1, 2)) = '7B22'
-			 AND value LIKE '%SKILL.md%'`,
-			)
-			.all();
-
-		for (const row of rows) {
-			let text: string;
-			try {
-				if (row.value instanceof Uint8Array) {
-					text = new TextDecoder().decode(row.value);
-				} else if (typeof row.value === "string") {
-					text = row.value;
-				} else {
-					text = String(row.value);
-				}
-			} catch {
-				continue;
-			}
-
-			let msg: BlobMessage;
-			try {
-				msg = JSON.parse(text) as BlobMessage;
-			} catch {
-				continue;
-			}
-
-			if (msg.role !== "assistant" || !Array.isArray(msg.content)) continue;
-
-			for (const item of msg.content) {
-				if (item.type !== "tool-call") continue;
-
-				const args =
-					item.args ?? item.arguments ?? item.input ?? ({} as Record<string, unknown>);
-				const path = String(
-					args.path ?? args.filePath ?? args.file_path ?? "",
-				);
-
-				if (!path.includes("SKILL.md")) continue;
-
-				const skillName = extractSkillFromPath(path);
-				if (!skillName) continue;
-
-				const blobHash = row.key.split(":").pop() ?? row.key;
-				results.push({
-					skillName,
-					timestamp: new Date().toISOString(),
-					sessionId: `cursor:vscdb:${blobHash.slice(0, 16)}`,
-					agent: "cursor",
-				});
-			}
-		}
-
-		sdb.close();
-	} catch {
-		return results;
-	}
-
-	return results;
-}
 
 export function parseCursorSessionFile(
 	filePath: string,
@@ -212,7 +111,6 @@ export function parseCursorSessionFile(
 
 export function countCursorSessions(): number {
 	let count = 0;
-
 	const projectsDir = join(homedir(), ".cursor", "projects");
 	if (existsSync(projectsDir)) {
 		const glob = new Bun.Glob("**/agent-transcripts/**/*.jsonl");
@@ -220,20 +118,6 @@ export function countCursorSessions(): number {
 			count++;
 		}
 	}
-
-	if (existsSync(STATE_VSCDB)) {
-		try {
-			const sdb = new SqliteDb(STATE_VSCDB, { readonly: true });
-			const row = sdb
-				.query<{ count: number }, []>(
-					"SELECT COUNT(DISTINCT key) as count FROM cursorDiskKV WHERE key LIKE 'agentKv:blob:%' AND value LIKE '%SKILL.md%'",
-				)
-				.get();
-			count += row?.count ?? 0;
-			sdb.close();
-		} catch {}
-	}
-
 	return count;
 }
 
@@ -256,9 +140,6 @@ export async function scanCursorSessions(
 			total += recordNewInvocations(db, trackedSet, invocations);
 		}
 	}
-
-	const vscdbInvocations = scanStateVscdb(knownSkills);
-	total += recordNewInvocations(db, trackedSet, vscdbInvocations);
 
 	return total;
 }
