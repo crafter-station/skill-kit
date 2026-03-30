@@ -25,22 +25,24 @@ function detectSource(skillPath: string): "skills.sh" | "manual" {
 export async function runScan(): Promise<void> {
 	const args = process.argv.slice(3);
 	const includeCommands = args.includes("--include-commands");
+	const quiet = args.includes("--quiet");
 	const agentFilter = parseAgentFilter(args);
 	const db = getDb();
 
 	const agents = getDetectedAgents(agentFilter);
 	if (agents.length === 0) {
-		console.log(
-			`\n  ${dim("No supported agents found (Claude Code, OpenCode).")}\n`,
-		);
+		if (!quiet)
+			console.log(
+				`\n  ${dim("No supported agents found (Claude Code, OpenCode).")}\n`,
+			);
 		return;
 	}
-	console.log(`\n  ${dim(`Scanning ${agents.join(" + ")}`)}`);
+	if (!quiet) console.log(`\n  ${dim(`Scanning ${agents.join(" + ")}`)}`);
 
 	const skills = scanInstalledSkills(agentFilter);
 
 	if (skills.length === 0) {
-		console.log(dim("  No skills found.\n"));
+		if (!quiet) console.log(dim("  No skills found.\n"));
 		return;
 	}
 
@@ -57,12 +59,13 @@ export async function runScan(): Promise<void> {
 	if (skillsShCount > 0) parts.push(`${skillsShCount} via skills.sh`);
 	if (manualCount > 0) parts.push(`${manualCount} manual`);
 
-	console.log(
-		`  ${bold(`Found ${skills.length} skills`)} ${dim(`(${parts.join(", ")})`)}`,
-	);
+	if (!quiet)
+		console.log(
+			`  ${bold(`Found ${skills.length} skills`)} ${dim(`(${parts.join(", ")})`)}`,
+		);
 
 	const localSkillsDir = join(process.cwd(), ".claude", "skills");
-	if (existsSync(localSkillsDir)) {
+	if (!quiet && existsSync(localSkillsDir)) {
 		try {
 			const localEntries = readdirSync(localSkillsDir).filter((e) => {
 				try {
@@ -91,15 +94,17 @@ export async function runScan(): Promise<void> {
 		.get();
 	const totalInvocations = totalRow?.count ?? 0;
 
-	console.log(
-		`  ${dim("Indexed")} ${bold(String(sessionCount))} ${dim("sessions")} ${cyan("·")} ${bold(totalInvocations.toLocaleString())} ${dim("invocations")}`,
-	);
+	if (!quiet) {
+		console.log(
+			`  ${dim("Indexed")} ${bold(String(sessionCount))} ${dim("sessions")} ${cyan("·")} ${bold(totalInvocations.toLocaleString())} ${dim("invocations")}`,
+		);
 
-	if (result.invocationCount > 0) {
-		console.log(dim(`  (${result.invocationCount} new)`));
+		if (result.invocationCount > 0) {
+			console.log(dim(`  (${result.invocationCount} new)`));
+		}
+
+		console.log(
+			`\n  ${dim("Ready. Run")} ${cyan("skillkit stats")} ${dim("to see usage.")}\n`,
+		);
 	}
-
-	console.log(
-		`\n  ${dim("Ready. Run")} ${cyan("skillkit stats")} ${dim("to see usage.")}\n`,
-	);
 }
