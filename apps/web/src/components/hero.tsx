@@ -30,10 +30,10 @@ export function Hero() {
 				>
 					<span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#333] bg-white/5 text-[#888] text-xs font-mono tracking-wide">
 						<span
-							className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"
+							className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
 							aria-hidden="true"
 						/>
-						Powered by skills.sh
+						v0.10 — sessions, streaks, graphs
 					</span>
 				</motion.div>
 
@@ -44,9 +44,9 @@ export function Hero() {
 					variants={fadeUp}
 					className="text-5xl md:text-7xl font-serif italic tracking-tight text-white max-w-4xl leading-[1.05]"
 				>
-					Know which skills
+					Know what your
 					<br />
-					actually matter
+					AI agents cost
 				</motion.h1>
 
 				<motion.p
@@ -56,8 +56,8 @@ export function Hero() {
 					variants={fadeUp}
 					className="text-lg text-[#888] max-w-2xl leading-relaxed"
 				>
-					Local-first analytics for 12 AI coding agents. Track sessions, burn rate,
-					streaks, and context budget — all offline.
+					Observability for AI coding agents. Track burn rate, sessions, streaks,
+					and contribution graphs across Claude, Cursor, Codex, and 9 more — all local, all offline.
 				</motion.p>
 
 				<motion.div

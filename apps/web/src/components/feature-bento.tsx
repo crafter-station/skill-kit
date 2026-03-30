@@ -60,7 +60,7 @@ export function FeatureBento() {
 					className="text-center mb-16"
 				>
 					<h2 className="text-4xl md:text-5xl font-serif italic text-white">
-						The observability layer for AI skills
+						The observability layer for AI agents
 					</h2>
 				</motion.div>
 				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -1,10 +1,10 @@
 import { AgentLogoBelt } from "@/components/agent-logo-belt";
+import { CommandsShowcase } from "@/components/commands-showcase";
 import { ComparisonTable } from "@/components/comparison-table";
 import { FAQ } from "@/components/faq";
 import { FeatureBento } from "@/components/feature-bento";
 import { FinalCTA } from "@/components/final-cta";
 import { Hero } from "@/components/hero";
-import { HowItWorks } from "@/components/how-it-works";
 import { Navbar } from "@/components/navbar";
 import { ObsidianCTA } from "@/components/obsidian-cta";
 import { OpenSourceBlock } from "@/components/open-source-block";
@@ -16,7 +16,7 @@ export default function Home() {
 			<main>
 				<Hero />
 				<AgentLogoBelt />
-				<HowItWorks />
+				<CommandsShowcase />
 				<FeatureBento />
 				<ComparisonTable />
 				<OpenSourceBlock />
