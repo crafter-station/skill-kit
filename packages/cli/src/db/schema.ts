@@ -89,6 +89,8 @@ export function getDb(): Database {
 
 function deduplicateInvocations(db: Database): void {
 	try {
+		db.run(`DELETE FROM skill_invocations WHERE skill_name LIKE 'mcp_%' OR skill_name LIKE 'mcp__%' OR skill_name = 'update_plan'`);
+
 		const row = db.query<{ dupes: number }, []>(
 			`SELECT COUNT(*) - COUNT(DISTINCT skill_name || '::' || REPLACE(timestamp, SUBSTR(timestamp, -5, 4), '')) as dupes FROM skill_invocations`
 		).get();

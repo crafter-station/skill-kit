@@ -10,7 +10,12 @@ const CODEX_INTERNAL_TOOLS = new Set([
 	"spawn_agent",
 	"write_stdin",
 	"multi_tool_use.parallel",
+	"update_plan",
 ]);
+
+function isInternalTool(name: string): boolean {
+	return isInternalTool(name) || name.startsWith("mcp__") || name.startsWith("mcp_");
+}
 
 const SKILL_PATH_RE = /skills\/([^/]+)\/SKILL\.md/;
 
@@ -76,7 +81,7 @@ export function parseCodexSessionFile(
 					continue;
 				}
 
-				if (CODEX_INTERNAL_TOOLS.has(name)) continue;
+				if (isInternalTool(name)) continue;
 
 				if (knownSkills.size === 0 || knownSkills.has(name)) {
 					results.push({
@@ -101,7 +106,7 @@ export function parseCodexSessionFile(
 						const name = (block.name ?? block.skill) as
 							| string
 							| undefined;
-						if (!name || CODEX_INTERNAL_TOOLS.has(name)) continue;
+						if (!name || isInternalTool(name)) continue;
 						if (
 							knownSkills.size === 0 ||
 							knownSkills.has(name)
