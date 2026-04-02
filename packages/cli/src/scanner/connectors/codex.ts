@@ -14,7 +14,7 @@ const CODEX_INTERNAL_TOOLS = new Set([
 ]);
 
 function isInternalTool(name: string): boolean {
-	return isInternalTool(name) || name.startsWith("mcp__") || name.startsWith("mcp_");
+	return CODEX_INTERNAL_TOOLS.has(name) || name.startsWith("mcp__") || name.startsWith("mcp_");
 }
 
 const SKILL_PATH_RE = /skills\/([^/]+)\/SKILL\.md/;
