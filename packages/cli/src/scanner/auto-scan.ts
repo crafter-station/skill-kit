@@ -3,7 +3,7 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { deduplicateInvocations, upsertInstalledSkill } from "../db/queries";
-import { scanAllSessions } from "./index";
+import { isSkillName, scanAllSessions } from "./index";
 import { getDetectedAgents, scanInstalledSkills } from "./skills";
 
 function detectSource(skillPath: string): "skills.sh" | "manual" {
@@ -97,6 +97,24 @@ export async function performScan(
 	}
 
 	deduplicateInvocations(db);
+
+	db.run(
+		`DELETE FROM skill_invocations WHERE skill_name LIKE 'mcp__%' OR skill_name LIKE 'mcp_%'`
+	);
+	const junkNames = [
+		"Read", "Write", "Edit", "MultiEdit", "Bash", "Glob", "Grep",
+		"WebSearch", "WebFetch", "TodoRead", "TodoWrite", "Task", "Agent",
+		"Skill", "LSP", "NotebookEdit", "AskFollowupQuestion",
+		"AttemptCompletion", "SearchReplace", "InsertCodeBlock",
+		"ReadImages", "ExecuteCommand", "ListFiles", "SearchFiles",
+		"ReadFile", "WriteFile", "ReplaceInFile", "ListCodeDefinitionNames",
+		"BrowserAction", "UseMcp", "shell", "shell_command",
+		"update_plan", "create_plan", "read_file", "write_file",
+		"execute_command", "spawn_agent", "write_stdin",
+		"multi_tool_use.parallel",
+	];
+	const placeholders = junkNames.map(() => "?").join(",");
+	db.run(`DELETE FROM skill_invocations WHERE skill_name IN (${placeholders})`, junkNames);
 
 	const newInvocations = await scanAllSessions(db, knownSkills, agentFilter);
 

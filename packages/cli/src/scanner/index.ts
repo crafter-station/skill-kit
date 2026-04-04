@@ -9,6 +9,25 @@ import {
 	scanOpenCodeSessions,
 } from "./connectors/opencode";
 
+const BUILTIN_TOOL_NAMES = new Set([
+	"Read", "Write", "Edit", "MultiEdit", "Bash", "Glob", "Grep",
+	"WebSearch", "WebFetch", "TodoRead", "TodoWrite", "Task", "Agent",
+	"Skill", "LSP", "NotebookEdit", "AskFollowupQuestion",
+	"AttemptCompletion", "SearchReplace", "InsertCodeBlock",
+	"ReadImages", "ExecuteCommand", "ListFiles", "SearchFiles",
+	"ReadFile", "WriteFile", "ReplaceInFile", "ListCodeDefinitionNames",
+	"BrowserAction", "UseMcp", "shell", "shell_command",
+	"update_plan", "create_plan", "read_file", "write_file",
+	"execute_command", "spawn_agent", "write_stdin",
+	"multi_tool_use.parallel",
+]);
+
+export function isSkillName(name: string): boolean {
+	if (BUILTIN_TOOL_NAMES.has(name)) return false;
+	if (name.startsWith("mcp__") || name.startsWith("mcp_")) return false;
+	return true;
+}
+
 interface AlreadyTracked {
 	session_id: string;
 	timestamp: string;
@@ -41,6 +60,7 @@ export function recordNewInvocations(
 ): number {
 	let count = 0;
 	for (const inv of invocations) {
+		if (!isSkillName(inv.skillName)) continue;
 		const key = `${inv.skillName}::${roundTs(inv.timestamp)}`;
 		if (!trackedSet.has(key)) {
 			recordInvocation(db, inv.skillName, inv.sessionId, undefined, inv.timestamp, inv.agent);
