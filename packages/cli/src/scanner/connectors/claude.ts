@@ -19,12 +19,10 @@ function extractSkillName(block: ToolUseBlock): string | null {
 	return null;
 }
 
-const COMMAND_NAME_RE = /<command-name>\/?([a-zA-Z][\w-]*(?::[\w-]*)*)<\/command-name>/g;
+const COMMAND_NAME_RE =
+	/<command-name>\/?([a-zA-Z][\w-]*(?::[\w-]*)*)<\/command-name>/g;
 
-function extractCommandNames(
-	text: string,
-	knownSkills: Set<string>,
-): string[] {
+function extractCommandNames(text: string, knownSkills: Set<string>): string[] {
 	const names: string[] = [];
 	let match: RegExpExecArray | null;
 	while ((match = COMMAND_NAME_RE.exec(text)) !== null) {
@@ -90,7 +88,12 @@ export function parseSessionFile(
 								.join("\n")
 						: "";
 			for (const name of extractCommandNames(text, knownSkills)) {
-				results.push({ skillName: name, timestamp, sessionId, agent: "claude" });
+				results.push({
+					skillName: name,
+					timestamp,
+					sessionId,
+					agent: "claude",
+				});
 			}
 			continue;
 		}
@@ -111,7 +114,7 @@ export function parseSessionFile(
 			) {
 				const skillName = extractSkillName(block as unknown as ToolUseBlock);
 				if (skillName) {
-					results.push({ skillName, timestamp, sessionId });
+					results.push({ skillName, timestamp, sessionId, agent: "claude" });
 				}
 			}
 		}

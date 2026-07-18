@@ -43,8 +43,23 @@ export function getDb(): Database {
 	`);
 	try {
 		db.run("ALTER TABLE skill_invocations ADD COLUMN agent TEXT");
-		db.run("UPDATE skill_invocations SET agent = 'claude' WHERE agent IS NULL AND session_id IS NOT NULL AND session_id NOT LIKE 'oc:%'");
-		db.run("UPDATE skill_invocations SET agent = 'opencode' WHERE agent IS NULL AND session_id LIKE 'oc:%'");
+	} catch {}
+	try {
+		db.run(
+			"UPDATE skill_invocations SET agent = 'opencode' WHERE (agent IS NULL OR agent = '') AND session_id LIKE 'oc:%'",
+		);
+		db.run(
+			"UPDATE skill_invocations SET agent = 'codex' WHERE (agent IS NULL OR agent = '') AND session_id LIKE 'codex:%'",
+		);
+		db.run(
+			"UPDATE skill_invocations SET agent = 'cursor' WHERE (agent IS NULL OR agent = '') AND session_id LIKE 'cursor:%'",
+		);
+		db.run(
+			"UPDATE skill_invocations SET agent = 'gemini' WHERE (agent IS NULL OR agent = '') AND session_id LIKE 'gemini:%'",
+		);
+		db.run(
+			"UPDATE skill_invocations SET agent = 'claude' WHERE (agent IS NULL OR agent = '') AND session_id IS NOT NULL",
+		);
 	} catch {}
 	db.run(
 		"CREATE INDEX IF NOT EXISTS idx_invocations_agent ON skill_invocations(agent)",
@@ -89,11 +104,15 @@ export function getDb(): Database {
 
 function deduplicateInvocations(db: Database): void {
 	try {
-		db.run(`DELETE FROM skill_invocations WHERE skill_name LIKE 'mcp_%' OR skill_name LIKE 'mcp__%' OR skill_name = 'update_plan'`);
+		db.run(
+			`DELETE FROM skill_invocations WHERE skill_name LIKE 'mcp_%' OR skill_name LIKE 'mcp__%' OR skill_name = 'update_plan'`,
+		);
 
-		const row = db.query<{ dupes: number }, []>(
-			`SELECT COUNT(*) - COUNT(DISTINCT skill_name || '::' || REPLACE(timestamp, SUBSTR(timestamp, -5, 4), '')) as dupes FROM skill_invocations`
-		).get();
+		const row = db
+			.query<{ dupes: number }, []>(
+				`SELECT COUNT(*) - COUNT(DISTINCT skill_name || '::' || REPLACE(timestamp, SUBSTR(timestamp, -5, 4), '')) as dupes FROM skill_invocations`,
+			)
+			.get();
 		if (row && row.dupes > 0) {
 			db.run(`
 				DELETE FROM skill_invocations WHERE rowid NOT IN (
@@ -102,5 +121,7 @@ function deduplicateInvocations(db: Database): void {
 				)
 			`);
 		}
-	} catch { /* empty */ }
+	} catch {
+		/* empty */
+	}
 }
