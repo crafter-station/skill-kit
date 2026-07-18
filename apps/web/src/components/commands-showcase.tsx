@@ -76,6 +76,47 @@ const COMMANDS: Command[] = [
 		],
 	},
 	{
+		name: "context",
+		cmd: "skillkit context --opus",
+		description: "Context tax: tokens + cost loaded on every API call",
+		lines: [
+			{ text: "  CONTEXT TAX — opus pricing, 40 turns/session", type: "header" },
+			{ text: "", type: "empty" },
+			{ text: "  ALWAYS LOADED (every API call)", type: "header" },
+			{ text: "  CLAUDE.md + refs        12.5K tokens   $0.0188", type: "white" },
+			{ text: "  Skills metadata          2.6K tokens   $0.0039", type: "white" },
+			{ text: "  Memory (MEMORY.md)       3.9K tokens   $0.0058", type: "white" },
+			{ text: "  ────────────────────────────────────────────", type: "dim" },
+			{ text: "  Total                   19.0K tokens   $0.0285/call", type: "accent" },
+			{ text: "", type: "empty" },
+			{ text: "  SESSION ESTIMATE (40 turns)", type: "header" },
+			{ text: "  With prompt caching     $1.29", type: "accent" },
+			{ text: "  Without caching         $10.04", type: "white" },
+			{ text: "  Cache savings           87%", type: "dim" },
+		],
+	},
+	{
+		name: "health",
+		cmd: "skillkit health",
+		description: "Unused skills, context budget, DB health",
+		lines: [
+			{ text: "  SKILLKIT HEALTH REPORT", type: "header" },
+			{ text: "", type: "empty" },
+			{ text: "  ✓ 43 skills installed", type: "accent" },
+			{ text: "  ✓ Analytics DB: 11,848 events tracked", type: "accent" },
+			{ text: "", type: "empty" },
+			{ text: "  ⚠ 6 skills never used in 30d", type: "white" },
+			{ text: "    Run: skillkit prune", type: "dim" },
+			{ text: "", type: "empty" },
+			{ text: "  [███░░░░░░░] 34% metadata budget (5.4K / 16.0K)", type: "white" },
+			{ text: "    name + description of each skill, loaded at startup", type: "dim" },
+			{ text: "  ● Total skill content: 103.8K chars (loaded on-demand)", type: "white" },
+			{ text: "", type: "empty" },
+			{ text: "  ⚠ 1 skill exceeds 500-line recommendation", type: "white" },
+			{ text: "    Split SKILL.md into referenced files", type: "dim" },
+		],
+	},
+	{
 		name: "graph",
 		cmd: "skillkit graph",
 		description: "52-week contribution heatmap",
@@ -141,7 +182,7 @@ export function CommandsShowcase() {
 					className="text-center mb-16"
 				>
 					<h2 className="text-4xl md:text-5xl font-serif italic text-white">
-						Five commands. Full picture.
+						One CLI. Full picture.
 					</h2>
 					<p className="text-[#888] mt-3 text-sm">
 						Everything runs locally. No accounts, no telemetry, no cloud.
@@ -208,7 +249,7 @@ export function CommandsShowcase() {
 						>
 							<span>skillkit v0.10</span>
 							<span>local-first</span>
-							<span>12 agents</span>
+							<span>13 commands</span>
 						</div>
 					</div>
 				</motion.div>

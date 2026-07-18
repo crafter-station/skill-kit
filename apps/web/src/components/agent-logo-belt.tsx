@@ -36,6 +36,8 @@ const AGENTS: AgentEntry[] = [
 	{ name: "Windsurf", logo: WindsurfLogo, issue: 3 },
 	{ name: "Cline", logo: ClineLogo, issue: 5 },
 	{ name: "Roo Code", logo: RooCodeLogo, issue: 6 },
+	{ name: "Continue", issue: 7 },
+	{ name: "Amp", issue: 10 },
 	{ name: "GitHub Copilot", logo: GithubCopilotLogo, issue: 8 },
 	{ name: "OpenHands", logo: OpenHandsLogo, issue: 9 },
 	{ name: "Goose", logo: GooseLogo, issue: 11 },
