@@ -5,7 +5,11 @@ import { basename, join } from "node:path";
 import { deduplicateInvocations, upsertInstalledSkill } from "../db/queries";
 import type { InstalledSkill } from "../types";
 import { isSkillName, scanAllSessions } from "./index";
-import { getDetectedAgents, scanInstalledSkills } from "./skills";
+import {
+	detectSkillSource,
+	getDetectedAgents,
+	scanInstalledSkills,
+} from "./skills";
 
 export function buildKnownSkills(
 	skills: InstalledSkill[],
@@ -56,20 +60,6 @@ export function buildKnownSkills(
 	return knownSkills;
 }
 
-function detectSource(skillPath: string): "skills.sh" | "manual" {
-	const metaDir = join(skillPath, ".skills");
-	if (existsSync(metaDir)) return "skills.sh";
-
-	const skillMd = join(skillPath, "SKILL.md");
-	if (existsSync(skillMd)) {
-		try {
-			const entries = readdirSync(skillPath);
-			if (entries.includes(".git") || entries.includes(".gitmodules"))
-				return "skills.sh";
-		} catch {}
-	}
-	return "manual";
-}
 
 export async function performScan(
 	db: Database,
@@ -89,7 +79,7 @@ export async function performScan(
 	const skills = scanInstalledSkills(agentFilter);
 
 	for (const skill of skills) {
-		const source = detectSource(skill.path);
+		const source = detectSkillSource(skill);
 		upsertInstalledSkill(
 			db,
 			skill.name,

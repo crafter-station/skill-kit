@@ -1,4 +1,4 @@
-import { scanInstalledSkills } from "../scanner/skills";
+import { detectSkillSource, scanInstalledSkills } from "../scanner/skills";
 import { bold, cyan, dim } from "../tui/colors";
 
 function formatSize(bytes: number): string {
@@ -25,10 +25,11 @@ export function runList(): void {
 	console.log(`\n  ${bold(`INSTALLED SKILLS (${skills.length})`)}\n`);
 
 	const nameWidth = 24;
-	const descWidth = 42;
+	const descWidth = 34;
+	const sourceWidth = 14;
 	const sizeWidth = 10;
 
-	const header = `  ${"NAME".padEnd(nameWidth)}${"DESCRIPTION".padEnd(descWidth)}${"SIZE".padStart(sizeWidth)}`;
+	const header = `  ${"NAME".padEnd(nameWidth)}${"DESCRIPTION".padEnd(descWidth)}${"SOURCE".padEnd(sourceWidth)}${"SIZE".padStart(sizeWidth)}`;
 	console.log(dim(header));
 
 	for (const skill of skills) {
@@ -36,8 +37,16 @@ export function runList(): void {
 		const desc = dim(
 			truncate(skill.description || "", descWidth).padEnd(descWidth),
 		);
+		const rawSource = detectSkillSource(skill);
+		const sourceLabel =
+			rawSource === "manual" || rawSource === "skills.sh"
+				? rawSource
+				: (rawSource.split("@")[0] ?? rawSource);
+		const source = dim(
+			truncate(sourceLabel, sourceWidth - 1).padEnd(sourceWidth),
+		);
 		const size = formatSize(skill.size).padStart(sizeWidth);
-		console.log(`  ${name}${desc}${size}`);
+		console.log(`  ${name}${desc}${source}${size}`);
 	}
 
 	console.log(

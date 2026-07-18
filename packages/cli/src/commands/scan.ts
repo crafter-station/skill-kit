@@ -3,24 +3,13 @@ import { join } from "node:path";
 import { getDb } from "../db/schema";
 import { performScan } from "../scanner/auto-scan";
 import { countAllSessions } from "../scanner/index";
-import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
+import {
+	detectSkillSource,
+	getDetectedAgents,
+	scanInstalledSkills,
+} from "../scanner/skills";
 import { parseAgentFilter } from "../tui/args";
 import { bold, cyan, dim } from "../tui/colors";
-
-function detectSource(skillPath: string): "skills.sh" | "manual" {
-	const metaDir = join(skillPath, ".skills");
-	if (existsSync(metaDir)) return "skills.sh";
-
-	const skillMd = join(skillPath, "SKILL.md");
-	if (existsSync(skillMd)) {
-		try {
-			const entries = readdirSync(skillPath);
-			if (entries.includes(".git") || entries.includes(".gitmodules"))
-				return "skills.sh";
-		} catch {}
-	}
-	return "manual";
-}
 
 export async function runScan(): Promise<void> {
 	const args = process.argv.slice(3);
@@ -48,15 +37,18 @@ export async function runScan(): Promise<void> {
 
 	let skillsShCount = 0;
 	let manualCount = 0;
+	let pluginCount = 0;
 
 	for (const skill of skills) {
-		const source = detectSource(skill.path);
+		const source = detectSkillSource(skill);
 		if (source === "skills.sh") skillsShCount++;
-		else manualCount++;
+		else if (source === "manual") manualCount++;
+		else pluginCount++;
 	}
 
 	const parts: string[] = [];
 	if (skillsShCount > 0) parts.push(`${skillsShCount} via skills.sh`);
+	if (pluginCount > 0) parts.push(`${pluginCount} via plugins`);
 	if (manualCount > 0) parts.push(`${manualCount} manual`);
 
 	if (!quiet)

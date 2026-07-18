@@ -16,21 +16,46 @@ function getSupportedAgents(): AgentDef[] {
 	const xdgConfig = process.env.XDG_CONFIG_HOME || join(home, ".config");
 
 	const agents: AgentDef[] = [
-		{ agent: "Claude Code", id: "claude", dirs: [join(home, ".claude", "skills")] },
+		{
+			agent: "Claude Code",
+			id: "claude",
+			dirs: [join(home, ".claude", "skills")],
+		},
 		{ agent: "Cursor", id: "cursor", dirs: [join(home, ".cursor", "skills")] },
 		{ agent: "Codex", id: "codex", dirs: [join(home, ".codex", "skills")] },
-		{ agent: "Gemini CLI", id: "gemini", dirs: [join(home, ".gemini", "skills")] },
-		{ agent: "Windsurf", id: "windsurf", dirs: [join(home, ".codeium", "windsurf", "skills")] },
-		{ agent: "Amp", id: "amp", dirs: [join(xdgData, "amp", "skills"), join(home, ".amp", "skills")] },
-		{ agent: "Continue", id: "continue", dirs: [join(home, ".continue", "skills")] },
+		{
+			agent: "Gemini CLI",
+			id: "gemini",
+			dirs: [join(home, ".gemini", "skills")],
+		},
+		{
+			agent: "Windsurf",
+			id: "windsurf",
+			dirs: [join(home, ".codeium", "windsurf", "skills")],
+		},
+		{
+			agent: "Amp",
+			id: "amp",
+			dirs: [join(xdgData, "amp", "skills"), join(home, ".amp", "skills")],
+		},
+		{
+			agent: "Continue",
+			id: "continue",
+			dirs: [join(home, ".continue", "skills")],
+		},
 		{ agent: "Goose", id: "goose", dirs: [join(xdgConfig, "goose", "skills")] },
 		{ agent: "Kiro", id: "kiro", dirs: [join(home, ".kiro", "skills")] },
 		{ agent: "Roo Code", id: "roo", dirs: [join(home, ".roo", "skills")] },
-		{ agent: "Antigravity", id: "antigravity", dirs: [join(home, ".gemini", "antigravity", "skills")] },
+		{
+			agent: "Antigravity",
+			id: "antigravity",
+			dirs: [join(home, ".gemini", "antigravity", "skills")],
+		},
 	];
 
 	if (os === "win32") {
-		const localAppData = process.env.LOCALAPPDATA || join(home, "AppData", "Local");
+		const localAppData =
+			process.env.LOCALAPPDATA || join(home, "AppData", "Local");
 		agents.push({
 			agent: "OpenCode",
 			id: "opencode",
@@ -52,10 +77,68 @@ function getSupportedAgents(): AgentDef[] {
 
 	const sharedDir = join(home, ".agents", "skills");
 	if (existsSync(sharedDir)) {
-		agents.push({ agent: "skills.sh (shared)", id: "shared", dirs: [sharedDir] });
+		agents.push({
+			agent: "skills.sh (shared)",
+			id: "shared",
+			dirs: [sharedDir],
+		});
 	}
 
 	return agents;
+}
+
+interface PluginInstall {
+	installPath?: string;
+	version?: string;
+}
+
+interface PluginManifest {
+	plugins?: Record<string, PluginInstall[]>;
+}
+
+function getClaudePluginSkillDirs(): Array<{ dir: string; source: string }> {
+	const manifestPath = join(
+		homedir(),
+		".claude",
+		"plugins",
+		"installed_plugins.json",
+	);
+	if (!existsSync(manifestPath)) return [];
+
+	let manifest: PluginManifest;
+	try {
+		manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+	} catch {
+		return [];
+	}
+
+	const result: Array<{ dir: string; source: string }> = [];
+	for (const [pluginKey, installs] of Object.entries(manifest.plugins ?? {})) {
+		if (!Array.isArray(installs)) continue;
+		for (const install of installs) {
+			if (!install?.installPath) continue;
+			const dir = join(install.installPath, "skills");
+			if (existsSync(dir)) result.push({ dir, source: pluginKey });
+		}
+	}
+	return result;
+}
+
+export function detectSkillSource(skill: InstalledSkill): string {
+	if (skill.source) return skill.source;
+
+	const metaDir = join(skill.path, ".skills");
+	if (existsSync(metaDir)) return "skills.sh";
+
+	const skillMd = join(skill.path, "SKILL.md");
+	if (existsSync(skillMd)) {
+		try {
+			const entries = readdirSync(skill.path);
+			if (entries.includes(".git") || entries.includes(".gitmodules"))
+				return "skills.sh";
+		} catch {}
+	}
+	return "manual";
 }
 
 function parseYamlFrontmatter(content: string): Record<string, string> {
@@ -160,22 +243,35 @@ export function scanInstalledSkills(agentFilter?: string): InstalledSkill[] {
 	const seen = new Set<string>();
 	const agents = getSupportedAgents();
 
+	const addSkill = (skill: InstalledSkill): void => {
+		try {
+			const ino = statSync(skill.path).ino;
+			if (seen.has(`ino:${ino}`)) return;
+			seen.add(`ino:${ino}`);
+		} catch {}
+		if (seen.has(`name:${skill.name}`)) return;
+		seen.add(`name:${skill.name}`);
+		allSkills.push(skill);
+	};
+
 	for (const { agent, id, dirs } of agents) {
 		if (agentFilter && id !== agentFilter) continue;
 		for (const dir of dirs) {
 			const skills = scanSkillsDir(dir, agent);
 			if (skills.length === 0) continue;
 			for (const skill of skills) {
-				try {
-					const ino = statSync(skill.path).ino;
-					if (seen.has(`ino:${ino}`)) continue;
-					seen.add(`ino:${ino}`);
-				} catch {}
-				if (seen.has(`name:${skill.name}`)) continue;
-				seen.add(`name:${skill.name}`);
-				allSkills.push(skill);
+				addSkill(skill);
 			}
 			break;
+		}
+	}
+
+	if (!agentFilter || agentFilter === "claude") {
+		for (const { dir, source } of getClaudePluginSkillDirs()) {
+			for (const skill of scanSkillsDir(dir, "Claude Code")) {
+				skill.source = source;
+				addSkill(skill);
+			}
 		}
 	}
 
