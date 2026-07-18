@@ -2,8 +2,10 @@ import type { Database } from "bun:sqlite";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
+import type { ProgressReporter } from "../../tui/progress";
 import type { Invocation } from "../index";
 import { recordNewInvocations } from "../index";
+import type { ScanCache } from "../scan-cache";
 
 export function parseCursorSessionFile(
 	filePath: string,
@@ -121,6 +123,8 @@ export async function scanCursorSessions(
 	db: Database,
 	trackedSet: Set<string>,
 	knownSkills: Set<string> = new Set(),
+	cache?: ScanCache,
+	progress?: ProgressReporter,
 ): Promise<number> {
 	let total = 0;
 
@@ -131,10 +135,18 @@ export async function scanCursorSessions(
 		for await (const file of glob.scan({ cwd: projectsDir, absolute: true })) {
 			files.push(file);
 		}
+		let done = 0;
 		for (const file of files) {
+			done++;
+			if (cache?.shouldSkip(file)) {
+				progress?.update(done, files.length);
+				continue;
+			}
 			const invocations = parseCursorSessionFile(file, knownSkills);
 			total += recordNewInvocations(db, trackedSet, invocations);
+			progress?.update(done, files.length);
 		}
+		progress?.finish();
 	}
 
 	return total;

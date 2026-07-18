@@ -60,16 +60,21 @@ export function buildKnownSkills(
 	return knownSkills;
 }
 
-
 export async function performScan(
 	db: Database,
 	options: {
 		includeCommands?: boolean;
 		quiet?: boolean;
 		agentFilter?: string;
+		force?: boolean;
 	} = {},
 ): Promise<{ skillCount: number; invocationCount: number }> {
-	const { includeCommands = false, quiet = false, agentFilter } = options;
+	const {
+		includeCommands = false,
+		quiet = false,
+		agentFilter,
+		force = false,
+	} = options;
 
 	const agents = getDetectedAgents(agentFilter);
 	if (agents.length === 0) {
@@ -149,7 +154,19 @@ export async function performScan(
 		junkNames,
 	);
 
-	const newInvocations = await scanAllSessions(db, knownSkills, agentFilter);
+	const saltSkills = agentFilter ? scanInstalledSkills() : skills;
+	const cacheSalt = Bun.hash(
+		saltSkills
+			.map((s) => s.name)
+			.sort()
+			.join("\n"),
+	).toString(16);
+
+	const newInvocations = await scanAllSessions(db, knownSkills, agentFilter, {
+		force,
+		quiet,
+		cacheSalt,
+	});
 
 	if (!agentFilter) {
 		const cleanupAllowlist = includeCommands

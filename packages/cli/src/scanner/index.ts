@@ -1,5 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { recordInvocation } from "../db/queries";
+import { createProgress } from "../tui/progress";
 import { countClaudeSessions, scanClaudeSessions } from "./connectors/claude";
 import { countCodexSessions, scanCodexSessions } from "./connectors/codex";
 import { countCursorSessions, scanCursorSessions } from "./connectors/cursor";
@@ -8,17 +9,48 @@ import {
 	countOpenCodeSessions,
 	scanOpenCodeSessions,
 } from "./connectors/opencode";
+import { ScanCache } from "./scan-cache";
 
 const BUILTIN_TOOL_NAMES = new Set([
-	"Read", "Write", "Edit", "MultiEdit", "Bash", "Glob", "Grep",
-	"WebSearch", "WebFetch", "TodoRead", "TodoWrite", "Task", "Agent",
-	"Skill", "LSP", "NotebookEdit", "AskFollowupQuestion",
-	"AttemptCompletion", "SearchReplace", "InsertCodeBlock",
-	"ReadImages", "ExecuteCommand", "ListFiles", "SearchFiles",
-	"ReadFile", "WriteFile", "ReplaceInFile", "ListCodeDefinitionNames",
-	"BrowserAction", "UseMcp", "shell", "shell_command",
-	"update_plan", "create_plan", "read_file", "write_file",
-	"execute_command", "spawn_agent", "write_stdin",
+	"Read",
+	"Write",
+	"Edit",
+	"MultiEdit",
+	"Bash",
+	"Glob",
+	"Grep",
+	"WebSearch",
+	"WebFetch",
+	"TodoRead",
+	"TodoWrite",
+	"Task",
+	"Agent",
+	"Skill",
+	"LSP",
+	"NotebookEdit",
+	"AskFollowupQuestion",
+	"AttemptCompletion",
+	"SearchReplace",
+	"InsertCodeBlock",
+	"ReadImages",
+	"ExecuteCommand",
+	"ListFiles",
+	"SearchFiles",
+	"ReadFile",
+	"WriteFile",
+	"ReplaceInFile",
+	"ListCodeDefinitionNames",
+	"BrowserAction",
+	"UseMcp",
+	"shell",
+	"shell_command",
+	"update_plan",
+	"create_plan",
+	"read_file",
+	"write_file",
+	"execute_command",
+	"spawn_agent",
+	"write_stdin",
 	"multi_tool_use.parallel",
 ]);
 
@@ -43,7 +75,9 @@ export function getTrackedSet(db: Database): Set<string> {
 			"SELECT skill_name, timestamp FROM skill_invocations",
 		)
 		.all();
-	return new Set(tracked.map((r) => `${r.skill_name}::${roundTs(r.timestamp)}`));
+	return new Set(
+		tracked.map((r) => `${r.skill_name}::${roundTs(r.timestamp)}`),
+	);
 }
 
 export interface Invocation {
@@ -63,7 +97,14 @@ export function recordNewInvocations(
 		if (!isSkillName(inv.skillName)) continue;
 		const key = `${inv.skillName}::${roundTs(inv.timestamp)}`;
 		if (!trackedSet.has(key)) {
-			recordInvocation(db, inv.skillName, inv.sessionId, undefined, inv.timestamp, inv.agent);
+			recordInvocation(
+				db,
+				inv.skillName,
+				inv.sessionId,
+				undefined,
+				inv.timestamp,
+				inv.agent,
+			);
 			trackedSet.add(key);
 			count++;
 		}
@@ -75,24 +116,53 @@ export async function scanAllSessions(
 	db: Database,
 	knownSkills: Set<string> = new Set(),
 	agentFilter?: string,
+	options: { force?: boolean; quiet?: boolean; cacheSalt?: string } = {},
 ): Promise<number> {
+	const { force = false, quiet = true, cacheSalt = "" } = options;
+	const cache = new ScanCache(db, { force, salt: cacheSalt });
+	const showProgress = !quiet && process.stdout.isTTY === true;
 	const trackedSet = getTrackedSet(db);
 	let total = 0;
 	if (!agentFilter || agentFilter === "claude") {
-		total += await scanClaudeSessions(db, trackedSet, knownSkills);
+		total += await scanClaudeSessions(
+			db,
+			trackedSet,
+			knownSkills,
+			cache,
+			createProgress("Claude Code sessions", showProgress),
+		);
 	}
 	if (!agentFilter || agentFilter === "opencode") {
-		total += scanOpenCodeSessions(db, trackedSet);
+		total += scanOpenCodeSessions(db, trackedSet, cache);
 	}
 	if (!agentFilter || agentFilter === "cursor") {
-		total += await scanCursorSessions(db, trackedSet, knownSkills);
+		total += await scanCursorSessions(
+			db,
+			trackedSet,
+			knownSkills,
+			cache,
+			createProgress("Cursor sessions", showProgress),
+		);
 	}
 	if (!agentFilter || agentFilter === "codex") {
-		total += await scanCodexSessions(db, trackedSet, knownSkills);
+		total += await scanCodexSessions(
+			db,
+			trackedSet,
+			knownSkills,
+			cache,
+			createProgress("Codex sessions", showProgress),
+		);
 	}
 	if (!agentFilter || agentFilter === "gemini") {
-		total += await scanGeminiSessions(db, trackedSet, knownSkills);
+		total += await scanGeminiSessions(
+			db,
+			trackedSet,
+			knownSkills,
+			cache,
+			createProgress("Gemini CLI sessions", showProgress),
+		);
 	}
+	cache.flush();
 	return total;
 }
 

@@ -15,6 +15,7 @@ export async function runScan(): Promise<void> {
 	const args = process.argv.slice(3);
 	const includeCommands = args.includes("--include-commands");
 	const quiet = args.includes("--quiet");
+	const force = args.includes("--full");
 	const agentFilter = parseAgentFilter(args);
 	const db = getDb();
 
@@ -76,7 +77,14 @@ export async function runScan(): Promise<void> {
 		} catch {}
 	}
 
-	const result = await performScan(db, { includeCommands, agentFilter });
+	const startedAt = performance.now();
+	const result = await performScan(db, {
+		includeCommands,
+		agentFilter,
+		quiet,
+		force,
+	});
+	const elapsed = ((performance.now() - startedAt) / 1000).toFixed(1);
 
 	const sessionCount = countAllSessions(agentFilter);
 	const totalRow = db
@@ -88,7 +96,7 @@ export async function runScan(): Promise<void> {
 
 	if (!quiet) {
 		console.log(
-			`  ${dim("Indexed")} ${bold(String(sessionCount))} ${dim("sessions")} ${cyan("·")} ${bold(totalInvocations.toLocaleString())} ${dim("invocations")}`,
+			`  ${dim("Indexed")} ${bold(String(sessionCount))} ${dim("sessions")} ${cyan("·")} ${bold(totalInvocations.toLocaleString())} ${dim("invocations")} ${dim(`(${elapsed}s)`)}`,
 		);
 
 		if (result.invocationCount > 0) {
