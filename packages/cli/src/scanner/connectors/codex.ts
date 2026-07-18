@@ -11,10 +11,25 @@ const CODEX_INTERNAL_TOOLS = new Set([
 	"write_stdin",
 	"multi_tool_use.parallel",
 	"update_plan",
+	"view_image",
+	"wait",
+	"wait_agent",
+	"js",
+	"click",
+	"get_goal",
+	"get_app_state",
+	"close_agent",
+	"send_message",
+	"update_goal",
+	"create_goal",
 ]);
 
 function isInternalTool(name: string): boolean {
-	return CODEX_INTERNAL_TOOLS.has(name) || name.startsWith("mcp__") || name.startsWith("mcp_");
+	return (
+		CODEX_INTERNAL_TOOLS.has(name) ||
+		name.startsWith("mcp__") ||
+		name.startsWith("mcp_")
+	);
 }
 
 const SKILL_PATH_RE = /skills\/([^/]+)\/SKILL\.md/;
@@ -83,7 +98,7 @@ export function parseCodexSessionFile(
 
 				if (isInternalTool(name)) continue;
 
-				if (knownSkills.size === 0 || knownSkills.has(name)) {
+				if (knownSkills.has(name)) {
 					results.push({
 						skillName: name,
 						timestamp,
@@ -99,18 +114,10 @@ export function parseCodexSessionFile(
 					| undefined;
 				if (!Array.isArray(content)) continue;
 				for (const block of content) {
-					if (
-						block.type === "tool_use" ||
-						block.type === "function_call"
-					) {
-						const name = (block.name ?? block.skill) as
-							| string
-							| undefined;
+					if (block.type === "tool_use" || block.type === "function_call") {
+						const name = (block.name ?? block.skill) as string | undefined;
 						if (!name || isInternalTool(name)) continue;
-						if (
-							knownSkills.size === 0 ||
-							knownSkills.has(name)
-						) {
+						if (knownSkills.has(name)) {
 							results.push({
 								skillName: name,
 								timestamp,

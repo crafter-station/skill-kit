@@ -46,12 +46,18 @@ export function parseGeminiSessionFile(
 	if (!Array.isArray(session.messages)) return results;
 
 	for (const msg of session.messages) {
-		const timestamp = msg.timestamp ?? session.startTime ?? new Date().toISOString();
+		const timestamp =
+			msg.timestamp ?? session.startTime ?? new Date().toISOString();
 
 		const calls = msg.toolCalls ?? msg.functionCalls ?? [];
 		for (const call of calls) {
-			if (call.name && (knownSkills.size === 0 || knownSkills.has(call.name))) {
-				results.push({ skillName: call.name, timestamp, sessionId, agent: "gemini" });
+			if (call.name && knownSkills.has(call.name)) {
+				results.push({
+					skillName: call.name,
+					timestamp,
+					sessionId,
+					agent: "gemini",
+				});
 			}
 		}
 
@@ -61,7 +67,12 @@ export function parseGeminiSessionFile(
 			while ((match = skillRe.exec(msg.content)) !== null) {
 				const name = match[1]!;
 				if (knownSkills.has(name)) {
-					results.push({ skillName: name, timestamp, sessionId, agent: "gemini" });
+					results.push({
+						skillName: name,
+						timestamp,
+						sessionId,
+						agent: "gemini",
+					});
 				}
 			}
 		}

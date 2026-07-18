@@ -48,16 +48,12 @@ export function parseCursorSessionFile(
 					block.type === "tool_use" &&
 					(block as { name?: string }).name === "Skill"
 				) {
-					const input = (block as { input?: Record<string, unknown> })
-						.input;
+					const input = (block as { input?: Record<string, unknown> }).input;
 					if (!input) continue;
-					const skillName = (input.skill ??
-						input.name ??
-						input.skillName) as string | undefined;
-					if (
-						skillName &&
-						(knownSkills.size === 0 || knownSkills.has(skillName))
-					) {
+					const skillName = (input.skill ?? input.name ?? input.skillName) as
+						| string
+						| undefined;
+					if (skillName && knownSkills.has(skillName)) {
 						results.push({
 							skillName,
 							timestamp: new Date().toISOString(),

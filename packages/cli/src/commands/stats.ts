@@ -1,6 +1,6 @@
 import {
-	getDailyUsage,
 	getCurrentStreak,
+	getDailyUsage,
 	getInstalledSkills,
 	getSkillStats,
 	getTopSkills,
@@ -8,12 +8,14 @@ import {
 } from "../db/queries";
 import { getDb } from "../db/schema";
 import { performScan } from "../scanner/auto-scan";
-import { scanAllSessions } from "../scanner/index";
 import { parseAgentFilter } from "../tui/args";
 import { bold, cyan, dim, green, red, yellow } from "../tui/colors";
 import { sparkline } from "../tui/sparkline";
 
-function getMostActiveDay(db: ReturnType<typeof getDb>, agent?: string): string {
+function getMostActiveDay(
+	db: ReturnType<typeof getDb>,
+	agent?: string,
+): string {
 	const agentClause = agent ? " WHERE agent = ?" : "";
 	const params = agent ? [agent] : [];
 	const row = db
@@ -49,7 +51,6 @@ function parseDays(args: string[]): number {
 	return 30;
 }
 
-
 export async function runStats(): Promise<void> {
 	const db = getDb();
 	const args = process.argv.slice(3);
@@ -69,15 +70,20 @@ export async function runStats(): Promise<void> {
 				console.log(JSON.stringify({ error: "no_skills_found" }));
 			} else {
 				console.log(`\n  ${yellow("No skills found.")}`);
-				console.log(`  ${dim("Skills will be scanned automatically on next run.")}\n`);
+				console.log(
+					`  ${dim("Skills will be scanned automatically on next run.")}\n`,
+				);
 			}
 			return;
 		}
 	} else {
 		if (!isJson) console.log("\n  Scanning sessions...");
-		const newCount = await scanAllSessions(db, new Set(), agentFilter);
-		if (newCount > 0 && !isJson) {
-			console.log(`  Found ${newCount} new invocations.\n`);
+		const refresh = await performScan(db, {
+			agentFilter,
+			includeCommands: true,
+		});
+		if (refresh.invocationCount > 0 && !isJson) {
+			console.log(`  Found ${refresh.invocationCount} new invocations.\n`);
 		}
 	}
 
@@ -94,7 +100,12 @@ export async function runStats(): Promise<void> {
 	}
 
 	const showAll = process.argv.includes("--all");
-	const topSkills = getTopSkills(db, days, showAll ? undefined : 10, agentFilter);
+	const topSkills = getTopSkills(
+		db,
+		days,
+		showAll ? undefined : 10,
+		agentFilter,
+	);
 	const activeDay = getMostActiveDay(db, agentFilter);
 
 	if (isJson) {
@@ -106,7 +117,11 @@ export async function runStats(): Promise<void> {
 			unique_skills: stats.unique_skills,
 			most_active_day: activeDay,
 			streak: { current: streak.current, longest: streak.longest },
-			velocity: { this_week: velocity.thisWeek, last_week: velocity.lastWeek, change_pct: velocity.change },
+			velocity: {
+				this_week: velocity.thisWeek,
+				last_week: velocity.lastWeek,
+				change_pct: velocity.change,
+			},
 			top_skills: topSkills.map((skill) => {
 				const daily = getDailyUsage(db, skill.skill_name, days, agentFilter);
 				return {
@@ -121,7 +136,11 @@ export async function runStats(): Promise<void> {
 	}
 
 	const label =
-		days === 30 ? "last 30 days" : days === 7 ? "last 7 days" : `last ${days} days`;
+		days === 30
+			? "last 30 days"
+			: days === 7
+				? "last 7 days"
+				: `last ${days} days`;
 
 	console.log(`\n  ${bold("SKILL-KIT ANALYTICS")} ${dim(`(${label})`)}\n`);
 	console.log(`  Total invocations: ${bold(String(stats.total))}`);
@@ -132,7 +151,9 @@ export async function runStats(): Promise<void> {
 	const velocity = getWeeklyVelocity(db, agentFilter);
 
 	if (streak.current > 0) {
-		console.log(`  Current streak:    ${bold(`${streak.current} days`)} ${streak.current >= 7 ? "🔥" : ""}`);
+		console.log(
+			`  Current streak:    ${bold(`${streak.current} days`)} ${streak.current >= 7 ? "🔥" : ""}`,
+		);
 		console.log(`  Longest streak:    ${bold(`${streak.longest} days`)}`);
 	}
 
@@ -143,7 +164,9 @@ export async function runStats(): Promise<void> {
 				: velocity.change < 0
 					? red(`${velocity.change.toFixed(0)}%`)
 					: dim("—");
-		console.log(`  This week:         ${bold(`$${velocity.thisWeek.toFixed(2)}`)} ${dim("vs last")} $${velocity.lastWeek.toFixed(2)} (${changeStr})`);
+		console.log(
+			`  This week:         ${bold(`$${velocity.thisWeek.toFixed(2)}`)} ${dim("vs last")} $${velocity.lastWeek.toFixed(2)} (${changeStr})`,
+		);
 	}
 
 	if (streak.current > 0 || velocity.thisWeek > 0) console.log();
