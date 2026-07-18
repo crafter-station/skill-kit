@@ -34,6 +34,7 @@ function printHelp(): void {
 
   ${bold("FLAGS")}
     ${dim("scan")}  ${cyan("--include-commands")}  Also track slash commands (not just skills)
+    ${dim("scan")}  ${cyan("--full")}              Re-index every session (ignore incremental cache)
     ${dim("stats")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("stats")} ${cyan("--all")}               Show all skills, not just top 10
     ${dim("stats")} ${cyan("--json")}              JSON output

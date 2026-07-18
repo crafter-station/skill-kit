@@ -5,6 +5,7 @@ import { homedir, platform } from "node:os";
 import { join } from "node:path";
 import type { Invocation } from "../index";
 import { recordNewInvocations } from "../index";
+import type { ScanCache } from "../scan-cache";
 
 function getDbPath(): string | null {
 	const os = platform();
@@ -76,7 +77,10 @@ export function countOpenCodeSessions(): number {
 export function scanOpenCodeSessions(
 	db: Database,
 	trackedSet: Set<string>,
+	cache?: ScanCache,
 ): number {
+	const dbPath = getDbPath();
+	if (dbPath && cache?.shouldSkip(dbPath)) return 0;
 	const ocDb = openDb();
 	if (!ocDb) return 0;
 

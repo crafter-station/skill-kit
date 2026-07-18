@@ -62,7 +62,7 @@ export async function runStats(): Promise<void> {
 
 	if (installedSkills.length === 0) {
 		if (!isJson) console.log("\n  First run detected, scanning skills...");
-		const result = await performScan(db, { agentFilter });
+		const result = await performScan(db, { agentFilter, quiet: isJson });
 		if (result.skillCount > 0) {
 			if (!isJson) console.log(`  Found ${result.skillCount} skills.\n`);
 		} else {
@@ -81,6 +81,7 @@ export async function runStats(): Promise<void> {
 		const refresh = await performScan(db, {
 			agentFilter,
 			includeCommands: true,
+			quiet: isJson,
 		});
 		if (refresh.invocationCount > 0 && !isJson) {
 			console.log(`  Found ${refresh.invocationCount} new invocations.\n`);

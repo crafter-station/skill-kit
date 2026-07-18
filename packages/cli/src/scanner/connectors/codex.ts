@@ -2,8 +2,10 @@ import type { Database } from "bun:sqlite";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
+import type { ProgressReporter } from "../../tui/progress";
 import type { Invocation } from "../index";
 import { recordNewInvocations } from "../index";
+import type { ScanCache } from "../scan-cache";
 
 const CODEX_INTERNAL_TOOLS = new Set([
 	"exec_command",
@@ -150,6 +152,8 @@ export async function scanCodexSessions(
 	db: Database,
 	trackedSet: Set<string>,
 	knownSkills: Set<string> = new Set(),
+	cache?: ScanCache,
+	progress?: ProgressReporter,
 ): Promise<number> {
 	const sessionsDir = join(homedir(), ".codex", "sessions");
 	if (!existsSync(sessionsDir)) return 0;
@@ -161,10 +165,18 @@ export async function scanCodexSessions(
 	}
 
 	let total = 0;
+	let done = 0;
 	for (const file of files) {
+		done++;
+		if (cache?.shouldSkip(file)) {
+			progress?.update(done, files.length);
+			continue;
+		}
 		const invocations = parseCodexSessionFile(file, knownSkills);
 		total += recordNewInvocations(db, trackedSet, invocations);
+		progress?.update(done, files.length);
 	}
+	progress?.finish();
 
 	return total;
 }
