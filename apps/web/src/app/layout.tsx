@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		title: "SkillKit",
 		description:
-			"Local-first analytics for AI agent skills. 15+ agents supported.",
+			"Local-first analytics for AI agent skills. Session tracking for 5 agents, skill discovery across 12.",
 	},
 };
 

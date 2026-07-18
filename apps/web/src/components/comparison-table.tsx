@@ -18,7 +18,7 @@ const ROWS: Row[] = [
 	{ feature: "Registry search", skillkit: false, skillssh: true, straude: false, manual: false },
 	{ feature: "Usage analytics + sparklines", skillkit: true, skillssh: false, straude: true, manual: false },
 	{ feature: "Burn rate (40+ models)", skillkit: true, skillssh: false, straude: true, manual: false },
-	{ feature: "Multi-agent (12 agents)", skillkit: true, skillssh: false, straude: false, manual: false },
+	{ feature: "Multi-agent (5 sessions, 12 skill scans)", skillkit: true, skillssh: false, straude: false, manual: false },
 	{ feature: "Streaks & velocity", skillkit: true, skillssh: false, straude: true, manual: false },
 	{ feature: "Contribution heatmap", skillkit: true, skillssh: false, straude: true, manual: false },
 	{ feature: "Context budget tracking", skillkit: true, skillssh: false, straude: false, manual: false },

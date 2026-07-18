@@ -246,7 +246,7 @@ export function TerminalDemo() {
 					style={{ background: "#0e0e0e" }}
 				>
 					<span>-- NORMAL --</span>
-					<span>skillkit v0.9.0</span>
+					<span>skillkit v0.10</span>
 					<span>utf-8</span>
 				</div>
 			</div>
