@@ -1,4 +1,12 @@
-import { existsSync, lstatSync, readFileSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	lstatSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+	unlinkSync,
+	writeFileSync,
+} from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { getTopSkills } from "../db/queries";
@@ -29,7 +37,9 @@ function removeFromLockFile(skillName: string): void {
 			delete data.skills[skillName];
 			writeFileSync(LOCK_PATH, JSON.stringify(data, null, 2) + "\n", "utf-8");
 		}
-	} catch { /* empty */ }
+	} catch {
+		/* empty */
+	}
 }
 
 function removeSymlinks(skillName: string): number {
@@ -43,7 +53,9 @@ function removeSymlinks(skillName: string): number {
 				unlinkSync(linkPath);
 				cleaned++;
 			}
-		} catch { /* empty */ }
+		} catch {
+			/* empty */
+		}
 	}
 	return cleaned;
 }
@@ -53,7 +65,9 @@ function isRegistrySkill(skillName: string): boolean {
 	try {
 		const data = JSON.parse(readFileSync(LOCK_PATH, "utf-8"));
 		return !!(data.skills && data.skills[skillName]);
-	} catch { /* empty */ }
+	} catch {
+		/* empty */
+	}
 	return false;
 }
 
@@ -72,7 +86,9 @@ function removeSkillClean(name: string, path: string): boolean {
 			}
 		}
 		return true;
-	} catch { /* empty */ }
+	} catch {
+		/* empty */
+	}
 	return false;
 }
 
@@ -94,7 +110,10 @@ export async function runPrune(): Promise<void> {
 
 	const topSkills = getTopSkills(db, 30);
 	const usedNames = new Set(topSkills.map((s) => s.skill_name));
-	const unused = skills.filter((s) => !usedNames.has(s.name));
+	const pluginManaged = skills.filter(
+		(s) => s.source && !usedNames.has(s.name),
+	);
+	const unused = skills.filter((s) => !s.source && !usedNames.has(s.name));
 
 	if (unused.length === 0) {
 		console.log(
@@ -112,7 +131,9 @@ export async function runPrune(): Promise<void> {
 		if (existsSync(skillMdPath)) {
 			try {
 				chars = readFileSync(skillMdPath, "utf-8").length;
-			} catch { /* empty */ }
+			} catch {
+				/* empty */
+			}
 		}
 		totalWaste += chars;
 		candidates.push({ name: skill.name, path: skill.path, chars });
@@ -132,6 +153,12 @@ export async function runPrune(): Promise<void> {
 		`\n  ${bold(String(candidates.length))} skills ${dim("·")} ${bold(`${(totalWaste / 1000).toFixed(1)}K`)} ${dim("context reclaimable")}`,
 	);
 
+	if (pluginManaged.length > 0) {
+		console.log(
+			`  ${dim(`${pluginManaged.length} unused plugin-bundled skills skipped (managed via /plugin, would be restored on update)`)}`,
+		);
+	}
+
 	const args = process.argv.slice(3);
 
 	const skillFlag = args.indexOf("--skill");
@@ -142,7 +169,9 @@ export async function runPrune(): Promise<void> {
 		: candidates;
 
 	if (targetSkill && targets.length === 0) {
-		console.log(`\n  ${dim(`Skill "${targetSkill}" is not in the prune list (either used recently or not installed).`)}\n`);
+		console.log(
+			`\n  ${dim(`Skill "${targetSkill}" is not in the prune list (either used recently or not installed).`)}\n`,
+		);
 		return;
 	}
 
@@ -169,7 +198,13 @@ export async function runPrune(): Promise<void> {
 	}
 
 	if (isJson) {
-		console.log(JSON.stringify({ removed: removedNames, count: removed, reclaimed_chars: totalWaste }));
+		console.log(
+			JSON.stringify({
+				removed: removedNames,
+				count: removed,
+				reclaimed_chars: totalWaste,
+			}),
+		);
 	} else {
 		console.log(
 			`\n  ${bold(`Removed ${removed} skills`)} ${dim("·")} ${bold(`${(totalWaste / 1000).toFixed(1)}K`)} ${dim("reclaimed")}\n`,
