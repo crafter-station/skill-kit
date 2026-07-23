@@ -1,0 +1,47 @@
+[
+	{
+		"ts": 1753142400000,
+		"type": "say",
+		"say": "task",
+		"text": "Send the launch email with the resend skill"
+	},
+	{
+		"ts": 1753142405000,
+		"type": "say",
+		"say": "api_req_started",
+		"text": "{\"request\":\"...\"}"
+	},
+	{
+		"ts": 1753142410000,
+		"type": "say",
+		"say": "tool",
+		"text": "{\"tool\":\"useSkill\",\"path\":\"resend\"}"
+	},
+	{
+		"ts": 1753142412000,
+		"type": "say",
+		"say": "tool",
+		"text": "{\"tool\":\"readFile\",\"path\":\".agents/skills/deslop/SKILL.md\",\"operationIsLocatedInWorkspace\":true}"
+	},
+	{
+		"ts": 1753142415000,
+		"type": "ask",
+		"ask": "tool",
+		"text": "{\"tool\":\"editedExistingFile\",\"path\":\"src/email.ts\",\"diff\":\"...\"}"
+	},
+	{
+		"ts": 1753142420000,
+		"type": "say",
+		"say": "text",
+		"text": "Done. I loaded the resend skill and sent the email.",
+		"partial": false
+	},
+	null,
+	42,
+	{
+		"ts": 1753142425000,
+		"type": "say",
+		"say": "tool",
+		"text": "{not valid json"
+	}
+]

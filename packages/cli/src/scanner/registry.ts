@@ -1,6 +1,7 @@
 import type { Connector } from "./connector";
 import { defineConnector } from "./connector";
 import { countClaudeSessions, scanClaudeSessions } from "./connectors/claude";
+import { countClineSessions, scanClineSessions } from "./connectors/cline";
 import { countCodexSessions, scanCodexSessions } from "./connectors/codex";
 import { countCursorSessions, scanCursorSessions } from "./connectors/cursor";
 import { countGeminiSessions, scanGeminiSessions } from "./connectors/gemini";
@@ -13,6 +14,7 @@ import {
 	scanCopilotSessions,
 } from "./connectors/copilot";
 import { countGooseSessions, scanGooseSessions } from "./connectors/goose";
+import { countKiloSessions, scanKiloSessions } from "./connectors/kilocode";
 import {
 	countOpenCodeSessions,
 	scanOpenCodeSessions,
@@ -21,6 +23,7 @@ import {
 	countOpenHandsSessions,
 	scanOpenHandsSessions,
 } from "./connectors/openhands";
+import { countRooSessions, scanRooSessions } from "./connectors/roo";
 import {
 	countWindsurfSessions,
 	scanWindsurfSessions,
@@ -71,6 +74,33 @@ export const connectors: Connector[] = [
 		count: countGeminiSessions,
 		scan: (db, trackedSet, knownSkills, cache, progress) =>
 			scanGeminiSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "cline",
+		displayName: "Cline",
+		sessionFormat: "json-files",
+		sessionSource: "globalStorage/saoudrizwan.claude-dev/tasks + ~/.cline/data/tasks",
+		count: countClineSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanClineSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "roo",
+		displayName: "Roo Code",
+		sessionFormat: "json-files",
+		sessionSource: "globalStorage/RooVeterinaryInc.roo-cline/tasks + ~/.vscode-mock",
+		count: countRooSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanRooSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "kilocode",
+		displayName: "Kilo Code",
+		sessionFormat: "sqlite",
+		sessionSource: "~/.local/share/kilo/kilo.db + legacy globalStorage tasks",
+		count: countKiloSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanKiloSessions(db, trackedSet, knownSkills, cache, progress),
 	}),
 	defineConnector({
 		id: "copilot",

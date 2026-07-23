@@ -1,0 +1,194 @@
+{
+	"v": 17,
+	"id": "T-019f8d5e-ae18-700d-80ae-d62f72a205c5",
+	"env": {
+		"initial": {
+			"trees": [
+				{
+					"uri": "file:///Users/hunter/project",
+					"displayName": "project"
+				}
+			],
+			"platform": {
+				"os": "darwin",
+				"client": "CLI Execute Mode",
+				"osVersion": "25.3.0",
+				"clientType": "cli",
+				"webBrowser": false,
+				"clientVersion": "0.0.1784765892-g7ff29e",
+				"installationID": "07f255f6-db11-42ef-9b4c-be563b735beb",
+				"cpuArchitecture": "arm64"
+			}
+		}
+	},
+	"meta": {
+		"executorType": "local-client",
+		"deleted": false,
+		"createdOnServer": false,
+		"lastUserMessageAt": "2026-07-23T05:00:12.215Z",
+		"workspaceID": null,
+		"projectID": null,
+		"visibility": "private",
+		"agentMode": "medium"
+	},
+	"title": "Use hello-world skill",
+	"created": 1784782809924,
+	"archived": true,
+	"messages": [
+		{
+			"meta": {
+				"sentAt": 1784782812215
+			},
+			"role": "user",
+			"readAt": null,
+			"content": [
+				{
+					"text": "Use the hello-world skill.",
+					"type": "text"
+				}
+			],
+			"messageId": 1,
+			"userState": {
+				"timeZone": "America/Buenos_Aires",
+				"currentlyVisibleFiles": []
+			},
+			"protocolMessageID": "M-033uHnAlIlVQShEtfMNJdV",
+			"protocolMessageVersion": 0
+		},
+		{
+			"role": "assistant",
+			"state": {
+				"type": "complete",
+				"stopReason": "tool_use"
+			},
+			"usage": {
+				"model": "gpt-5.6-sol",
+				"timestamp": "2026-07-23T05:00:16.116Z",
+				"inputTokens": 0,
+				"outputTokens": 71,
+				"maxInputTokens": 272000,
+				"totalInputTokens": 18827,
+				"cacheReadInputTokens": 0,
+				"cacheCreationInputTokens": 18827
+			},
+			"readAt": null,
+			"content": [
+				{
+					"id": "TU-033uHnFstNGj10Z9VwOXql",
+					"name": "skill",
+					"type": "tool_use",
+					"input": {
+						"name": "hello-world"
+					},
+					"complete": true,
+					"blockState": "complete",
+					"providerToolUseId": "call_Ar28vjzkyAqflocErBfkMs8D"
+				}
+			],
+			"messageId": 2,
+			"protocolMessageID": "M-033uHnDBcKUdxERNJtQUEt",
+			"protocolMessageVersion": 1
+		},
+		{
+			"role": "user",
+			"readAt": null,
+			"content": [
+				{
+					"run": {
+						"result": {
+							"output": "# Hello World skill loaded"
+						},
+						"status": "done"
+					},
+					"type": "tool_result",
+					"toolUseID": "TU-033uHnFstNGj10Z9VwOXql"
+				}
+			],
+			"messageId": 3,
+			"protocolMessageID": "M-033uHnImG121gAPc6D26PI",
+			"protocolMessageVersion": 0
+		},
+		{
+			"role": "assistant",
+			"state": {
+				"type": "complete",
+				"stopReason": "tool_use"
+			},
+			"usage": {
+				"model": "gpt-5.6-sol",
+				"timestamp": "2026-07-23T05:00:17.500Z",
+				"inputTokens": 0,
+				"outputTokens": 40,
+				"maxInputTokens": 272000,
+				"totalInputTokens": 19000,
+				"cacheReadInputTokens": 18827,
+				"cacheCreationInputTokens": 173
+			},
+			"readAt": null,
+			"content": [
+				{
+					"id": "TU-033uHnGaaaaaaaaaaaaaaaa",
+					"name": "shell_command",
+					"type": "tool_use",
+					"input": {
+						"command": "cat /Users/hunter/.config/agents/skills/deploy-helper/SKILL.md",
+						"workdir": "/Users/hunter/project"
+					},
+					"complete": true,
+					"blockState": "complete",
+					"providerToolUseId": "call_Bs39wkalzBqgmpdFsCgkNt9E"
+				}
+			],
+			"messageId": 4,
+			"protocolMessageID": "M-033uHnGbcKUdxERNJtQUEu",
+			"protocolMessageVersion": 1
+		},
+		{
+			"role": "user",
+			"readAt": null,
+			"content": [
+				{
+					"run": {
+						"result": {
+							"output": "# Deploy Helper",
+							"exitCode": 0
+						},
+						"status": "done"
+					},
+					"type": "tool_result",
+					"toolUseID": "TU-033uHnGaaaaaaaaaaaaaaaa"
+				}
+			],
+			"messageId": 5,
+			"protocolMessageID": "M-033uHnHmG121gAPc6D26PJ",
+			"protocolMessageVersion": 0
+		},
+		{
+			"role": "assistant",
+			"state": {
+				"type": "complete",
+				"stopReason": "end_turn"
+			},
+			"usage": {
+				"model": "gpt-5.6-sol",
+				"timestamp": "2026-07-23T05:00:18.584Z",
+				"inputTokens": 0,
+				"outputTokens": 5,
+				"maxInputTokens": 272000,
+				"totalInputTokens": 19100,
+				"cacheReadInputTokens": 19000,
+				"cacheCreationInputTokens": 100
+			},
+			"readAt": null,
+			"content": [
+				{
+					"text": "hello from skill",
+					"type": "text"
+				}
+			],
+			"messageId": 6,
+			"protocolMessageID": "M-033uHnIruY6Pq8m1FSbr6F",
+			"protocolMessageVersion": 0
+		}
+	]
+}
