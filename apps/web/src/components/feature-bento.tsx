@@ -9,7 +9,7 @@ const cards = [
 		icon: Flame,
 		title: "Burn Rate Analysis",
 		description:
-			"Track token spend across Claude Code, Cursor, Codex, Gemini CLI, and OpenCode. Daily burn, model breakdown, and plan utilization.",
+			"Track token spend across 14 agents - Claude Code, Cursor, Codex, Windsurf, Cline, Copilot CLI, and more. Daily burn, model breakdown, and plan utilization.",
 	},
 	{
 		id: "sessions",

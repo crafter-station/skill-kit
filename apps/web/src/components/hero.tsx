@@ -57,8 +57,9 @@ export function Hero() {
 					className="text-lg text-[#888] max-w-2xl leading-relaxed"
 				>
 					Observability for AI coding agents. Track burn rate, sessions, streaks,
-					and contribution graphs across Claude Code, Cursor, Codex, Gemini CLI, and
-						OpenCode, plus skill discovery for 12 agents — all local, all offline.
+					and contribution graphs across 14 agents — Claude Code, Cursor, Codex,
+					Windsurf, Cline, Copilot CLI, and more — plus skill discovery for the
+					full skills.sh ecosystem (75 agents). All local, all offline.
 				</motion.p>
 
 				<motion.div
