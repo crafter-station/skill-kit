@@ -1,14 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { recordInvocation } from "../db/queries";
 import { createProgress } from "../tui/progress";
-import { countClaudeSessions, scanClaudeSessions } from "./connectors/claude";
-import { countCodexSessions, scanCodexSessions } from "./connectors/codex";
-import { countCursorSessions, scanCursorSessions } from "./connectors/cursor";
-import { countGeminiSessions, scanGeminiSessions } from "./connectors/gemini";
-import {
-	countOpenCodeSessions,
-	scanOpenCodeSessions,
-} from "./connectors/opencode";
 import { ScanCache } from "./scan-cache";
 
 const BUILTIN_TOOL_NAMES = new Set([
@@ -119,47 +111,19 @@ export async function scanAllSessions(
 	options: { force?: boolean; quiet?: boolean; cacheSalt?: string } = {},
 ): Promise<number> {
 	const { force = false, quiet = true, cacheSalt = "" } = options;
+	const { connectors } = await import("./registry");
 	const cache = new ScanCache(db, { force, salt: cacheSalt });
 	const showProgress = !quiet && process.stdout.isTTY === true;
 	const trackedSet = getTrackedSet(db);
 	let total = 0;
-	if (!agentFilter || agentFilter === "claude") {
-		total += await scanClaudeSessions(
+	for (const connector of connectors) {
+		if (agentFilter && connector.id !== agentFilter) continue;
+		total += await connector.scan(
 			db,
 			trackedSet,
 			knownSkills,
 			cache,
-			createProgress("Claude Code sessions", showProgress),
-		);
-	}
-	if (!agentFilter || agentFilter === "opencode") {
-		total += scanOpenCodeSessions(db, trackedSet, cache);
-	}
-	if (!agentFilter || agentFilter === "cursor") {
-		total += await scanCursorSessions(
-			db,
-			trackedSet,
-			knownSkills,
-			cache,
-			createProgress("Cursor sessions", showProgress),
-		);
-	}
-	if (!agentFilter || agentFilter === "codex") {
-		total += await scanCodexSessions(
-			db,
-			trackedSet,
-			knownSkills,
-			cache,
-			createProgress("Codex sessions", showProgress),
-		);
-	}
-	if (!agentFilter || agentFilter === "gemini") {
-		total += await scanGeminiSessions(
-			db,
-			trackedSet,
-			knownSkills,
-			cache,
-			createProgress("Gemini CLI sessions", showProgress),
+			createProgress(`${connector.displayName} sessions`, showProgress),
 		);
 	}
 	cache.flush();
@@ -167,21 +131,11 @@ export async function scanAllSessions(
 }
 
 export function countAllSessions(agentFilter?: string): number {
+	const { connectors } = require("./registry") as typeof import("./registry");
 	let total = 0;
-	if (!agentFilter || agentFilter === "claude") {
-		total += countClaudeSessions();
-	}
-	if (!agentFilter || agentFilter === "opencode") {
-		total += countOpenCodeSessions();
-	}
-	if (!agentFilter || agentFilter === "cursor") {
-		total += countCursorSessions();
-	}
-	if (!agentFilter || agentFilter === "codex") {
-		total += countCodexSessions();
-	}
-	if (!agentFilter || agentFilter === "gemini") {
-		total += countGeminiSessions();
+	for (const connector of connectors) {
+		if (agentFilter && connector.id !== agentFilter) continue;
+		total += connector.count();
 	}
 	return total;
 }
