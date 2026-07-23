@@ -1,4 +1,4 @@
 {
-	"installCommand": "bun install",
+	"installCommand": "bun install && bun add -d lightningcss-linux-x64-gnu@1.30.2",
 	"buildCommand": "bun run build"
 }
