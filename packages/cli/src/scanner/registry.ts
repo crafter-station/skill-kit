@@ -8,11 +8,19 @@ import {
 	countContinueSessions,
 	scanContinueSessions,
 } from "./connectors/continue";
+import {
+	countCopilotSessions,
+	scanCopilotSessions,
+} from "./connectors/copilot";
 import { countGooseSessions, scanGooseSessions } from "./connectors/goose";
 import {
 	countOpenCodeSessions,
 	scanOpenCodeSessions,
 } from "./connectors/opencode";
+import {
+	countOpenHandsSessions,
+	scanOpenHandsSessions,
+} from "./connectors/openhands";
 import {
 	countWindsurfSessions,
 	scanWindsurfSessions,
@@ -63,6 +71,24 @@ export const connectors: Connector[] = [
 		count: countGeminiSessions,
 		scan: (db, trackedSet, knownSkills, cache, progress) =>
 			scanGeminiSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "copilot",
+		displayName: "GitHub Copilot CLI",
+		sessionFormat: "jsonl-files",
+		sessionSource: "~/.copilot/session-state/*/events.jsonl",
+		count: countCopilotSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanCopilotSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "openhands",
+		displayName: "OpenHands",
+		sessionFormat: "json-files",
+		sessionSource: "~/.openhands/{conversations,v1_conversations}/*",
+		count: countOpenHandsSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanOpenHandsSessions(db, trackedSet, knownSkills, cache, progress),
 	}),
 	defineConnector({
 		id: "continue",
