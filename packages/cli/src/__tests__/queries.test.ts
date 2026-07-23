@@ -102,8 +102,8 @@ describe("daily_usage", () => {
 
 		const rows = getDailyUsageRows(db, 30);
 		expect(rows).toHaveLength(2);
-		expect(rows.find((r) => r.agent === "claude")!.cost_usd).toBe(1.5);
-		expect(rows.find((r) => r.agent === "cursor")!.output_tokens).toBe(2000);
+		expect(rows.find((r) => r.agent === "claude")?.cost_usd).toBe(1.5);
+		expect(rows.find((r) => r.agent === "cursor")?.output_tokens).toBe(2000);
 	});
 
 	it("upsert replaces on conflict", () => {
@@ -138,8 +138,8 @@ describe("daily_usage", () => {
 
 		const rows = getDailyUsageRows(db, 30);
 		expect(rows).toHaveLength(1);
-		expect(rows[0]!.cost_usd).toBe(2.5);
-		expect(rows[0]!.input_tokens).toBe(2000);
+		expect(rows[0]?.cost_usd).toBe(2.5);
+		expect(rows[0]?.input_tokens).toBe(2000);
 	});
 
 	it("filters by agent", () => {
@@ -174,11 +174,11 @@ describe("daily_usage", () => {
 
 		const claude = getDailyUsageRows(db, 30, "claude");
 		expect(claude).toHaveLength(1);
-		expect(claude[0]!.agent).toBe("claude");
+		expect(claude[0]?.agent).toBe("claude");
 
 		const cursor = getDailyUsageRows(db, 30, "cursor");
 		expect(cursor).toHaveLength(1);
-		expect(cursor[0]!.agent).toBe("cursor");
+		expect(cursor[0]?.agent).toBe("cursor");
 	});
 
 	it("respects day cutoff", () => {
@@ -477,8 +477,8 @@ describe("skill_invocations (existing)", () => {
 		);
 
 		const top = getTopSkills(db, 30);
-		expect(top[0]!.skill_name).toBe("clerk");
-		expect(top[0]!.total).toBe(2);
+		expect(top[0]?.skill_name).toBe("clerk");
+		expect(top[0]?.total).toBe(2);
 	});
 
 	it("getSkillStats counts correctly", () => {
@@ -577,7 +577,7 @@ describe("installed_skills (existing)", () => {
 
 		const skills = getInstalledSkills(db);
 		expect(skills).toHaveLength(2);
-		expect(skills[0]!.name).toBe("clerk");
+		expect(skills[0]?.name).toBe("clerk");
 	});
 
 	it("updates on conflict", () => {
@@ -586,7 +586,7 @@ describe("installed_skills (existing)", () => {
 
 		const skills = getInstalledSkills(db);
 		expect(skills).toHaveLength(1);
-		expect(skills[0]!.path).toBe("/new");
-		expect(skills[0]!.version).toBe("2.0.0");
+		expect(skills[0]?.path).toBe("/new");
+		expect(skills[0]?.version).toBe("2.0.0");
 	});
 });

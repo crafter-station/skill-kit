@@ -174,7 +174,8 @@ export async function performScan(
 			: buildKnownSkills(skills, true);
 		db.run(
 			`DELETE FROM skill_invocations
-				WHERE agent IN ('codex', 'cursor', 'gemini')
+				WHERE agent IN ('codex', 'cursor', 'gemini', 'amp', 'cline', 'roo',
+					'kilocode', 'continue', 'goose', 'copilot', 'openhands', 'windsurf')
 					AND skill_name NOT IN (SELECT name FROM installed_skills)
 					AND skill_name NOT IN (SELECT value FROM json_each(?))`,
 			[JSON.stringify([...cleanupAllowlist])],

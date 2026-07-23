@@ -191,7 +191,7 @@ export function parseClineFamilyUiMessages(
 							seen,
 							name,
 							knownSkills,
-							false,
+							true,
 							timestamp,
 							sessionId,
 							agent,
@@ -208,7 +208,7 @@ export function parseClineFamilyUiMessages(
 				seen,
 				name,
 				knownSkills,
-				false,
+				true,
 				timestamp,
 				sessionId,
 				agent,
@@ -320,7 +320,7 @@ export function parseClineFamilyApiHistory(
 						seen,
 						name,
 						knownSkills,
-						false,
+						true,
 						timestamp,
 						sessionId,
 						agent,
@@ -410,8 +410,15 @@ export function listClineFamilyTaskFiles(
 			const taskDir = join(tasksDir, taskId);
 			const ui = join(taskDir, "ui_messages.json");
 			const api = join(taskDir, "api_conversation_history.json");
-			if (existsSync(ui)) files.push({ filePath: ui, taskId, kind: "ui" });
-			if (existsSync(api)) files.push({ filePath: api, taskId, kind: "api" });
+			// ui_messages is the canonical view (real per-message ts) and covers
+			// the same conversation as api_conversation_history; parsing both
+			// double-records every invocation under two timestamps. Only fall
+			// back to the api file when the ui file is missing.
+			if (existsSync(ui)) {
+				files.push({ filePath: ui, taskId, kind: "ui" });
+			} else if (existsSync(api)) {
+				files.push({ filePath: api, taskId, kind: "api" });
+			}
 		}
 	}
 	return files;

@@ -73,14 +73,14 @@ try {
 		/^ {2}'?([\w-]+)'?: \{\n {4}name: '([^']+)',\n {4}displayName: '([^']+)',\n {4}skillsDir: '([^']+)',\n {4}globalSkillsDir: ([^\n]+?),?\n/gm;
 
 	const agents: VendoredAgent[] = [];
-	let m: RegExpExecArray | null;
-	while ((m = agentRe.exec(src)) !== null) {
+	for (const m of src.matchAll(agentRe)) {
 		const [, , name, displayName, skillsDir, globalExpr] = m;
+		if (!name || !displayName || !skillsDir || !globalExpr) continue;
 		agents.push({
-			id: name!,
-			displayName: displayName!,
-			skillsDir: skillsDir!,
-			globalSkillsDir: resolveDirExpr(globalExpr!),
+			id: name,
+			displayName,
+			skillsDir,
+			globalSkillsDir: resolveDirExpr(globalExpr),
 		});
 	}
 

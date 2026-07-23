@@ -1,7 +1,13 @@
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const TEST_DIR = join(tmpdir(), `skillkit-hook-test-${Date.now()}`);
 const SETTINGS_PATH = join(TEST_DIR, ".claude", "settings.json");
@@ -37,9 +43,17 @@ function loadModule() {
 			} catch {}
 
 			if (!settings.hooks) settings.hooks = {};
-			if (!Array.isArray(settings.hooks.SessionEnd)) settings.hooks.SessionEnd = [];
+			if (!Array.isArray(settings.hooks.SessionEnd))
+				settings.hooks.SessionEnd = [];
 			settings.hooks.SessionEnd.push({
-				hooks: [{ type: "command", command: "skillkit scan --quiet", timeout: 120, async: true }],
+				hooks: [
+					{
+						type: "command",
+						command: "skillkit scan --quiet",
+						timeout: 120,
+						async: true,
+					},
+				],
 			});
 			writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
 			return true;
@@ -49,9 +63,11 @@ function loadModule() {
 			if (!mod.isHookInstalled()) return false;
 			const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
 			settings.hooks.SessionEnd = settings.hooks.SessionEnd.filter(
-				(entry: any) => !entry.hooks?.some((h: any) => h.command === "skillkit scan --quiet"),
+				(entry: any) =>
+					!entry.hooks?.some((h: any) => h.command === "skillkit scan --quiet"),
 			);
-			if (settings.hooks.SessionEnd.length === 0) delete settings.hooks.SessionEnd;
+			if (settings.hooks.SessionEnd.length === 0)
+				delete settings.hooks.SessionEnd;
 			writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
 			return true;
 		},
@@ -74,7 +90,9 @@ describe("hooks", () => {
 
 	afterEach(() => {
 		mod.cleanup();
-		try { rmSync(TEST_DIR, { recursive: true }); } catch {}
+		try {
+			rmSync(TEST_DIR, { recursive: true });
+		} catch {}
 	});
 
 	it("detects no hook when settings missing", () => {
@@ -92,7 +110,9 @@ describe("hooks", () => {
 
 		const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
 		expect(settings.hooks.SessionEnd).toHaveLength(1);
-		expect(settings.hooks.SessionEnd[0].hooks[0].command).toBe("skillkit scan --quiet");
+		expect(settings.hooks.SessionEnd[0].hooks[0].command).toBe(
+			"skillkit scan --quiet",
+		);
 		expect(settings.hooks.SessionEnd[0].hooks[0].async).toBe(true);
 	});
 
@@ -105,11 +125,16 @@ describe("hooks", () => {
 	});
 
 	it("preserves existing hooks", () => {
-		writeFileSync(SETTINGS_PATH, JSON.stringify({
-			hooks: {
-				SessionEnd: [{ hooks: [{ type: "command", command: "other-tool run" }] }],
-			},
-		}));
+		writeFileSync(
+			SETTINGS_PATH,
+			JSON.stringify({
+				hooks: {
+					SessionEnd: [
+						{ hooks: [{ type: "command", command: "other-tool run" }] },
+					],
+				},
+			}),
+		);
 
 		mod.installHook();
 		const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));

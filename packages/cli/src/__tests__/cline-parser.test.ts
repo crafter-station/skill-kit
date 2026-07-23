@@ -39,9 +39,18 @@ describe("cline: parseClineTaskFile (ui_messages.json)", () => {
 		expect(out[0]?.sessionId).toBe("cline:1753142400000");
 	});
 
-	it("extracts skills read via SKILL.md path in readFile tool messages", () => {
-		const out = parseClineTaskFile(clineUiPath, "1753142400000");
+	it("extracts skills read via SKILL.md path in readFile tool messages (gated by knownSkills)", () => {
+		const out = parseClineTaskFile(
+			clineUiPath,
+			"1753142400000",
+			new Set(["resend", "deslop"]),
+		);
 		expect(out.map((i) => i.skillName)).toContain("deslop");
+	});
+
+	it("ignores SKILL.md path mentions for skills not in knownSkills", () => {
+		const out = parseClineTaskFile(clineUiPath, "1753142400000");
+		expect(out.map((i) => i.skillName)).not.toContain("deslop");
 	});
 
 	it("uses the ClineMessage ts (ms epoch) as the timestamp", () => {
@@ -73,8 +82,12 @@ describe("cline: parseClineTaskFile (ui_messages.json)", () => {
 });
 
 describe("cline: parseClineTaskFile (api_conversation_history.json)", () => {
-	it("extracts XML use_skill calls from assistant text", () => {
-		const out = parseClineTaskFile(clineApiPath, "1753142400000");
+	it("extracts XML use_skill calls from assistant text (gated by knownSkills)", () => {
+		const out = parseClineTaskFile(
+			clineApiPath,
+			"1753142400000",
+			new Set(["resend", "deslop", "tiktok", "x-momentum"]),
+		);
 		expect(out.map((i) => i.skillName)).toContain("resend");
 	});
 
@@ -83,15 +96,23 @@ describe("cline: parseClineTaskFile (api_conversation_history.json)", () => {
 		expect(out.map((i) => i.skillName)).toContain("deslop");
 	});
 
-	it("extracts SKILL.md reads from tool_use input and plain string content", () => {
-		const out = parseClineTaskFile(clineApiPath, "1753142400000");
+	it("extracts SKILL.md reads from tool_use input and plain string content (gated by knownSkills)", () => {
+		const out = parseClineTaskFile(
+			clineApiPath,
+			"1753142400000",
+			new Set(["tiktok", "x-momentum"]),
+		);
 		const names = out.map((i) => i.skillName);
 		expect(names).toContain("tiktok");
 		expect(names).toContain("x-momentum");
 	});
 
 	it("falls back to the numeric taskId timestamp when messages lack ts", () => {
-		const out = parseClineTaskFile(clineApiPath, "1753142400000");
+		const out = parseClineTaskFile(
+			clineApiPath,
+			"1753142400000",
+			new Set(["resend", "deslop", "tiktok", "x-momentum"]),
+		);
 		expect(out[0]?.timestamp).toBe(new Date(1753142400000).toISOString());
 	});
 
@@ -142,14 +163,22 @@ describe("roo: parseRooTaskFile", () => {
 	});
 
 	it("extracts XML skill calls and native skill tool_use from api history", () => {
-		const out = parseRooTaskFile(rooApiPath, "t1");
+		const out = parseRooTaskFile(
+			rooApiPath,
+			"t1",
+			new Set(["resend", "deslop"]),
+		);
 		const names = out.map((i) => i.skillName);
 		expect(names).toContain("resend");
 		expect(names).toContain("deslop");
 	});
 
 	it("uses per-message ts from Roo ApiMessage entries", () => {
-		const out = parseRooTaskFile(rooApiPath, "t1");
+		const out = parseRooTaskFile(
+			rooApiPath,
+			"t1",
+			new Set(["resend", "deslop"]),
+		);
 		const resend = out.find((i) => i.skillName === "resend");
 		expect(resend?.timestamp).toBe(new Date(1753146010000).toISOString());
 	});
@@ -218,12 +247,37 @@ describe("cline-family shared parser edge cases", () => {
 		);
 	});
 
+	it("lists only the ui file when a task has both ui and api files (no double count)", async () => {
+		const { listClineFamilyTaskFiles } = await import(
+			"../scanner/connectors/cline-family"
+		);
+		const { mkdtempSync, mkdirSync, copyFileSync, rmSync } = await import(
+			"node:fs"
+		);
+		const { tmpdir } = await import("node:os");
+		const base = mkdtempSync(join(tmpdir(), "cline-family-"));
+		try {
+			const taskDir = join(base, "tasks", "1753142400000");
+			mkdirSync(taskDir, { recursive: true });
+			copyFileSync(clineUiPath, join(taskDir, "ui_messages.json"));
+			copyFileSync(
+				clineApiPath,
+				join(taskDir, "api_conversation_history.json"),
+			);
+			const files = listClineFamilyTaskFiles([base]);
+			expect(files).toHaveLength(1);
+			expect(files[0]?.kind).toBe("ui");
+		} finally {
+			rmSync(base, { recursive: true, force: true });
+		}
+	});
+
 	it("dedupes repeated identical signals within one file", () => {
 		const out = parseClineFamilyApiHistory(
 			clineApiPath,
 			"cline",
 			"cline:dedupe",
-			new Set(),
+			new Set(["resend", "deslop", "tiktok", "x-momentum"]),
 			"2026-07-22T00:00:00.000Z",
 		);
 		const resendHits = out.filter((i) => i.skillName === "resend");

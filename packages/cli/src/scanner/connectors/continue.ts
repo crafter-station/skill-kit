@@ -132,11 +132,16 @@ function readSessionIndex(sessionsDir: string): Map<string, string> {
 	return index;
 }
 
+// birthtime, not mtime: an active session file's mtime moves on every
+// write, which would mint a fresh dedupe key per scan and re-record the
+// session's history. Creation time is stable for the file's lifetime.
 function fileTimestamp(filePath: string): string {
 	try {
-		return statSync(filePath).mtime.toISOString();
+		const stat = statSync(filePath);
+		const birth = stat.birthtime.getTime();
+		return (birth > 0 ? stat.birthtime : stat.mtime).toISOString();
 	} catch {
-		return new Date().toISOString();
+		return new Date(0).toISOString();
 	}
 }
 

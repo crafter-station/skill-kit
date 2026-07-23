@@ -15,6 +15,7 @@ const LEGACY_IDS: Record<string, string> = {
 	"gemini-cli": "gemini",
 	kilo: "kilocode",
 	"github-copilot": "copilot",
+	"kiro-cli": "kiro",
 };
 
 function resolveRegistryDir(dir: string): string {

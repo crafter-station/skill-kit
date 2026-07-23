@@ -99,11 +99,14 @@ function openDb(): InstanceType<typeof BunDatabase> | null {
 function extractSkillsFromText(
 	text: string,
 	knownSkills: Set<string>,
+	requireKnown = false,
 ): string[] {
 	const found: string[] = [];
 	for (const match of text.matchAll(SKILL_PATH_RE)) {
 		const name = match[1];
-		if (name) found.push(name);
+		if (!name) continue;
+		if (requireKnown && !knownSkills.has(name)) continue;
+		found.push(name);
 	}
 	if (found.length > 0) return found;
 
@@ -141,16 +144,32 @@ function collectStepSkills(
 	}
 
 	if (typeof step.text === "string" && step.text.length > 0) {
-		names.push(...extractSkillsFromText(step.text, knownSkills));
+		// Plain prose: a SKILL.md path mention is not proof of execution, so
+		// gate by knownSkills to avoid recording skills the user never had.
+		names.push(...extractSkillsFromText(step.text, knownSkills, true));
 	}
 
 	return names;
 }
 
+// Chat bubbles carry no timestamp. A wall-clock fallback would mint a new
+// dedupe key on every scan and re-record the whole history without bound,
+// so we derive a deterministic synthetic timestamp from the tab id: the
+// same invocation always maps to the same key. The date is marked clearly
+// synthetic (epoch year 2001) rather than pretending to be real.
+function syntheticTabTimestamp(tabKey: string, bubbleIndex: number): string {
+	let hash = 0;
+	for (let i = 0; i < tabKey.length; i++) {
+		hash = (hash * 31 + tabKey.charCodeAt(i)) | 0;
+	}
+	const base = Date.UTC(2001, 0, 1) + (Math.abs(hash) % 86_400_000);
+	return new Date(base + bubbleIndex * 1000).toISOString();
+}
+
 export function parseWindsurfChatData(
 	raw: string,
 	knownSkills: Set<string> = new Set(),
-	fallbackTimestamp: string = new Date().toISOString(),
+	fallbackTimestamp?: string,
 ): Invocation[] {
 	const results: Invocation[] = [];
 
@@ -165,9 +184,11 @@ export function parseWindsurfChatData(
 	for (let i = 0; i < data.tabs.length; i++) {
 		const tab = data.tabs[i];
 		if (!tab || !Array.isArray(tab.bubbles)) continue;
-		const sessionId = `windsurf:chat:${tab.tabId ?? `tab-${i}`}`;
+		const tabKey = tab.tabId ?? `tab-${i}`;
+		const sessionId = `windsurf:chat:${tabKey}`;
 
-		for (const bubble of tab.bubbles) {
+		for (let b = 0; b < tab.bubbles.length; b++) {
+			const bubble = tab.bubbles[b];
 			if (typeof bubble !== "object" || bubble === null) continue;
 			const text = bubble.rawText ?? bubble.text ?? "";
 			const skills = collectStepSkills(
@@ -177,7 +198,7 @@ export function parseWindsurfChatData(
 			for (const skillName of skills) {
 				results.push({
 					skillName,
-					timestamp: fallbackTimestamp,
+					timestamp: fallbackTimestamp ?? syntheticTabTimestamp(tabKey, b),
 					sessionId,
 					agent: "windsurf",
 				});
@@ -203,12 +224,13 @@ export function parseWindsurfAgentBlob(
 	}
 	if (!Array.isArray(data.conversation)) return results;
 
+	// createdAt is stable across scans; lastUpdatedAt changes while the blob
+	// is active and would mint a fresh dedupe key each scan (re-recording the
+	// blob's whole history), so it is deliberately NOT used.
 	const ts =
-		typeof data.lastUpdatedAt === "number"
-			? new Date(data.lastUpdatedAt).toISOString()
-			: typeof data.createdAt === "number"
-				? new Date(data.createdAt).toISOString()
-				: new Date().toISOString();
+		typeof data.createdAt === "number"
+			? new Date(data.createdAt).toISOString()
+			: syntheticTabTimestamp(key, 0);
 	const sessionId = `windsurf:agent:${key}`;
 
 	for (const step of data.conversation) {

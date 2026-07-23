@@ -38,6 +38,12 @@ describe("parseWindsurfChatData", () => {
 		expect(out[0]?.timestamp).toBe(ts);
 	});
 
+	it("derives a deterministic timestamp when none is provided (no re-record across scans)", () => {
+		const a = parseWindsurfChatData(chatFixture);
+		const b = parseWindsurfChatData(chatFixture);
+		expect(a[0]?.timestamp).toBe(b[0]?.timestamp);
+	});
+
 	it("returns [] for corrupt JSON", () => {
 		expect(parseWindsurfChatData("{not json", new Set(["resend"]))).toEqual([]);
 	});
@@ -75,13 +81,28 @@ describe("parseWindsurfAgentBlob", () => {
 		expect(names).toContain("hapi-cli");
 	});
 
-	it("uses lastUpdatedAt as the timestamp", () => {
+	it("uses createdAt as the timestamp (stable across scans, unlike lastUpdatedAt)", () => {
 		const out = parseWindsurfAgentBlob(
 			"agentData:abc123",
 			agentFixture,
 			new Set(["skillkit"]),
 		);
-		expect(out[0]?.timestamp).toBe(new Date(1752872400000).toISOString());
+		expect(out[0]?.timestamp).toBe(new Date(1752868800000).toISOString());
+	});
+
+	it("derives a deterministic synthetic timestamp when the blob has no dates", () => {
+		const raw = JSON.stringify({
+			conversation: [
+				{
+					toolCalls: [
+						{ name: "shell", args: { cmd: "cat skills/hapi-cli/SKILL.md" } },
+					],
+				},
+			],
+		});
+		const a = parseWindsurfAgentBlob("agentData:zzz", raw);
+		const b = parseWindsurfAgentBlob("agentData:zzz", raw);
+		expect(a[0]?.timestamp).toBe(b[0]?.timestamp);
 	});
 
 	it("returns [] for corrupt JSON", () => {

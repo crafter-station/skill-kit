@@ -4,8 +4,6 @@ import { countAmpSessions, scanAmpSessions } from "./connectors/amp";
 import { countClaudeSessions, scanClaudeSessions } from "./connectors/claude";
 import { countClineSessions, scanClineSessions } from "./connectors/cline";
 import { countCodexSessions, scanCodexSessions } from "./connectors/codex";
-import { countCursorSessions, scanCursorSessions } from "./connectors/cursor";
-import { countGeminiSessions, scanGeminiSessions } from "./connectors/gemini";
 import {
 	countContinueSessions,
 	scanContinueSessions,
@@ -14,6 +12,8 @@ import {
 	countCopilotSessions,
 	scanCopilotSessions,
 } from "./connectors/copilot";
+import { countCursorSessions, scanCursorSessions } from "./connectors/cursor";
+import { countGeminiSessions, scanGeminiSessions } from "./connectors/gemini";
 import { countGooseSessions, scanGooseSessions } from "./connectors/goose";
 import { countKiloSessions, scanKiloSessions } from "./connectors/kilocode";
 import {
@@ -90,7 +90,8 @@ export const connectors: Connector[] = [
 		id: "cline",
 		displayName: "Cline",
 		sessionFormat: "json-files",
-		sessionSource: "globalStorage/saoudrizwan.claude-dev/tasks + ~/.cline/data/tasks",
+		sessionSource:
+			"globalStorage/saoudrizwan.claude-dev/tasks + ~/.cline/data/tasks",
 		count: countClineSessions,
 		scan: (db, trackedSet, knownSkills, cache, progress) =>
 			scanClineSessions(db, trackedSet, knownSkills, cache, progress),
@@ -99,7 +100,8 @@ export const connectors: Connector[] = [
 		id: "roo",
 		displayName: "Roo Code",
 		sessionFormat: "json-files",
-		sessionSource: "globalStorage/RooVeterinaryInc.roo-cline/tasks + ~/.vscode-mock",
+		sessionSource:
+			"globalStorage/RooVeterinaryInc.roo-cline/tasks + ~/.vscode-mock",
 		count: countRooSessions,
 		scan: (db, trackedSet, knownSkills, cache, progress) =>
 			scanRooSessions(db, trackedSet, knownSkills, cache, progress),
