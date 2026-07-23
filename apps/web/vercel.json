@@ -1,4 +1,4 @@
 {
-	"installCommand": "bun install && bun add -d lightningcss-linux-x64-gnu@1.30.2",
+	"installCommand": "bun install && bun add -d lightningcss-linux-x64-gnu@1.30.2 @tailwindcss/oxide-linux-x64-gnu@4.1.18 @takumi-rs/core-linux-x64-gnu@0.68.5",
 	"buildCommand": "bun run build"
 }
