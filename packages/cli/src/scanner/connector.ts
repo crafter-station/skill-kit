@@ -1,6 +1,5 @@
 import type { Database } from "bun:sqlite";
 import type { ProgressReporter } from "../tui/progress";
-import type { Invocation } from "./index";
 import type { ScanCache } from "./scan-cache";
 
 export type SessionFormat =
