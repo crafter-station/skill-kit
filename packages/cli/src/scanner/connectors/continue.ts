@@ -148,7 +148,8 @@ function extractSkillFromToolCall(
 ): string | null {
 	// Built-in "Skills" tool: { skill_name: "..." }
 	if (name === "Skills") {
-		if (typeof parsedArgs?.skill_name === "string") return parsedArgs.skill_name;
+		if (typeof parsedArgs?.skill_name === "string")
+			return parsedArgs.skill_name;
 		try {
 			const parsed = JSON.parse(args) as Record<string, unknown>;
 			if (typeof parsed.skill_name === "string") return parsed.skill_name;
@@ -234,7 +235,8 @@ export function parseContinueSessionFile(
 					state.parsedArgs,
 					knownSkills,
 				);
-				if (skillName) record(skillName, state.toolCallId ?? state.toolCall?.id);
+				if (skillName)
+					record(skillName, state.toolCallId ?? state.toolCall?.id);
 			}
 		}
 	}

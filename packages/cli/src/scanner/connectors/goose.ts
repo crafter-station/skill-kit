@@ -285,22 +285,23 @@ export function countGooseSessions(): number {
 	const sessionsDir = findSessionsDir();
 	if (!sessionsDir) return 0;
 
-	let count = 0;
+	// Legacy jsonl files are imported into sessions.db on first run and kept
+	// on disk, so when the db exists it is the single source of truth.
 	const gooseDb = openGooseDb(sessionsDir);
 	if (gooseDb) {
 		try {
 			const row = gooseDb
 				.query<{ count: number }, []>("SELECT COUNT(*) as count FROM sessions")
 				.get();
-			count += row?.count ?? 0;
+			return row?.count ?? 0;
 		} catch {
+			return 0;
 		} finally {
 			gooseDb.close();
 		}
 	}
 
-	count += listLegacyFiles(sessionsDir).length;
-	return count;
+	return listLegacyFiles(sessionsDir).length;
 }
 
 export function scanGooseDb(
@@ -356,14 +357,17 @@ export async function scanGooseSessions(
 	const sessionsDir = findSessionsDir();
 	if (!sessionsDir) return 0;
 
-	let total = 0;
-
+	// Legacy jsonl files are imported into sessions.db on first run and kept
+	// on disk, so when the db exists it is the single source of truth.
 	const dbPath = join(sessionsDir, "sessions.db");
-	const skipDb = existsSync(dbPath) && cache?.shouldSkip(dbPath);
-	if (!skipDb) {
-		total += scanGooseDb(dbPath, db, trackedSet, knownSkills);
+	if (existsSync(dbPath)) {
+		if (cache?.shouldSkip(dbPath)) return 0;
+		const total = scanGooseDb(dbPath, db, trackedSet, knownSkills);
+		progress?.finish();
+		return total;
 	}
 
+	let total = 0;
 	const files = listLegacyFiles(sessionsDir);
 	let done = 0;
 	for (const file of files) {

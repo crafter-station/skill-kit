@@ -5,6 +5,11 @@ import { countCodexSessions, scanCodexSessions } from "./connectors/codex";
 import { countCursorSessions, scanCursorSessions } from "./connectors/cursor";
 import { countGeminiSessions, scanGeminiSessions } from "./connectors/gemini";
 import {
+	countContinueSessions,
+	scanContinueSessions,
+} from "./connectors/continue";
+import { countGooseSessions, scanGooseSessions } from "./connectors/goose";
+import {
 	countOpenCodeSessions,
 	scanOpenCodeSessions,
 } from "./connectors/opencode";
@@ -58,6 +63,24 @@ export const connectors: Connector[] = [
 		count: countGeminiSessions,
 		scan: (db, trackedSet, knownSkills, cache, progress) =>
 			scanGeminiSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "continue",
+		displayName: "Continue",
+		sessionFormat: "json-files",
+		sessionSource: "~/.continue/sessions/*.json",
+		count: countContinueSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanContinueSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "goose",
+		displayName: "Goose",
+		sessionFormat: "sqlite",
+		sessionSource: "goose sessions.db (XDG data dir) + legacy *.jsonl",
+		count: countGooseSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanGooseSessions(db, trackedSet, knownSkills, cache, progress),
 	}),
 	defineConnector({
 		id: "windsurf",
