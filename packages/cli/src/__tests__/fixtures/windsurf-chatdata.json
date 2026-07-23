@@ -1,0 +1,35 @@
+{
+	"tabs": [
+		{
+			"tabId": "3f6a1c2e-11aa-4bb2-9c0d-77e5a9f01234",
+			"chatTitle": "Wire up resend emails",
+			"bubbles": [
+				{
+					"type": "user",
+					"text": "use the resend skill to send the launch email"
+				},
+				{
+					"type": "assistant",
+					"rawText": "Reading skills/resend/SKILL.md to follow the setup steps before sending.",
+					"toolCalls": [
+						{
+							"name": "read_file",
+							"args": {
+								"path": "/Users/hunter/.codeium/windsurf/skills/resend/SKILL.md"
+							}
+						}
+					]
+				},
+				{
+					"type": "assistant",
+					"rawText": "Done. Email queued via Resend batch API."
+				}
+			]
+		},
+		{
+			"tabId": "b91d44f0-22bb-4cc3-8d1e-88f6b0a45678",
+			"chatTitle": "Empty tab",
+			"bubbles": []
+		}
+	]
+}

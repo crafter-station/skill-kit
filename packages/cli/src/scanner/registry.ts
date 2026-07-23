@@ -8,6 +8,10 @@ import {
 	countOpenCodeSessions,
 	scanOpenCodeSessions,
 } from "./connectors/opencode";
+import {
+	countWindsurfSessions,
+	scanWindsurfSessions,
+} from "./connectors/windsurf";
 
 export const connectors: Connector[] = [
 	defineConnector({
@@ -54,6 +58,15 @@ export const connectors: Connector[] = [
 		count: countGeminiSessions,
 		scan: (db, trackedSet, knownSkills, cache, progress) =>
 			scanGeminiSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "windsurf",
+		displayName: "Windsurf",
+		sessionFormat: "vscode-state",
+		sessionSource: "state.vscdb (Windsurf globalStorage)",
+		count: countWindsurfSessions,
+		scan: (db, trackedSet, knownSkills, cache) =>
+			scanWindsurfSessions(db, trackedSet, knownSkills, cache),
 	}),
 ];
 
