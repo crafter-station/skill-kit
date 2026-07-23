@@ -1,5 +1,6 @@
 import type { Connector } from "./connector";
 import { defineConnector } from "./connector";
+import { countAmpSessions, scanAmpSessions } from "./connectors/amp";
 import { countClaudeSessions, scanClaudeSessions } from "./connectors/claude";
 import { countClineSessions, scanClineSessions } from "./connectors/cline";
 import { countCodexSessions, scanCodexSessions } from "./connectors/codex";
@@ -74,6 +75,16 @@ export const connectors: Connector[] = [
 		count: countGeminiSessions,
 		scan: (db, trackedSet, knownSkills, cache, progress) =>
 			scanGeminiSessions(db, trackedSet, knownSkills, cache, progress),
+	}),
+	defineConnector({
+		id: "amp",
+		displayName: "Amp",
+		sessionFormat: "json-files",
+		sessionSource:
+			"$XDG_DATA_HOME/amp/threads/*.json (legacy; modern Amp is server-side)",
+		count: countAmpSessions,
+		scan: (db, trackedSet, knownSkills, cache, progress) =>
+			scanAmpSessions(db, trackedSet, knownSkills, cache, progress),
 	}),
 	defineConnector({
 		id: "cline",
