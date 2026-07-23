@@ -28,5 +28,8 @@
 		"@types/react-dom": "^19",
 		"tailwindcss": "^4.1.8",
 		"typescript": "^5.9.3"
+	},
+	"optionalDependencies": {
+		"lightningcss-linux-x64-gnu": "1.30.2"
 	}
 }
