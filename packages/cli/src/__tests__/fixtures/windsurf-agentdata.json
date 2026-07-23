@@ -1,0 +1,35 @@
+{
+	"name": "Ship skill telemetry fix",
+	"status": "done",
+	"createdAt": 1752868800000,
+	"lastUpdatedAt": 1752872400000,
+	"conversation": [
+		{
+			"type": 1,
+			"role": "user",
+			"text": "run the skillkit skill and show me stats"
+		},
+		{
+			"type": 2,
+			"role": "assistant",
+			"text": "Loading the skill instructions first.",
+			"toolCalls": [
+				{
+					"name": "skillkit",
+					"args": { "command": "stats" }
+				},
+				{
+					"name": "run_command",
+					"args": {
+						"command": "cat ~/.codeium/windsurf/skills/hapi-cli/SKILL.md"
+					}
+				}
+			]
+		},
+		{
+			"type": 2,
+			"role": "assistant",
+			"text": "Stats collected, hapi-cli reference loaded."
+		}
+	]
+}

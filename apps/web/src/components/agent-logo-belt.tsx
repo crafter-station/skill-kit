@@ -33,15 +33,15 @@ const AGENTS: AgentEntry[] = [
 	{ name: "Codex", logo: OpenAILogo, supported: true },
 	{ name: "Gemini CLI", logo: GeminiLogo, supported: true },
 	{ name: "OpenCode", logo: OpenCodeLogo, supported: true },
-	{ name: "Windsurf", logo: WindsurfLogo, issue: 3 },
-	{ name: "Cline", logo: ClineLogo, issue: 5 },
-	{ name: "Roo Code", logo: RooCodeLogo, issue: 6 },
-	{ name: "Continue", issue: 7 },
-	{ name: "Amp", issue: 10 },
-	{ name: "GitHub Copilot", logo: GithubCopilotLogo, issue: 8 },
-	{ name: "OpenHands", logo: OpenHandsLogo, issue: 9 },
-	{ name: "Goose", logo: GooseLogo, issue: 11 },
-	{ name: "Kilo Code", logo: KiloCodeLogo, issue: 12 },
+	{ name: "Windsurf", logo: WindsurfLogo, supported: true },
+	{ name: "Cline", logo: ClineLogo, supported: true },
+	{ name: "Roo Code", logo: RooCodeLogo, supported: true },
+	{ name: "Continue", supported: true },
+	{ name: "Amp", supported: true },
+	{ name: "GitHub Copilot", logo: GithubCopilotLogo, supported: true },
+	{ name: "OpenHands", logo: OpenHandsLogo, supported: true },
+	{ name: "Goose", logo: GooseLogo, supported: true },
+	{ name: "Kilo Code", logo: KiloCodeLogo, supported: true },
 	{ name: "Trae", logo: TraeLogo, issue: 13 },
 ];
 
@@ -90,7 +90,7 @@ export function AgentLogoBelt() {
 
 				<div className="flex flex-col items-center gap-4">
 					<p className="text-xs text-[#333] uppercase tracking-widest font-medium">
-						Coming soon
+						Not trackable yet
 					</p>
 					<motion.div
 						initial={{ opacity: 0, y: 12 }}
@@ -110,7 +110,7 @@ export function AgentLogoBelt() {
 								<AgentIcon agent={agent} />
 								{agent.name}
 								<span className="opacity-0 group-hover:opacity-100 transition-opacity text-[#555]">
-									+1
+									why?
 								</span>
 							</a>
 						))}

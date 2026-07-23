@@ -1,0 +1,19 @@
+{
+	"id": "prt_9f2c1a",
+	"sessionID": "ses_4b7e2d",
+	"messageID": "msg_1a2b3c",
+	"type": "tool",
+	"callID": "call_abc123",
+	"tool": "skill",
+	"state": {
+		"status": "completed",
+		"input": { "name": "resend" },
+		"output": "<skill_content name=\"resend\">\n# Skill: resend\n\nUse the Resend API.\n</skill_content>",
+		"title": "Loaded skill: resend",
+		"metadata": {
+			"name": "resend",
+			"dir": "/Users/hunter/.kilo/skills/resend"
+		},
+		"time": { "start": 1753150000000, "end": 1753150000420 }
+	}
+}

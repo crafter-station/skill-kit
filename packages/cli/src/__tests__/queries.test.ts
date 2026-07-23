@@ -1,16 +1,16 @@
 import { Database } from "bun:sqlite";
-import { describe, expect, it, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import {
-	upsertDailyUsage,
-	getDailyUsageRows,
+	deduplicateInvocations,
 	getCurrentStreak,
+	getDailyUsageRows,
+	getInstalledSkills,
+	getSkillStats,
+	getTopSkills,
 	getWeeklyVelocity,
 	recordInvocation,
-	getTopSkills,
-	getSkillStats,
-	deduplicateInvocations,
+	upsertDailyUsage,
 	upsertInstalledSkill,
-	getInstalledSkills,
 } from "../db/queries";
 
 function makeDb(): Database {
@@ -66,44 +66,150 @@ function daysAgo(n: number): string {
 
 describe("daily_usage", () => {
 	let db: Database;
-	beforeEach(() => { db = makeDb(); });
+	beforeEach(() => {
+		db = makeDb();
+	});
 
 	it("upserts and retrieves rows", () => {
-		upsertDailyUsage(db, "2026-03-28", "claude", 1000, 5000, 200, 100, 6300, 1.5, 3, ["claude-opus-4"], {});
-		upsertDailyUsage(db, "2026-03-28", "cursor", 500, 2000, 0, 0, 2500, 0.3, 1, ["gpt-4o"], {});
+		upsertDailyUsage(
+			db,
+			daysAgo(2),
+			"claude",
+			1000,
+			5000,
+			200,
+			100,
+			6300,
+			1.5,
+			3,
+			["claude-opus-4"],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(2),
+			"cursor",
+			500,
+			2000,
+			0,
+			0,
+			2500,
+			0.3,
+			1,
+			["gpt-4o"],
+			{},
+		);
 
 		const rows = getDailyUsageRows(db, 30);
 		expect(rows).toHaveLength(2);
-		expect(rows.find(r => r.agent === "claude")!.cost_usd).toBe(1.5);
-		expect(rows.find(r => r.agent === "cursor")!.output_tokens).toBe(2000);
+		expect(rows.find((r) => r.agent === "claude")?.cost_usd).toBe(1.5);
+		expect(rows.find((r) => r.agent === "cursor")?.output_tokens).toBe(2000);
 	});
 
 	it("upsert replaces on conflict", () => {
-		upsertDailyUsage(db, "2026-03-28", "claude", 1000, 5000, 0, 0, 6000, 1.0, 1, [], {});
-		upsertDailyUsage(db, "2026-03-28", "claude", 2000, 10000, 0, 0, 12000, 2.5, 2, [], {});
+		upsertDailyUsage(
+			db,
+			daysAgo(2),
+			"claude",
+			1000,
+			5000,
+			0,
+			0,
+			6000,
+			1.0,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(2),
+			"claude",
+			2000,
+			10000,
+			0,
+			0,
+			12000,
+			2.5,
+			2,
+			[],
+			{},
+		);
 
 		const rows = getDailyUsageRows(db, 30);
 		expect(rows).toHaveLength(1);
-		expect(rows[0]!.cost_usd).toBe(2.5);
-		expect(rows[0]!.input_tokens).toBe(2000);
+		expect(rows[0]?.cost_usd).toBe(2.5);
+		expect(rows[0]?.input_tokens).toBe(2000);
 	});
 
 	it("filters by agent", () => {
-		upsertDailyUsage(db, "2026-03-28", "claude", 1000, 5000, 0, 0, 6000, 1.0, 1, [], {});
-		upsertDailyUsage(db, "2026-03-28", "cursor", 500, 2000, 0, 0, 2500, 0.3, 1, [], {});
+		upsertDailyUsage(
+			db,
+			daysAgo(2),
+			"claude",
+			1000,
+			5000,
+			0,
+			0,
+			6000,
+			1.0,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(2),
+			"cursor",
+			500,
+			2000,
+			0,
+			0,
+			2500,
+			0.3,
+			1,
+			[],
+			{},
+		);
 
 		const claude = getDailyUsageRows(db, 30, "claude");
 		expect(claude).toHaveLength(1);
-		expect(claude[0]!.agent).toBe("claude");
+		expect(claude[0]?.agent).toBe("claude");
 
 		const cursor = getDailyUsageRows(db, 30, "cursor");
 		expect(cursor).toHaveLength(1);
-		expect(cursor[0]!.agent).toBe("cursor");
+		expect(cursor[0]?.agent).toBe("cursor");
 	});
 
 	it("respects day cutoff", () => {
-		upsertDailyUsage(db, daysAgo(5), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
-		upsertDailyUsage(db, daysAgo(40), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
+		upsertDailyUsage(
+			db,
+			daysAgo(5),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(40),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
 
 		expect(getDailyUsageRows(db, 30)).toHaveLength(1);
 		expect(getDailyUsageRows(db, 60)).toHaveLength(2);
@@ -112,7 +218,9 @@ describe("daily_usage", () => {
 
 describe("streak", () => {
 	let db: Database;
-	beforeEach(() => { db = makeDb(); });
+	beforeEach(() => {
+		db = makeDb();
+	});
 
 	it("returns 0 for empty db", () => {
 		const s = getCurrentStreak(db);
@@ -122,7 +230,20 @@ describe("streak", () => {
 
 	it("counts consecutive days from today", () => {
 		for (let i = 0; i < 5; i++) {
-			upsertDailyUsage(db, daysAgo(i), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
+			upsertDailyUsage(
+				db,
+				daysAgo(i),
+				"claude",
+				100,
+				500,
+				0,
+				0,
+				600,
+				0.1,
+				1,
+				[],
+				{},
+			);
 		}
 		const s = getCurrentStreak(db);
 		expect(s.current).toBe(5);
@@ -130,11 +251,76 @@ describe("streak", () => {
 	});
 
 	it("breaks streak on gap", () => {
-		upsertDailyUsage(db, daysAgo(0), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
-		upsertDailyUsage(db, daysAgo(1), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
-		upsertDailyUsage(db, daysAgo(5), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
-		upsertDailyUsage(db, daysAgo(6), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
-		upsertDailyUsage(db, daysAgo(7), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
+		upsertDailyUsage(
+			db,
+			daysAgo(0),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(1),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(5),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(6),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(7),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
 
 		const s = getCurrentStreak(db);
 		expect(s.current).toBe(2);
@@ -142,8 +328,34 @@ describe("streak", () => {
 	});
 
 	it("current streak is 0 if last activity was >1 day ago", () => {
-		upsertDailyUsage(db, daysAgo(3), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
-		upsertDailyUsage(db, daysAgo(4), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
+		upsertDailyUsage(
+			db,
+			daysAgo(3),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(4),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
 
 		const s = getCurrentStreak(db);
 		expect(s.current).toBe(0);
@@ -151,9 +363,48 @@ describe("streak", () => {
 	});
 
 	it("multi-agent days count once", () => {
-		upsertDailyUsage(db, daysAgo(0), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
-		upsertDailyUsage(db, daysAgo(0), "cursor", 50, 200, 0, 0, 250, 0.05, 1, [], {});
-		upsertDailyUsage(db, daysAgo(1), "claude", 100, 500, 0, 0, 600, 0.1, 1, [], {});
+		upsertDailyUsage(
+			db,
+			daysAgo(0),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(0),
+			"cursor",
+			50,
+			200,
+			0,
+			0,
+			250,
+			0.05,
+			1,
+			[],
+			{},
+		);
+		upsertDailyUsage(
+			db,
+			daysAgo(1),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			0.1,
+			1,
+			[],
+			{},
+		);
 
 		const s = getCurrentStreak(db);
 		expect(s.current).toBe(2);
@@ -162,7 +413,9 @@ describe("streak", () => {
 
 describe("velocity", () => {
 	let db: Database;
-	beforeEach(() => { db = makeDb(); });
+	beforeEach(() => {
+		db = makeDb();
+	});
 
 	it("returns zeros for empty db", () => {
 		const v = getWeeklyVelocity(db);
@@ -172,7 +425,20 @@ describe("velocity", () => {
 	});
 
 	it("sums cost for current week", () => {
-		upsertDailyUsage(db, today(), "claude", 100, 500, 0, 0, 600, 5.0, 1, [], {});
+		upsertDailyUsage(
+			db,
+			today(),
+			"claude",
+			100,
+			500,
+			0,
+			0,
+			600,
+			5.0,
+			1,
+			[],
+			{},
+		);
 		const v = getWeeklyVelocity(db);
 		expect(v.thisWeek).toBeGreaterThanOrEqual(5.0);
 	});
@@ -180,21 +446,58 @@ describe("velocity", () => {
 
 describe("skill_invocations (existing)", () => {
 	let db: Database;
-	beforeEach(() => { db = makeDb(); });
+	beforeEach(() => {
+		db = makeDb();
+	});
 
 	it("records and retrieves invocations", () => {
-		recordInvocation(db, "clerk", "sess1", "proj1", "2026-03-28T10:00:00Z", "claude");
-		recordInvocation(db, "clerk", "sess2", "proj1", "2026-03-28T11:00:00Z", "claude");
-		recordInvocation(db, "resend", "sess3", "proj2", "2026-03-28T12:00:00Z", "cursor");
+		recordInvocation(
+			db,
+			"clerk",
+			"sess1",
+			"proj1",
+			`${daysAgo(2)}T10:00:00Z`,
+			"claude",
+		);
+		recordInvocation(
+			db,
+			"clerk",
+			"sess2",
+			"proj1",
+			`${daysAgo(2)}T11:00:00Z`,
+			"claude",
+		);
+		recordInvocation(
+			db,
+			"resend",
+			"sess3",
+			"proj2",
+			`${daysAgo(2)}T12:00:00Z`,
+			"cursor",
+		);
 
 		const top = getTopSkills(db, 30);
-		expect(top[0]!.skill_name).toBe("clerk");
-		expect(top[0]!.total).toBe(2);
+		expect(top[0]?.skill_name).toBe("clerk");
+		expect(top[0]?.total).toBe(2);
 	});
 
 	it("getSkillStats counts correctly", () => {
-		recordInvocation(db, "clerk", "s1", null, "2026-03-28T10:00:00Z", "claude");
-		recordInvocation(db, "resend", "s2", null, "2026-03-28T11:00:00Z", "claude");
+		recordInvocation(
+			db,
+			"clerk",
+			"s1",
+			null,
+			`${daysAgo(2)}T10:00:00Z`,
+			"claude",
+		);
+		recordInvocation(
+			db,
+			"resend",
+			"s2",
+			null,
+			`${daysAgo(2)}T11:00:00Z`,
+			"claude",
+		);
 
 		const stats = getSkillStats(db, 30);
 		expect(stats.total).toBe(2);
@@ -202,17 +505,52 @@ describe("skill_invocations (existing)", () => {
 	});
 
 	it("filters by agent", () => {
-		recordInvocation(db, "clerk", "s1", null, "2026-03-28T10:00:00Z", "claude");
-		recordInvocation(db, "clerk", "s2", null, "2026-03-28T11:00:00Z", "cursor");
+		recordInvocation(
+			db,
+			"clerk",
+			"s1",
+			null,
+			`${daysAgo(2)}T10:00:00Z`,
+			"claude",
+		);
+		recordInvocation(
+			db,
+			"clerk",
+			"s2",
+			null,
+			`${daysAgo(2)}T11:00:00Z`,
+			"cursor",
+		);
 
 		expect(getTopSkills(db, 30, undefined, "claude")).toHaveLength(1);
 		expect(getTopSkills(db, 30, undefined, "cursor")).toHaveLength(1);
 	});
 
 	it("deduplicates invocations", () => {
-		recordInvocation(db, "clerk", "s1", null, "2026-03-28T10:00:00Z", "claude");
-		recordInvocation(db, "clerk", "s1", null, "2026-03-28T10:00:00Z", "claude");
-		recordInvocation(db, "clerk", "s1", null, "2026-03-28T10:00:00Z", "claude");
+		recordInvocation(
+			db,
+			"clerk",
+			"s1",
+			null,
+			`${daysAgo(2)}T10:00:00Z`,
+			"claude",
+		);
+		recordInvocation(
+			db,
+			"clerk",
+			"s1",
+			null,
+			`${daysAgo(2)}T10:00:00Z`,
+			"claude",
+		);
+		recordInvocation(
+			db,
+			"clerk",
+			"s1",
+			null,
+			`${daysAgo(2)}T10:00:00Z`,
+			"claude",
+		);
 
 		const removed = deduplicateInvocations(db);
 		expect(removed).toBe(2);
@@ -222,15 +560,24 @@ describe("skill_invocations (existing)", () => {
 
 describe("installed_skills (existing)", () => {
 	let db: Database;
-	beforeEach(() => { db = makeDb(); });
+	beforeEach(() => {
+		db = makeDb();
+	});
 
 	it("upserts and lists skills", () => {
 		upsertInstalledSkill(db, "clerk", "/path/clerk", "global", "1.0.0", 2048);
-		upsertInstalledSkill(db, "resend", "/path/resend", "project", "0.5.0", 1024);
+		upsertInstalledSkill(
+			db,
+			"resend",
+			"/path/resend",
+			"project",
+			"0.5.0",
+			1024,
+		);
 
 		const skills = getInstalledSkills(db);
 		expect(skills).toHaveLength(2);
-		expect(skills[0]!.name).toBe("clerk");
+		expect(skills[0]?.name).toBe("clerk");
 	});
 
 	it("updates on conflict", () => {
@@ -239,7 +586,7 @@ describe("installed_skills (existing)", () => {
 
 		const skills = getInstalledSkills(db);
 		expect(skills).toHaveLength(1);
-		expect(skills[0]!.path).toBe("/new");
-		expect(skills[0]!.version).toBe("2.0.0");
+		expect(skills[0]?.path).toBe("/new");
+		expect(skills[0]?.version).toBe("2.0.0");
 	});
 });

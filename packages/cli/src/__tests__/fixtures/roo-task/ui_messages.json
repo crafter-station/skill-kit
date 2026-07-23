@@ -1,0 +1,32 @@
+[
+	{
+		"ts": 1753146000000,
+		"type": "say",
+		"say": "text",
+		"text": "Starting the task."
+	},
+	{
+		"ts": 1753146010000,
+		"type": "ask",
+		"ask": "tool",
+		"text": "{\"tool\":\"skill\",\"skill\":\"resend\",\"args\":\"send launch email\",\"source\":\"project\",\"description\":\"Send emails with Resend\"}"
+	},
+	{
+		"ts": 1753146020000,
+		"type": "ask",
+		"ask": "tool",
+		"text": "{\"tool\":\"skill\",\"skill\":\"unknown-skill\",\"source\":\"global\"}"
+	},
+	{
+		"ts": 1753146030000,
+		"type": "say",
+		"say": "completion_result",
+		"text": "Email sent."
+	},
+	"garbage-entry",
+	{
+		"type": "ask",
+		"ask": "tool",
+		"text": "{\"tool\":\"skill\",\"skill\":\"deslop\"}"
+	}
+]

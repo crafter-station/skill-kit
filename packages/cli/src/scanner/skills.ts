@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { homedir, platform } from "node:os";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import type { InstalledSkill } from "../types";
+import registry from "./agent-registry.generated.json" with { type: "json" };
 
 interface AgentDef {
 	agent: string;
@@ -9,73 +10,56 @@ interface AgentDef {
 	dirs: string[];
 }
 
-function getSupportedAgents(): AgentDef[] {
-	const os = platform();
+const LEGACY_IDS: Record<string, string> = {
+	"claude-code": "claude",
+	"gemini-cli": "gemini",
+	kilo: "kilocode",
+	"github-copilot": "copilot",
+	"kiro-cli": "kiro",
+};
+
+function resolveRegistryDir(dir: string): string {
 	const home = homedir();
-	const xdgData = process.env.XDG_DATA_HOME || join(home, ".local", "share");
 	const xdgConfig = process.env.XDG_CONFIG_HOME || join(home, ".config");
+	const codexHome = process.env.CODEX_HOME?.trim() || join(home, ".codex");
+	const claudeHome =
+		process.env.CLAUDE_CONFIG_DIR?.trim() || join(home, ".claude");
+	if (dir.startsWith("~/")) return join(home, dir.slice(2));
+	if (dir.startsWith("$XDG_CONFIG/"))
+		return join(xdgConfig, dir.slice("$XDG_CONFIG/".length));
+	if (dir.startsWith("$CODEX_HOME/"))
+		return join(codexHome, dir.slice("$CODEX_HOME/".length));
+	if (dir.startsWith("$CLAUDE_HOME/"))
+		return join(claudeHome, dir.slice("$CLAUDE_HOME/".length));
+	return dir;
+}
 
-	const agents: AgentDef[] = [
-		{
-			agent: "Claude Code",
-			id: "claude",
-			dirs: [join(home, ".claude", "skills")],
-		},
-		{ agent: "Cursor", id: "cursor", dirs: [join(home, ".cursor", "skills")] },
-		{ agent: "Codex", id: "codex", dirs: [join(home, ".codex", "skills")] },
-		{
-			agent: "Gemini CLI",
-			id: "gemini",
-			dirs: [join(home, ".gemini", "skills")],
-		},
-		{
-			agent: "Windsurf",
-			id: "windsurf",
-			dirs: [join(home, ".codeium", "windsurf", "skills")],
-		},
-		{
-			agent: "Amp",
-			id: "amp",
-			dirs: [join(xdgData, "amp", "skills"), join(home, ".amp", "skills")],
-		},
-		{
-			agent: "Continue",
-			id: "continue",
-			dirs: [join(home, ".continue", "skills")],
-		},
-		{ agent: "Goose", id: "goose", dirs: [join(xdgConfig, "goose", "skills")] },
-		{ agent: "Kiro", id: "kiro", dirs: [join(home, ".kiro", "skills")] },
-		{ agent: "Roo Code", id: "roo", dirs: [join(home, ".roo", "skills")] },
-		{
-			agent: "Antigravity",
-			id: "antigravity",
-			dirs: [join(home, ".gemini", "antigravity", "skills")],
-		},
-	];
+function getSupportedAgents(): AgentDef[] {
+	const home = homedir();
+	const agents: AgentDef[] = [];
+	const seenDirs = new Set<string>();
+	const sharedDir = join(home, ".agents", "skills");
 
-	if (os === "win32") {
-		const localAppData =
-			process.env.LOCALAPPDATA || join(home, "AppData", "Local");
+	for (const entry of registry.agents) {
+		if (!entry.globalSkillsDir) continue;
+		const dir = resolveRegistryDir(entry.globalSkillsDir);
+		// Agents whose global dir IS the shared skills.sh dir are covered by
+		// the single "shared" entry below; listing each would double-count.
+		if (dir === sharedDir) continue;
+		if (seenDirs.has(dir)) continue;
+		seenDirs.add(dir);
 		agents.push({
-			agent: "OpenCode",
-			id: "opencode",
-			dirs: [
-				join(localAppData, "opencode", "skills"),
-				join(xdgConfig, "opencode", "skills"),
-			],
-		});
-	} else {
-		agents.push({
-			agent: "OpenCode",
-			id: "opencode",
-			dirs: [
-				join(xdgData, "opencode", "skills"),
-				join(xdgConfig, "opencode", "skills"),
-			],
+			agent: entry.displayName,
+			id: LEGACY_IDS[entry.id] ?? entry.id,
+			dirs: [dir],
 		});
 	}
 
-	const sharedDir = join(home, ".agents", "skills");
+	// OpenCode historically also used the XDG data dir; keep as fallback.
+	const xdgData = process.env.XDG_DATA_HOME || join(home, ".local", "share");
+	const opencode = agents.find((a) => a.id === "opencode");
+	if (opencode) opencode.dirs.push(join(xdgData, "opencode", "skills"));
+
 	if (existsSync(sharedDir)) {
 		agents.push({
 			agent: "skills.sh (shared)",

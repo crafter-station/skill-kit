@@ -1,0 +1,41 @@
+[
+	{
+		"role": "user",
+		"ts": 1753146000000,
+		"content": [
+			{ "type": "text", "text": "<task>Send the launch email</task>" }
+		]
+	},
+	{
+		"role": "assistant",
+		"ts": 1753146010000,
+		"content": [
+			{
+				"type": "text",
+				"text": "<skill>\n<skill>resend</skill>\n<args>send launch email</args>\n</skill>"
+			}
+		]
+	},
+	{
+		"role": "user",
+		"ts": 1753146015000,
+		"content": [
+			{
+				"type": "text",
+				"text": "Skill: resend\nSource: project\n\n--- Skill Instructions ---\n\nUse the Resend API."
+			}
+		]
+	},
+	{
+		"role": "assistant",
+		"ts": 1753146020000,
+		"content": [
+			{
+				"type": "tool_use",
+				"id": "call_1",
+				"name": "skill",
+				"input": { "skill": "deslop" }
+			}
+		]
+	}
+]

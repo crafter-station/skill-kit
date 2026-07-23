@@ -11,12 +11,12 @@ const ITEMS = [
 	{
 		question: "How is this different from Straude?",
 		answer:
-			"Straude tracks Claude Code usage and uploads it to a cloud leaderboard. SkillKit is local-first (your data never leaves your machine), tracks sessions from 5 agents instead of just Claude, and focuses on efficiency rather than rewarding spend.",
+			"Straude tracks Claude Code usage and uploads it to a cloud leaderboard. SkillKit is local-first (your data never leaves your machine), tracks sessions from 14 agents instead of just Claude, and focuses on efficiency rather than rewarding spend.",
 	},
 	{
 		question: "Which AI coding agents are supported?",
 		answer:
-			"Session analytics (burn, sessions, graph): Claude Code, Cursor, Codex, Gemini CLI, and OpenCode, with filters like --claude, --cursor, --codex. Skill discovery (scan, list, health): those plus Windsurf, Amp, Continue, Goose, Kiro, Roo Code, and Antigravity. More session connectors are tracked as open issues on GitHub.",
+			"Session analytics (burn, sessions, graph): Claude Code, Cursor, Codex, Gemini CLI, OpenCode, Windsurf, Cline, Roo Code, Kilo Code, Continue, Goose, Amp, GitHub Copilot CLI, and OpenHands — with per-agent filters like --claude, --cursor, --cline. Skill discovery (scan, list, health) covers the full skills.sh ecosystem: 75 agents via a registry synced from vercel-labs/skills.",
 	},
 	{
 		question: "Is SkillKit free?",

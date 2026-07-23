@@ -38,7 +38,7 @@ const SKILL_PATH_RE = /skills\/([^/]+)\/SKILL\.md/;
 
 function extractSkillFromArgs(args: string): string | null {
 	const match = SKILL_PATH_RE.exec(args);
-	return match ? match[1] : null;
+	return match ? (match[1] ?? null) : null;
 }
 
 export function parseCodexSessionFile(

@@ -1,0 +1,59 @@
+[
+	{
+		"role": "user",
+		"content": [
+			{
+				"type": "text",
+				"text": "<task>\nSend the launch email with the resend skill\n</task>"
+			}
+		]
+	},
+	{
+		"role": "assistant",
+		"content": [
+			{
+				"type": "text",
+				"text": "I'll load the skill first.\n\n<use_skill>\n<skill_name>resend</skill_name>\n</use_skill>"
+			}
+		]
+	},
+	{
+		"role": "user",
+		"content": [
+			{
+				"type": "text",
+				"text": "[use_skill for 'resend'] Result: skill content loaded"
+			}
+		]
+	},
+	{
+		"role": "assistant",
+		"content": [
+			{
+				"type": "tool_use",
+				"id": "toolu_01",
+				"name": "use_skill",
+				"input": { "skill_name": "deslop" }
+			}
+		]
+	},
+	{
+		"role": "assistant",
+		"content": [
+			{
+				"type": "tool_use",
+				"id": "toolu_02",
+				"name": "read_file",
+				"input": { "path": ".agents/skills/tiktok/SKILL.md" }
+			},
+			{
+				"type": "text",
+				"text": "Reading .agents/skills/tiktok/SKILL.md now."
+			}
+		]
+	},
+	{
+		"role": "assistant",
+		"content": "Plain string content mentioning skills/x-momentum/SKILL.md inline."
+	}
+]

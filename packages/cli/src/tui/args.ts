@@ -11,6 +11,10 @@ const AGENT_FLAGS: Record<string, string> = {
 	"--kiro": "kiro",
 	"--roo": "roo",
 	"--antigravity": "antigravity",
+	"--cline": "cline",
+	"--kilocode": "kilocode",
+	"--copilot": "copilot",
+	"--openhands": "openhands",
 };
 
 export function parseAgentFilter(args: string[]): string | undefined {
