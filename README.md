@@ -96,28 +96,38 @@ $ npx @crafter/skillkit prune
 
 ## Data Storage
 
-All data stays on your machine:
-
-| Path | Purpose |
-|------|---------|
-| `~/.skillkit/analytics.db` | SQLite database with invocation history |
-| `~/.claude/skills/` | Claude Code skills (read-only) |
-| `~/.local/share/opencode/skills/` | OpenCode skills (read-only) |
-| `~/.claude/projects/**/*.jsonl` | Claude Code sessions (read-only) |
-| `~/.local/share/opencode/opencode.db` | OpenCode sessions (read-only) |
-
-On Windows, OpenCode paths use `%LOCALAPPDATA%\opencode\`.
+All data stays on your machine. Analytics live in `~/.skillkit/analytics.db`; every agent source below is read-only.
 
 ## Supported Agents
 
-Discovers and tracks skills for **Claude Code** and **OpenCode**.
+Session connectors (skill invocations tracked from local session data):
 
-- **Claude Code** - JSONL sessions (`~/.claude/projects/`)
-- **OpenCode** - SQLite database (`opencode.db`)
+| Agent | Format | Session source |
+|-------|--------|----------------|
+| Claude Code | JSONL | `~/.claude/projects/**/*.jsonl` |
+| OpenCode | SQLite | `opencode.db` (XDG data dir) |
+| Cursor | JSONL | `~/.cursor/projects/**/*.jsonl` |
+| Codex | JSONL | `~/.codex/sessions/**/*.jsonl` |
+| Gemini CLI | JSON | `~/.gemini/tmp/**/chats/session-*.json` |
+| Amp | JSON | `$XDG_DATA_HOME/amp/threads/*.json` (legacy; modern Amp stores threads server-side) |
+| Cline | JSON | VS Code `globalStorage/saoudrizwan.claude-dev/tasks` + `~/.cline/data/tasks` |
+| Roo Code | JSON | VS Code `globalStorage/RooVeterinaryInc.roo-cline/tasks` |
+| Kilo Code | SQLite + JSON | `kilo.db` (XDG data dir) + legacy globalStorage tasks |
+| Continue | JSON | `~/.continue/sessions/*.json` |
+| Goose | SQLite + JSONL | `sessions.db` (XDG data dir) + legacy `*.jsonl` |
+| GitHub Copilot CLI | JSONL | `~/.copilot/session-state/*/events.jsonl` |
+| OpenHands | JSON | `~/.openhands/{conversations,v1_conversations}` |
+| Windsurf | SQLite | `state.vscdb` (Windsurf globalStorage) |
 
-Filter by agent with `--claude` or `--opencode`.
+Filter any command by agent, e.g. `--claude`, `--opencode`, `--cursor`.
 
-**Why only two?** Most agents (Cursor, Windsurf, Copilot, etc.) load skills as context rules injected into the prompt - there's no discrete "Skill" tool invocation in their session data. Claude Code and OpenCode are the only agents that invoke skills through a trackable tool call. If other agents adopt this pattern, adding a connector is straightforward.
+Not trackable yet: **Trae** (closed-source, no documented local conversation storage). Windsurf's native Cascade trajectories (`~/.codeium/windsurf/cascade/*.pb`) are encrypted at rest; the connector reads the VS Code state database instead.
+
+Skill *discovery* (which skills are installed where) covers all 75 agents in the [skills.sh](https://skills.sh) ecosystem via a vendored registry (`agent-registry.generated.json`, re-synced with `bun run scripts/sync-agent-registry.ts`).
+
+### Adding a connector
+
+Each agent is an isometric adapter implementing the `Connector` interface (`packages/cli/src/scanner/connector.ts`): `count()`, `scan()`, plus a `parse*` function tested against fixtures faithful to the agent's real session schema. Register it in `packages/cli/src/scanner/registry.ts` - no other wiring needed.
 
 ## Project Structure
 
