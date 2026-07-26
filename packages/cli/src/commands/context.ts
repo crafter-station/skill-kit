@@ -1,6 +1,6 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 import {
 	type BaselineSource,
 	deleteBaseline,
@@ -128,30 +128,62 @@ function findClaudeMdFiles(cwd: string): ContextSource[] {
 	return sources;
 }
 
-function findContextFiles(cwd: string): ContextSource[] {
+const MAX_IMPORT_DEPTH = 5;
+
+/**
+ * Resolve `@path/to/file.md` imports reachable from the CLAUDE.md files.
+ *
+ * Two properties matter for the token total to be right:
+ *  - each file is counted once, even when several CLAUDE.md files (or a
+ *    chain of imports) reference it, so shared context is not double-billed
+ *  - imports are followed transitively, since an imported file may itself
+ *    import more, and the model pays for the whole closure
+ *
+ * Depth is capped and visited paths are tracked, so an import cycle
+ * terminates instead of recursing forever.
+ */
+export function findContextFiles(cwd: string): ContextSource[] {
 	const sources: ContextSource[] = [];
+	const visited = new Set<string>();
 
 	const claudeMdFiles = findClaudeMdFiles(cwd);
-	for (const claudeMd of claudeMdFiles) {
-		const content = readFileSync(claudeMd.path, "utf-8");
+	for (const claudeMd of claudeMdFiles) visited.add(claudeMd.path);
+
+	const walk = (filePath: string, depth: number): void => {
+		if (depth > MAX_IMPORT_DEPTH) return;
+
+		let content: string;
+		try {
+			content = readFileSync(filePath, "utf-8");
+		} catch {
+			return;
+		}
+
 		const atRefs = content.match(/^@(.+\.md)$/gm);
-		if (!atRefs) continue;
+		if (!atRefs) return;
 
 		for (const ref of atRefs) {
-			const refPath = ref.slice(1);
-			const fullPath = join(dirname(claudeMd.path), refPath);
-			if (existsSync(fullPath)) {
-				const refContent = readFileSync(fullPath, "utf-8");
-				sources.push({
-					name: refPath.replace(/.*\//, ""),
-					path: fullPath,
-					chars: refContent.length,
-					tokens: charsToTokens(refContent.length),
-					type: "claude-md",
-				});
-			}
+			const refPath = ref.slice(1).trim();
+			const fullPath = join(dirname(filePath), refPath);
+			if (visited.has(fullPath)) continue;
+			visited.add(fullPath);
+
+			if (!existsSync(fullPath)) continue;
+
+			const refContent = readFileSync(fullPath, "utf-8");
+			sources.push({
+				name: refPath.replace(/.*\//, ""),
+				path: fullPath,
+				chars: refContent.length,
+				tokens: charsToTokens(refContent.length),
+				type: "claude-md",
+			});
+
+			walk(fullPath, depth + 1);
 		}
-	}
+	};
+
+	for (const claudeMd of claudeMdFiles) walk(claudeMd.path, 0);
 
 	return sources;
 }

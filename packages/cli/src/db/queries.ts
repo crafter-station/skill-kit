@@ -81,13 +81,15 @@ export function getInstalledSkills(db: Database): InstalledSkillRow[] {
 		.all();
 }
 
+// Callers pass null for "no session / no project / no agent" as readily as
+// they omit the argument, and the body already normalizes both to SQL NULL.
 export function recordInvocation(
 	db: Database,
 	skillName: string,
-	sessionId?: string,
-	project?: string,
-	timestamp?: string,
-	agent?: string,
+	sessionId?: string | null,
+	project?: string | null,
+	timestamp?: string | null,
+	agent?: string | null,
 ): void {
 	const ts = timestamp ?? new Date().toISOString();
 	db.run(
