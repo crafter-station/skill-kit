@@ -214,7 +214,8 @@ describe("scanGooseDb (sqlite)", () => {
 			session_id TEXT,
 			project TEXT,
 			success INTEGER DEFAULT 1,
-			agent TEXT
+			agent TEXT,
+			event_id TEXT
 		)`);
 		db.run(`CREATE TABLE IF NOT EXISTS skill_daily_stats (
 			date TEXT NOT NULL,

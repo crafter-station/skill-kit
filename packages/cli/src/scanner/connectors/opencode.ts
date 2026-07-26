@@ -122,6 +122,8 @@ export function scanOpenCodeSessions(
 				timestamp: new Date(row.time_created).toISOString(),
 				sessionId: `oc:${row.session_id}`,
 				agent: "opencode",
+				eventId:
+					typeof data.callID === "string" ? data.callID : undefined,
 			});
 		}
 
