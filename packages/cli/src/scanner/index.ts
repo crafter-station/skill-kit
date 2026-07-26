@@ -52,24 +52,71 @@ export function isSkillName(name: string): boolean {
 	return true;
 }
 
-interface AlreadyTracked {
-	session_id: string;
-	timestamp: string;
-}
-
 function roundTs(ts: string): string {
 	return ts.replace(/\.\d{3}Z$/, "Z");
 }
 
+/**
+ * Dedupe key for a source that carries a stable per-event id.
+ *
+ * Scoped by session because tool-call ids are only unique within a session,
+ * not globally.
+ */
+export function eventKey(
+	skillName: string,
+	sessionId: string,
+	eventId: string,
+): string {
+	return `${skillName}::e:${sessionId}::${eventId}`;
+}
+
+/**
+ * Dedupe key for a source with no stable id, kept for backward compatibility.
+ *
+ * This key assumes timestamps are unique and stable across scans. Neither is
+ * guaranteed: a connector reading the same event from two stores can see it
+ * with different timestamp fidelity, and a source with no per-event time needs
+ * a synthetic one. Prefer eventKey wherever the source provides an id.
+ */
+export function timestampKey(skillName: string, timestamp: string): string {
+	return `${skillName}::${roundTs(timestamp)}`;
+}
+
 export function getTrackedSet(db: Database): Set<string> {
-	const tracked = db
-		.query<{ skill_name: string; timestamp: string }, []>(
-			"SELECT skill_name, timestamp FROM skill_invocations",
-		)
-		.all();
-	return new Set(
-		tracked.map((r) => `${r.skill_name}::${roundTs(r.timestamp)}`),
-	);
+	type TrackedRow = {
+		skill_name: string;
+		timestamp: string;
+		session_id: string | null;
+		event_id: string | null;
+	};
+
+	let tracked: TrackedRow[];
+	try {
+		tracked = db
+			.query<TrackedRow, []>(
+				"SELECT skill_name, timestamp, session_id, event_id FROM skill_invocations",
+			)
+			.all();
+	} catch {
+		// Database predating the event_id column; timestamp keys still apply.
+		tracked = db
+			.query<TrackedRow, []>(
+				"SELECT skill_name, timestamp, session_id, NULL as event_id FROM skill_invocations",
+			)
+			.all();
+	}
+
+	const keys = new Set<string>();
+	for (const r of tracked) {
+		// A row recorded with an event id is tracked under both keys: the strong
+		// one, and the timestamp one so a re-scan that cannot recover the id
+		// still recognizes the row instead of inserting a duplicate.
+		if (r.event_id && r.session_id) {
+			keys.add(eventKey(r.skill_name, r.session_id, r.event_id));
+		}
+		keys.add(timestampKey(r.skill_name, r.timestamp));
+	}
+	return keys;
 }
 
 export interface Invocation {
@@ -77,6 +124,12 @@ export interface Invocation {
 	timestamp: string;
 	sessionId: string;
 	agent?: string;
+	/**
+	 * Stable id for this event from the source itself (tool-call id, event id).
+	 * When present it is what identifies the invocation across scans, so a
+	 * source seen twice with drifting timestamps still dedupes.
+	 */
+	eventId?: string;
 }
 
 export function recordNewInvocations(
@@ -87,19 +140,37 @@ export function recordNewInvocations(
 	let count = 0;
 	for (const inv of invocations) {
 		if (!isSkillName(inv.skillName)) continue;
-		const key = `${inv.skillName}::${roundTs(inv.timestamp)}`;
-		if (!trackedSet.has(key)) {
-			recordInvocation(
-				db,
-				inv.skillName,
-				inv.sessionId,
-				undefined,
-				inv.timestamp,
-				inv.agent,
-			);
-			trackedSet.add(key);
-			count++;
-		}
+
+		const strongKey = inv.eventId
+			? eventKey(inv.skillName, inv.sessionId, inv.eventId)
+			: null;
+		const weakKey = timestampKey(inv.skillName, inv.timestamp);
+
+		// Either key matching means we already have this invocation.
+		//
+		// The event key catches what the timestamp key misses: two views of one
+		// event that disagree on the time. The timestamp key still has to be
+		// honoured even when an id is present, because rows recorded before ids
+		// existed are only tracked under it, and skipping that check would
+		// re-insert every one of them the first time a connector learns to
+		// report an id.
+		if (trackedSet.has(weakKey)) continue;
+		if (strongKey && trackedSet.has(strongKey)) continue;
+
+		const key = strongKey ?? weakKey;
+
+		recordInvocation(
+			db,
+			inv.skillName,
+			inv.sessionId,
+			undefined,
+			inv.timestamp,
+			inv.agent,
+			inv.eventId,
+		);
+		trackedSet.add(key);
+		if (strongKey) trackedSet.add(weakKey);
+		count++;
 	}
 	return count;
 }

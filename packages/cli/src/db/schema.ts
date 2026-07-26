@@ -45,6 +45,9 @@ export function getDb(): Database {
 		db.run("ALTER TABLE skill_invocations ADD COLUMN agent TEXT");
 	} catch {}
 	try {
+		db.run("ALTER TABLE skill_invocations ADD COLUMN event_id TEXT");
+	} catch {}
+	try {
 		db.run(
 			"UPDATE skill_invocations SET agent = 'opencode' WHERE (agent IS NULL OR agent = '') AND session_id LIKE 'oc:%'",
 		);

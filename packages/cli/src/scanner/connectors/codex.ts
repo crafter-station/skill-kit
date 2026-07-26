@@ -86,6 +86,10 @@ export function parseCodexSessionFile(
 				if (name === "exec_command") {
 					const args = (payload.arguments as string) ?? "";
 					const skillName = extractSkillFromArgs(args);
+					// This branch keeps only the first sighting of each skill per
+					// file, so the id recorded is that first command's call_id.
+					// It is stable across scans because the file is replayed in
+					// order, which is what the dedupe key needs.
 					if (skillName && !seenSkills.has(skillName)) {
 						seenSkills.add(skillName);
 						results.push({
@@ -93,6 +97,7 @@ export function parseCodexSessionFile(
 							timestamp,
 							sessionId,
 							agent: "codex",
+							eventId: payload.call_id as string | undefined,
 						});
 					}
 					continue;
@@ -106,6 +111,7 @@ export function parseCodexSessionFile(
 						timestamp,
 						sessionId,
 						agent: "codex",
+						eventId: payload.call_id as string | undefined,
 					});
 				}
 			}
@@ -125,6 +131,7 @@ export function parseCodexSessionFile(
 								timestamp,
 								sessionId,
 								agent: "codex",
+								eventId: (block.call_id ?? block.id) as string | undefined,
 							});
 						}
 					}

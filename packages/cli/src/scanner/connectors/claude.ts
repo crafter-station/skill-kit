@@ -11,6 +11,8 @@ interface ToolUseBlock {
 	type: "tool_use";
 	name: string;
 	input: Record<string, unknown>;
+	/** Anthropic tool-call id, e.g. "toolu_01...". Stable across re-scans. */
+	id?: string;
 }
 
 function extractSkillName(block: ToolUseBlock): string | null {
@@ -114,9 +116,16 @@ export function parseSessionFile(
 				block.type === "tool_use" &&
 				(block as unknown as ToolUseBlock).name === "Skill"
 			) {
-				const skillName = extractSkillName(block as unknown as ToolUseBlock);
+				const toolUse = block as unknown as ToolUseBlock;
+				const skillName = extractSkillName(toolUse);
 				if (skillName) {
-					results.push({ skillName, timestamp, sessionId, agent: "claude" });
+					results.push({
+						skillName,
+						timestamp,
+						sessionId,
+						agent: "claude",
+						eventId: toolUse.id,
+					});
 				}
 			}
 		}

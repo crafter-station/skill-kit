@@ -209,6 +209,7 @@ export function parseContinueSessionFile(
 			timestamp,
 			sessionId,
 			agent: "continue",
+			eventId: callId,
 		});
 	};
 

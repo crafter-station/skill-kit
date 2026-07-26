@@ -127,6 +127,7 @@ export function parseKiloPartData(
 			timestamp: new Date(timeCreated).toISOString(),
 			sessionId: `kilo:${sessionId}`,
 			agent: "kilocode",
+			eventId: typeof data.callID === "string" ? data.callID : undefined,
 		},
 	];
 }

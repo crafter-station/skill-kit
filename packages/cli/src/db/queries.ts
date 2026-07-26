@@ -90,12 +90,29 @@ export function recordInvocation(
 	project?: string | null,
 	timestamp?: string | null,
 	agent?: string | null,
+	eventId?: string | null,
 ): void {
 	const ts = timestamp ?? new Date().toISOString();
-	db.run(
-		"INSERT INTO skill_invocations (skill_name, timestamp, session_id, project, agent) VALUES (?, ?, ?, ?, ?)",
-		[skillName, ts, sessionId ?? null, project ?? null, agent ?? null],
-	);
+	try {
+		db.run(
+			"INSERT INTO skill_invocations (skill_name, timestamp, session_id, project, agent, event_id) VALUES (?, ?, ?, ?, ?, ?)",
+			[
+				skillName,
+				ts,
+				sessionId ?? null,
+				project ?? null,
+				agent ?? null,
+				eventId ?? null,
+			],
+		);
+	} catch {
+		// A database that never went through getDb() has no event_id column.
+		// Recording the invocation matters more than recording its id.
+		db.run(
+			"INSERT INTO skill_invocations (skill_name, timestamp, session_id, project, agent) VALUES (?, ?, ?, ?, ?)",
+			[skillName, ts, sessionId ?? null, project ?? null, agent ?? null],
+		);
+	}
 	const date = ts.slice(0, 10);
 	db.run(
 		"INSERT INTO skill_daily_stats (date, skill_name, count) VALUES (?, ?, 1) ON CONFLICT(date, skill_name) DO UPDATE SET count = count + 1",

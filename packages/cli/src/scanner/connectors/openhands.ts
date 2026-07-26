@@ -37,6 +37,16 @@ function extractSkillFromArgs(args: string): string | null {
 	return match ? (match[1] ?? null) : null;
 }
 
+/**
+ * Stable id for one event file.
+ *
+ * Both layouts name the file after the event, so the basename identifies the
+ * event even when the JSON carries no id of its own.
+ */
+function eventIdForEventFile(filePath: string): string {
+	return basename(filePath).replace(/\.json$/, "");
+}
+
 function sessionIdForEventFile(filePath: string): string {
 	const parent = dirname(filePath);
 	// CLI/SDK layout: <conversations>/<cid>/events/event-*.json
@@ -75,6 +85,8 @@ export function parseOpenHandsEventFile(
 			? obj.timestamp
 			: new Date().toISOString();
 	const kind = obj.kind as string | undefined;
+	const baseEventId =
+		typeof obj.id === "string" && obj.id ? obj.id : eventIdForEventFile(filePath);
 
 	if (kind === "MessageEvent") {
 		const activated = obj.activated_skills;
@@ -88,6 +100,7 @@ export function parseOpenHandsEventFile(
 					timestamp,
 					sessionId,
 					agent: "openhands",
+					eventId: `${baseEventId}#${name}`,
 				});
 			}
 		}
@@ -116,6 +129,7 @@ export function parseOpenHandsEventFile(
 				timestamp,
 				sessionId,
 				agent: "openhands",
+				eventId: baseEventId,
 			});
 			return results;
 		}
@@ -126,6 +140,7 @@ export function parseOpenHandsEventFile(
 				timestamp,
 				sessionId,
 				agent: "openhands",
+				eventId: baseEventId,
 			});
 		}
 	}
