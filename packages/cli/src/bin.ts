@@ -48,8 +48,13 @@ function printHelp(): void {
     ${dim("burn")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("burn")} ${cyan("--plan N")}             Monthly plan cost in USD (default: 200)
     ${dim("burn")} ${cyan("--json")}               JSON output
-    ${dim("context")} ${cyan("--opus/--haiku")}      Model pricing (default: sonnet)
+    ${dim("context")} ${cyan("--sonnet/--haiku")}    Model pricing (default: opus)
     ${dim("context")} ${cyan("--turns N")}          Avg turns per session (default: 40)
+    ${dim("context")} ${cyan("--mcp")}              Measure MCP server tool schemas
+    ${dim("context")} ${cyan("--mcp-timeout N")}    Per-server probe timeout in s (default: 20)
+    ${dim("context")} ${cyan("--save-baseline <n>")} Save current measurement as baseline
+    ${dim("context")} ${cyan("--compare <n>")}      Diff against a saved baseline
+    ${dim("context")} ${cyan("--list-baselines")}   List saved baselines
     ${dim("context")} ${cyan("--json")}             JSON output
     ${dim("any")}   ${cyan("--claude")}             Only scan Claude Code
     ${dim("any")}   ${cyan("--cursor")}             Only scan Cursor
