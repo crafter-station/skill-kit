@@ -168,14 +168,43 @@ const unmappedModelsWarned = new Set<string>();
 
 const INTERNAL_MODELS = /^<.*>$|^synthetic$|^test$|^unknown$/i;
 
-function getPricing(model: string): ModelPricing {
+/**
+ * Standard cache multipliers, used when a model has no published cache
+ * pricing of its own: a cache write costs 1.25x input, a cache read 0.1x.
+ *
+ * Most entries in MODEL_PRICING (every non-Anthropic one) omit cacheCreate
+ * and cacheRead. Reading those straight off the record yields `undefined`,
+ * and `tokens * undefined` is NaN, which then propagates through every
+ * running total it touches and silently voids the whole cost report.
+ */
+const CACHE_WRITE_MULTIPLIER = 1.25;
+const CACHE_READ_MULTIPLIER = 0.1;
+
+/** Pricing with every cost field guaranteed present. */
+type ResolvedPricing = Required<
+	Pick<ModelPricing, "input" | "output" | "cacheCreate" | "cacheRead">
+> &
+	Pick<ModelPricing, "avgIn" | "avgOut">;
+
+function resolvePricing(pricing: ModelPricing): ResolvedPricing {
+	return {
+		input: pricing.input,
+		output: pricing.output,
+		cacheCreate: pricing.cacheCreate ?? pricing.input * CACHE_WRITE_MULTIPLIER,
+		cacheRead: pricing.cacheRead ?? pricing.input * CACHE_READ_MULTIPLIER,
+		avgIn: pricing.avgIn,
+		avgOut: pricing.avgOut,
+	};
+}
+
+export function getPricing(model: string): ResolvedPricing {
 	for (const [key, pricing] of Object.entries(MODEL_PRICING)) {
-		if (model.includes(key)) return pricing;
+		if (model.includes(key)) return resolvePricing(pricing);
 	}
 	if (!INTERNAL_MODELS.test(model) && !unmappedModelsWarned.has(model)) {
 		unmappedModelsWarned.add(model);
 	}
-	return FALLBACK_PRICING;
+	return resolvePricing(FALLBACK_PRICING);
 }
 
 
