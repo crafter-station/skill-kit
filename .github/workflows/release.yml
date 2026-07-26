@@ -58,6 +58,12 @@ jobs:
         working-directory: .
         run: bun install --frozen-lockfile
 
+      # The published skill must not advertise a version it does not describe.
+      - name: Check skill version matches
+        if: steps.version.outputs.changed == 'true'
+        working-directory: .
+        run: bun run skill:version
+
       - name: Publish
         if: steps.version.outputs.changed == 'true'
         run: npm publish --access public
