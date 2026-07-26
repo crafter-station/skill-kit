@@ -22,12 +22,17 @@ AI coding agents load skills into their context window on every session. More sk
 | `list` | List installed skills with size and context budget |
 | `health` | Health check: unused skills, context budget, DB |
 | `prune` | Remove unused skills to reclaim context budget |
+| `context` | Context tax: tokens and cost loaded on every API call |
+| `burn` | Token burn rate and cost across agents |
 | `scan` | Force re-scan (runs automatically, rarely needed) |
 
 ### Flags
 
 | Flag | Applies to | Description |
 |------|-----------|-------------|
+| `--mcp` | context | Measure MCP server tool schemas (spawns each server) |
+| `--compare <name>` | context | Diff against a saved baseline |
+| `--save-baseline <name>` | context | Save the current measurement |
 | `--days N` | stats | Time range in days (default: 30) |
 | `--all` | stats | Show all skills, not just top 10 |
 | `--include-commands` | scan | Also track slash commands |

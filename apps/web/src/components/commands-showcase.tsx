@@ -8,7 +8,10 @@ type Command = {
 	name: string;
 	cmd: string;
 	description: string;
-	lines: Array<{ text: string; type: "dim" | "white" | "accent" | "header" | "empty" }>;
+	lines: Array<{
+		text: string;
+		type: "dim" | "white" | "accent" | "header" | "empty";
+	}>;
 };
 
 const COMMANDS: Command[] = [
@@ -70,29 +73,78 @@ const COMMANDS: Command[] = [
 			{ text: "  This week:         $999 vs $6,034 (-83%)", type: "white" },
 			{ text: "", type: "empty" },
 			{ text: "  TOP SKILLS", type: "header" },
-			{ text: "  ray              ████████████████  364  \u2585\u2583\u2588", type: "accent" },
-			{ text: "  trigger-video    ███████████       275  \u2581\u2585\u2583\u2588", type: "white" },
-			{ text: "  recall           ██████            184  \u2581\u2581\u2585\u2583\u2588", type: "dim" },
+			{
+				text: "  ray              ████████████████  364  \u2585\u2583\u2588",
+				type: "accent",
+			},
+			{
+				text: "  trigger-video    ███████████       275  \u2581\u2585\u2583\u2588",
+				type: "white",
+			},
+			{
+				text: "  recall           ██████            184  \u2581\u2581\u2585\u2583\u2588",
+				type: "dim",
+			},
 		],
 	},
 	{
 		name: "context",
-		cmd: "skillkit context --opus",
+		cmd: "skillkit context --mcp",
 		description: "Context tax: tokens + cost loaded on every API call",
 		lines: [
-			{ text: "  CONTEXT TAX — opus pricing, 40 turns/session", type: "header" },
+			{
+				text: "  CONTEXT TAX — opus pricing, 40 turns/session",
+				type: "header",
+			},
 			{ text: "", type: "empty" },
 			{ text: "  ALWAYS LOADED (every API call)", type: "header" },
-			{ text: "  CLAUDE.md + refs        12.5K tokens   $0.0188", type: "white" },
-			{ text: "  Skills metadata          2.6K tokens   $0.0039", type: "white" },
-			{ text: "  Memory (MEMORY.md)       3.9K tokens   $0.0058", type: "white" },
+			{
+				text: "  CLAUDE.md + refs        12.5K tokens   $0.0187",
+				type: "white",
+			},
+			{
+				text: "  Skills metadata          2.3K tokens   $0.0034",
+				type: "white",
+			},
+			{
+				text: "  Memory (MEMORY.md)       4.1K tokens   $0.0061",
+				type: "white",
+			},
+			{
+				text: "  MCP tool schemas        46.0K tokens   $0.0690",
+				type: "white",
+			},
 			{ text: "  ────────────────────────────────────────────", type: "dim" },
-			{ text: "  Total                   19.0K tokens   $0.0285/call", type: "accent" },
+			{
+				text: "  Total                   64.8K tokens   $0.0972/call",
+				type: "accent",
+			},
+			{ text: "", type: "empty" },
+			{ text: "  MCP SERVERS (8/15 measured)", type: "header" },
+			{ text: "  firecrawl (26)   ███████████████  18.9K", type: "white" },
+			{ text: "  trigger (37)     ██████████░░░░░  12.8K", type: "white" },
+			{ text: "  google-calendar  ███████░░░░░░░░   9.4K", type: "white" },
 			{ text: "", type: "empty" },
 			{ text: "  SESSION ESTIMATE (40 turns)", type: "header" },
-			{ text: "  With prompt caching     $1.29", type: "accent" },
-			{ text: "  Without caching         $10.04", type: "white" },
+			{ text: "  With prompt caching     $5.01", type: "accent" },
+			{ text: "  Without caching         $38.88", type: "white" },
 			{ text: "  Cache savings           87%", type: "dim" },
+		],
+	},
+	{
+		name: "drift",
+		cmd: "skillkit context --compare pre-pack",
+		description: "Diff context against a saved baseline to catch growth",
+		lines: [
+			{ text: '  CONTEXT DRIFT (vs "pre-pack", 6d ago)', type: "header" },
+			{ text: "", type: "empty" },
+			{ text: "  Total      18.8K → 64.8K   +46.0K (+244%)", type: "accent" },
+			{ text: "", type: "empty" },
+			{ text: "  + firecrawl              new   +18.9K", type: "white" },
+			{ text: "  + trigger                new   +12.8K", type: "white" },
+			{ text: "  + google-calendar        new    +9.4K", type: "white" },
+			{ text: "  ~ ./CLAUDE.md      6.5K → 6.7K    +191", type: "white" },
+			{ text: "  - removed-skill         gone     -412", type: "dim" },
 		],
 	},
 	{
@@ -108,9 +160,18 @@ const COMMANDS: Command[] = [
 			{ text: "  ⚠ 6 skills never used in 30d", type: "white" },
 			{ text: "    Run: skillkit prune", type: "dim" },
 			{ text: "", type: "empty" },
-			{ text: "  [███░░░░░░░] 34% metadata budget (5.4K / 16.0K)", type: "white" },
-			{ text: "    name + description of each skill, loaded at startup", type: "dim" },
-			{ text: "  ● Total skill content: 103.8K chars (loaded on-demand)", type: "white" },
+			{
+				text: "  [███░░░░░░░] 34% metadata budget (5.4K / 16.0K)",
+				type: "white",
+			},
+			{
+				text: "    name + description of each skill, loaded at startup",
+				type: "dim",
+			},
+			{
+				text: "  ● Total skill content: 103.8K chars (loaded on-demand)",
+				type: "white",
+			},
 			{ text: "", type: "empty" },
 			{ text: "  ⚠ 1 skill exceeds 500-line recommendation", type: "white" },
 			{ text: "    Split SKILL.md into referenced files", type: "dim" },
@@ -124,16 +185,37 @@ const COMMANDS: Command[] = [
 			{ text: "  CONTRIBUTION GRAPH (all agents)", type: "header" },
 			{ text: "", type: "empty" },
 			{ text: "       Oct   Nov    Dec   Jan   Feb   Mar", type: "dim" },
-			{ text: "                                    \u2593\u2593", type: "white" },
-			{ text: "  Mon                             \u2591 \u2588\u2593", type: "accent" },
-			{ text: "                                  \u2592\u2591\u2592", type: "white" },
+			{
+				text: "                                    \u2593\u2593",
+				type: "white",
+			},
+			{
+				text: "  Mon                             \u2591 \u2588\u2593",
+				type: "accent",
+			},
+			{
+				text: "                                  \u2592\u2591\u2592",
+				type: "white",
+			},
 			{ text: "  Wed                               \u2588", type: "accent" },
-			{ text: "                                  \u2591\u2591\u2593", type: "white" },
-			{ text: "  Fri                             \u2591\u2592\u2588", type: "accent" },
-			{ text: "                                  \u2592\u2592\u2588", type: "white" },
+			{
+				text: "                                  \u2591\u2591\u2593",
+				type: "white",
+			},
+			{
+				text: "  Fri                             \u2591\u2592\u2588",
+				type: "accent",
+			},
+			{
+				text: "                                  \u2592\u2592\u2588",
+				type: "white",
+			},
 			{ text: "", type: "empty" },
 			{ text: "  Active days: 18  Total: $7,859", type: "white" },
-			{ text: "  \u2591 <$54  \u2592 $292  \u2593 $855  \u2588 >$855", type: "dim" },
+			{
+				text: "  \u2591 <$54  \u2592 $292  \u2593 $855  \u2588 >$855",
+				type: "dim",
+			},
 		],
 	},
 	{
