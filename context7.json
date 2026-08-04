@@ -1,0 +1,12 @@
+{
+  "projectTitle": "skillkit",
+  "description": "Local-first observability CLI for AI agent skills: usage analytics, context budget, trigger conflict detection, dead weight coverage, and cost/burn analysis across Claude Code, Cursor, Codex, and 15+ agents.",
+  "folders": [],
+  "excludeFolders": ["node_modules", "dist", ".next"],
+  "rules": [
+    "Install as @crafter/skillkit, not skillkit",
+    "Requires Bun as the runtime; run with bunx @crafter/skillkit",
+    "Run skillkit scan before stats, health, or graph to build the local database",
+    "prune is a dry run by default; pass --yes to actually delete skills"
+  ]
+}
