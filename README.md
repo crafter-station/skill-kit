@@ -31,6 +31,7 @@ AI coding agents load skills into their context window on every session. More sk
 | Flag | Applies to | Description |
 |------|-----------|-------------|
 | `--mcp` | context | Measure MCP server tool schemas (spawns each server) |
+| `--mcp-timeout N` | context | Timeout in seconds per MCP server (default: 20s; server skipped on timeout) |
 | `--compare <name>` | context | Diff against a saved baseline |
 | `--save-baseline <name>` | context | Save the current measurement |
 | `--days N` | stats | Time range in days (default: 30) |
