@@ -31,6 +31,7 @@ AI coding agents load skills into their context window on every session. More sk
 | Flag | Applies to | Description |
 |------|-----------|-------------|
 | `--mcp` | context | Measure MCP server tool schemas (spawns each server) |
+| `--mcp-timeout N` | context | Per-server probe timeout in seconds (default: 20) |
 | `--compare <name>` | context | Diff against a saved baseline |
 | `--save-baseline <name>` | context | Save the current measurement |
 | `--days N` | stats | Time range in days (default: 30) |
@@ -38,6 +39,9 @@ AI coding agents load skills into their context window on every session. More sk
 | `--include-commands` | scan | Also track slash commands |
 | `--claude` | any | Only scan Claude Code |
 | `--opencode` | any | Only scan OpenCode |
+
+When an MCP server does not answer within `--mcp-timeout`, it is skipped and
+reported as timed out; the command does not hang waiting for it.
 
 Install skills via [skills.sh](https://skills.sh): `npx skills add <owner/repo>`
 
