@@ -18,12 +18,18 @@ AI coding agents load skills into their context window on every session. More sk
 
 | Command | Description |
 |---------|-------------|
+| `auto` | Auto-scan after Claude Code sessions |
 | `stats` | Usage analytics with sparklines (auto-scans on first run) |
 | `list` | List installed skills with size and context budget |
 | `health` | Health check: unused skills, context budget, DB |
+| `trace` | Run and record skill execution traces |
+| `conflicts` | Test skills for trigger collisions |
+| `coverage` | Analyze dead weight in a skill |
 | `prune` | Remove unused skills to reclaim context budget |
 | `context` | Context tax: tokens and cost loaded on every API call |
 | `burn` | Token burn rate and cost across agents |
+| `sessions` | Daily usage across all agents |
+| `graph` | 52-week contribution heatmap |
 | `scan` | Force re-scan (runs automatically, rarely needed) |
 
 ### Flags
