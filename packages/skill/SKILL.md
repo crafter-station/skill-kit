@@ -1,6 +1,6 @@
 ---
 name: skillkit
-version: 0.11.0
+version: 0.11.2
 description: "Local-first analytics for AI agent skills. Use when user asks about skill usage, analytics, health, context budget, MCP context cost, token burn rate, or wants to clean up unused skills."
 ---
 
