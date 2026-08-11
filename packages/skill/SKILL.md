@@ -24,6 +24,7 @@ Run with `npx @crafter/skillkit <command>`, or install globally (`npm i -g @craf
 
 - `context` - Tokens and cost loaded on every API call: CLAUDE.md and its imports, skill metadata, memory (alias: `ctx`)
 - `context --mcp` - Also measure MCP server tool schemas. Often the largest slice, and invisible without this flag. Spawns each configured server to read its tool list, so it takes a few seconds
+- `context --mcp-timeout N` - Set the per-server probe timeout in seconds (default: 20). Timed-out servers are skipped and reported as timed out
 - `context --save-baseline <name>` - Save the current measurement
 - `context --compare <name>` - Diff against a saved baseline to see what grew and why
 - `context --list-baselines` / `context --delete-baseline <name>`
