@@ -1,7 +1,6 @@
 import {
 	existsSync,
 	lstatSync,
-	readdirSync,
 	readFileSync,
 	rmSync,
 	unlinkSync,
@@ -14,61 +13,86 @@ import { getDb } from "../db/schema";
 import { scanInstalledSkills } from "../scanner/skills";
 import { bold, cyan, dim, red, yellow } from "../tui/colors";
 
-const HOME = homedir();
-const LOCK_PATH = join(HOME, ".agents", ".skill-lock.json");
+/** Prefer HOME so tests can isolate; Bun caches os.homedir() at process start. */
+function getHome(): string {
+	return process.env.HOME || homedir();
+}
 
-const AGENT_SKILL_DIRS = [
-	join(HOME, ".claude", "skills"),
-	join(HOME, ".cursor", "skills"),
-	join(HOME, ".codex", "skills"),
-	join(HOME, ".codeium", "windsurf", "skills"),
-	join(HOME, ".config", "amp", "skills"),
-	join(HOME, ".config", "opencode", "skills"),
-	join(HOME, ".copilot", "skills"),
-	join(HOME, ".pi", "agent", "skills"),
-	join(HOME, ".gemini", "antigravity", "skills"),
-];
+function getLockPath(): string {
+	return join(getHome(), ".agents", ".skill-lock.json");
+}
 
-function removeFromLockFile(skillName: string): void {
-	if (!existsSync(LOCK_PATH)) return;
+function getAgentSkillDirs(): string[] {
+	const home = getHome();
+	return [
+		join(home, ".claude", "skills"),
+		join(home, ".cursor", "skills"),
+		join(home, ".codex", "skills"),
+		join(home, ".codeium", "windsurf", "skills"),
+		join(home, ".config", "amp", "skills"),
+		join(home, ".config", "opencode", "skills"),
+		join(home, ".copilot", "skills"),
+		join(home, ".pi", "agent", "skills"),
+		join(home, ".gemini", "antigravity", "skills"),
+	];
+}
+
+function readLockData(): { skills?: Record<string, unknown> } | null {
+	const lockPath = getLockPath();
+	if (!existsSync(lockPath)) return null;
 	try {
-		const data = JSON.parse(readFileSync(LOCK_PATH, "utf-8"));
-		if (data.skills && data.skills[skillName]) {
-			delete data.skills[skillName];
-			writeFileSync(LOCK_PATH, JSON.stringify(data, null, 2) + "\n", "utf-8");
+		const parsed: unknown = JSON.parse(readFileSync(lockPath, "utf-8"));
+		if (
+			parsed === null ||
+			typeof parsed !== "object" ||
+			Array.isArray(parsed)
+		) {
+			return {};
 		}
-	} catch {
-		/* empty */
+		return parsed as { skills?: Record<string, unknown> };
+	} catch (error) {
+		console.error(
+			red(`Warning: could not read ${lockPath}: ${(error as Error).message}`),
+		);
+		return null;
 	}
 }
 
-function removeSymlinks(skillName: string): number {
+export function removeFromLockFile(skillName: string): void {
+	const lockPath = getLockPath();
+	const data = readLockData();
+	if (data === null) return;
+	if (data.skills?.[skillName]) {
+		delete data.skills[skillName];
+		writeFileSync(lockPath, `${JSON.stringify(data, null, 2)}\n`, "utf-8");
+	}
+}
+
+export function removeSymlinks(skillName: string): number {
 	let cleaned = 0;
-	for (const agentDir of AGENT_SKILL_DIRS) {
+	for (const agentDir of getAgentSkillDirs()) {
 		const linkPath = join(agentDir, skillName);
-		if (!existsSync(linkPath)) continue;
 		try {
 			const stat = lstatSync(linkPath);
 			if (stat.isSymbolicLink()) {
 				unlinkSync(linkPath);
 				cleaned++;
 			}
-		} catch {
-			/* empty */
+		} catch (error) {
+			const err = error as NodeJS.ErrnoException;
+			if (err.code === "ENOENT") continue;
+			console.error(
+				yellow(`Warning: could not remove symlink ${linkPath}: ${err.message}`),
+			);
 		}
 	}
 	return cleaned;
 }
 
-function isRegistrySkill(skillName: string): boolean {
-	if (!existsSync(LOCK_PATH)) return false;
-	try {
-		const data = JSON.parse(readFileSync(LOCK_PATH, "utf-8"));
-		return !!(data.skills && data.skills[skillName]);
-	} catch {
-		/* empty */
-	}
-	return false;
+export function isRegistrySkill(skillName: string): boolean {
+	const data = readLockData();
+	if (data === null) return false;
+	return !!data.skills?.[skillName];
 }
 
 function removeSkillClean(name: string, path: string): boolean {
@@ -80,7 +104,7 @@ function removeSkillClean(name: string, path: string): boolean {
 		}
 		rmSync(path, { recursive: true, force: true });
 		if (isRegistry) {
-			const canonicalPath = join(HOME, ".agents", "skills", name);
+			const canonicalPath = join(getHome(), ".agents", "skills", name);
 			if (existsSync(canonicalPath) && canonicalPath !== path) {
 				rmSync(canonicalPath, { recursive: true, force: true });
 			}
