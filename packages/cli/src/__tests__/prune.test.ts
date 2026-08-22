@@ -155,4 +155,22 @@ describe("prune helpers", () => {
 		expect(errorSpy).not.toHaveBeenCalled();
 		expect(existsSync(lockPath())).toBe(false);
 	});
+
+	it("rejects traversal names without touching outside symlinks", () => {
+		const cursorDir = join(tmpHome, ".cursor");
+		const outsideTarget = join(tmpHome, "outside-target");
+		const outsideLink = join(cursorDir, "outside-link");
+		mkdirSync(cursorDir, { recursive: true });
+		mkdirSync(outsideTarget);
+		symlinkSync(outsideTarget, outsideLink);
+
+		expect(removeSymlinks("../outside-link")).toBe(0);
+		expect(lstatSync(outsideLink).isSymbolicLink()).toBe(true);
+		expect(removeSymlinks("..\\outside-link")).toBe(0);
+		expect(lstatSync(outsideLink).isSymbolicLink()).toBe(true);
+		expect(errorSpy).toHaveBeenCalledTimes(2);
+		expect(String(errorSpy.mock.calls[0]?.[0] ?? "")).toContain(
+			"unsafe skill name",
+		);
+	});
 });
