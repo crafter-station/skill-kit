@@ -7,7 +7,7 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { getTopSkills } from "../db/queries";
 import { getDb } from "../db/schema";
 import { scanInstalledSkills } from "../scanner/skills";
@@ -35,6 +35,23 @@ function getAgentSkillDirs(): string[] {
 		join(home, ".pi", "agent", "skills"),
 		join(home, ".gemini", "antigravity", "skills"),
 	];
+}
+
+function isSafeSkillName(skillName: string): boolean {
+	return (
+		skillName.length > 0 &&
+		skillName !== "." &&
+		skillName !== ".." &&
+		!skillName.includes("/") &&
+		!skillName.includes("\\") &&
+		basename(skillName) === skillName
+	);
+}
+
+function warnUnsafeSkillName(skillName: string): void {
+	console.error(
+		red(`Warning: refusing unsafe skill name ${JSON.stringify(skillName)}`),
+	);
 }
 
 function readLockData(): { skills?: Record<string, unknown> } | null {
@@ -69,6 +86,10 @@ export function removeFromLockFile(skillName: string): void {
 }
 
 export function removeSymlinks(skillName: string): number {
+	if (!isSafeSkillName(skillName)) {
+		warnUnsafeSkillName(skillName);
+		return 0;
+	}
 	let cleaned = 0;
 	for (const agentDir of getAgentSkillDirs()) {
 		const linkPath = join(agentDir, skillName);
@@ -96,6 +117,10 @@ export function isRegistrySkill(skillName: string): boolean {
 }
 
 function removeSkillClean(name: string, path: string): boolean {
+	if (!isSafeSkillName(name)) {
+		warnUnsafeSkillName(name);
+		return false;
+	}
 	try {
 		const isRegistry = isRegistrySkill(name);
 		if (isRegistry) {
