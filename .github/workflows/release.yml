@@ -64,6 +64,16 @@ jobs:
         working-directory: .
         run: bun run skill:version
 
+      - name: Validate
+        if: steps.version.outputs.changed == 'true'
+        working-directory: .
+        run: |
+          bun run type-check
+          bun test packages/cli/src
+          bun run build:cli
+          packages/cli/dist/skillkit skills get core --full > /dev/null
+          bun run packages/cli/src/bin.ts audit skills/skillkit packages/cli/src/skill-data/core --strict
+
       - name: Publish
         if: steps.version.outputs.changed == 'true'
         run: npm publish --access public

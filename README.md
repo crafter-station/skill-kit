@@ -18,10 +18,12 @@ AI coding agents load skills into their context window on every session. More sk
 
 | Command | Description |
 |---------|-------------|
+| `skills` | Load guidance matched to the installed CLI version |
 | `auto` | Auto-scan after Claude Code sessions |
 | `stats` | Usage analytics with sparklines (auto-scans on first run) |
 | `list` | List installed skills with size and context budget |
 | `health` | Health check: unused skills, context budget, DB |
+| `audit` | Audit any skill or pack against Agent Skills best practices |
 | `trace` | Run and record skill execution traces |
 | `conflicts` | Test skills for trigger collisions |
 | `coverage` | Analyze dead weight in a skill |
@@ -36,6 +38,7 @@ AI coding agents load skills into their context window on every session. More sk
 
 | Flag | Applies to | Description |
 |------|-----------|-------------|
+| `--full` | skills | Include the complete bundled command reference |
 | `--mcp` | context | Measure MCP server tool schemas (spawns each server) |
 | `--mcp-timeout N` | context | Per-server probe timeout in seconds (default: 20) |
 | `--compare <name>` | context | Diff against a saved baseline |
@@ -43,20 +46,33 @@ AI coding agents load skills into their context window on every session. More sk
 | `--days N` | stats | Time range in days (default: 30) |
 | `--all` | stats | Show all skills, not just top 10 |
 | `--include-commands` | scan | Also track slash commands |
+| `--include <glob>` | audit | Audit only matching skills in a pack |
+| `--strict` | audit | Exit 1 when warnings or errors are found |
 | `--claude` | any | Only scan Claude Code |
 | `--opencode` | any | Only scan OpenCode |
 
 When an MCP server does not answer within `--mcp-timeout`, it is skipped and
 reported as timed out; the command does not hang waiting for it.
 
-Install skills via [skills.sh](https://skills.sh): `npx skills add <owner/repo>`
+Install skills via [skills.sh](https://skills.sh): `bunx skills add <owner/repo>`
+
+### Version-matched agent guidance
+
+The installable `skillkit` skill is a thin discovery stub. It asks the agent to load the canonical workflow from the installed CLI, so guidance cannot silently drift from command behavior:
+
+```bash
+skillkit skills get core
+skillkit skills get core --full
+```
+
+The first command returns the operating workflow. `--full` adds exact flags, JSON behavior, safety notes, data locations, and the complete command catalog. Both bundled skill files are checked against the CLI package version during release.
 
 ## Use as a Skill
 
 Install skillkit as a skill so the agent can run analytics commands for you:
 
 ```bash
-npx skills add crafter-station/skills --skill skillkit
+bunx skills add crafter-station/skill-kit --skill skillkit
 ```
 
 Then ask your agent things like "which skills do I use the most?" or "clean up unused skills" and it will run the right commands.
@@ -94,6 +110,19 @@ $ npx @crafter/skillkit health
   [████████░░] 78% metadata budget (12.5K / 16.0K)
   ! 3 skills unused in 30d - run skillkit prune
 ```
+
+### Audit
+
+Audits one skill, multiple skill paths, or an entire repository without installing it. Reports eager metadata cost, activation cost, on-demand reference cost, bundled files, broken pointers, unreferenced files, progressive disclosure gaps, and possible description overlaps.
+
+```bash
+skillkit audit ./skills
+skillkit audit ./skills/testing ./skills/release
+skillkit audit ./skills --include "rn-*"
+skillkit audit ./skills --json --strict
+```
+
+`--strict` is intended for CI. Token counts are local estimates based on character length.
 
 ### Prune
 
@@ -149,8 +178,8 @@ Each agent is an isometric adapter implementing the `Connector` interface (`pack
 ```
 skill-kit/
 ├── apps/web/          # Landing page (Next.js)
-├── packages/cli/      # CLI tool (Bun, zero deps)
-└── packages/skill/    # Skill definition (SKILL.md)
+├── packages/cli/      # CLI and bundled version-matched skill content
+└── skills/skillkit/   # Thin installable discovery stub
 ```
 
 ## Development

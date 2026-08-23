@@ -1,6 +1,7 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { auditSkill } from "../audit/analyzer";
 import { getTopSkills } from "../db/queries";
 import { getDb } from "../db/schema";
 import { getDetectedAgents, scanInstalledSkills } from "../scanner/skills";
@@ -8,6 +9,7 @@ import { bold, dim, green, red, yellow } from "../tui/colors";
 
 const METADATA_BUDGET = 16000;
 const BODY_LINE_LIMIT = 500;
+const BODY_TOKEN_LIMIT = 5000;
 
 function check(label: string) {
 	return `  ${green("✓")} ${label}`;
@@ -21,32 +23,6 @@ function info(label: string) {
 	return `  ${dim("●")} ${label}`;
 }
 
-function parseFrontmatter(content: string): {
-	name: string;
-	description: string;
-	bodyLines: number;
-} {
-	const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
-	if (!match)
-		return { name: "", description: "", bodyLines: content.split("\n").length };
-
-	const yaml = match[1] ?? "";
-	const body = content.slice(match[0].length);
-	const bodyLines = body.trim() ? body.trim().split("\n").length : 0;
-
-	let name = "";
-	let description = "";
-
-	const nameMatch = yaml.match(/^name:\s*(.+)$/m);
-	if (nameMatch?.[1]) name = nameMatch[1].trim().replace(/^["']|["']$/g, "");
-
-	const descMatch = yaml.match(/^description:\s*(.+)$/m);
-	if (descMatch?.[1])
-		description = descMatch[1].trim().replace(/^["']|["']$/g, "");
-
-	return { name, description, bodyLines };
-}
-
 export async function runHealth(): Promise<void> {
 	const args = process.argv.slice(3);
 	const isJson = args.includes("--json");
@@ -58,30 +34,34 @@ export async function runHealth(): Promise<void> {
 	let totalMetadataChars = 0;
 	let totalBodyChars = 0;
 	const oversizedSkills: Array<{ name: string; lines: number }> = [];
+	const tokenHeavySkills: Array<{ name: string; tokens: number }> = [];
 	const longDescSkills: Array<{ name: string; chars: number }> = [];
 
 	for (const skill of skills) {
 		const skillMdPath = join(skill.path, "SKILL.md");
 		if (!existsSync(skillMdPath)) continue;
 		try {
-			const content = readFileSync(skillMdPath, "utf-8");
-			const fm = parseFrontmatter(content);
-
-			const metadataSize =
-				(fm.name || skill.name).length + fm.description.length;
+			const audit = auditSkill(skill.path);
+			const metadataSize = audit.name.length + audit.description.length;
 			totalMetadataChars += metadataSize;
-			totalBodyChars += content.length;
+			totalBodyChars += audit.metrics.chars;
 
-			if (fm.bodyLines > BODY_LINE_LIMIT) {
+			if (audit.metrics.lines > BODY_LINE_LIMIT) {
 				oversizedSkills.push({
-					name: fm.name || skill.name,
-					lines: fm.bodyLines,
+					name: audit.name,
+					lines: audit.metrics.lines,
 				});
 			}
-			if (fm.description.length > 1024) {
+			if (audit.metrics.estimatedTokens > BODY_TOKEN_LIMIT) {
+				tokenHeavySkills.push({
+					name: audit.name,
+					tokens: audit.metrics.estimatedTokens,
+				});
+			}
+			if (audit.description.length > 1024) {
 				longDescSkills.push({
-					name: fm.name || skill.name,
-					chars: fm.description.length,
+					name: audit.name,
+					chars: audit.description.length,
 				});
 			}
 		} catch {}
@@ -140,6 +120,7 @@ export async function runHealth(): Promise<void> {
 			},
 			warnings: {
 				oversized: oversizedSkills,
+				over_token_limit: tokenHeavySkills,
 				long_descriptions: longDescSkills,
 			},
 		};
@@ -226,6 +207,20 @@ export async function runHealth(): Promise<void> {
 		);
 		for (const s of longDescSkills.slice(0, 3)) {
 			console.log(`    ${dim(`${s.name}: ${s.chars} chars`)}`);
+		}
+	}
+
+	if (tokenHeavySkills.length > 0) {
+		console.log();
+		console.log(
+			warn(
+				`${tokenHeavySkills.length} skills exceed the estimated ${BODY_TOKEN_LIMIT.toLocaleString()}-token recommendation`,
+			),
+		);
+		for (const skill of tokenHeavySkills.slice(0, 5)) {
+			console.log(
+				`    ${dim(`${skill.name}: ~${skill.tokens.toLocaleString()} tokens`)}`,
+			);
 		}
 	}
 

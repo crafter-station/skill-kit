@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "motion/react";
+import { useState } from "react";
 import { cn } from "@/lib/cn";
 
 type Command = {
@@ -15,6 +15,69 @@ type Command = {
 };
 
 const COMMANDS: Command[] = [
+	{
+		name: "skills",
+		cmd: "skillkit skills get core --full",
+		description: "Version-matched operating guidance, bundled with the CLI",
+		lines: [
+			{ text: "  skillkit core v0.12.0", type: "header" },
+			{ text: "", type: "empty" },
+			{ text: "  Choose the command", type: "accent" },
+			{ text: "  Audit a repository     skillkit audit <path>", type: "white" },
+			{ text: "  Inspect installed use  skillkit stats", type: "white" },
+			{
+				text: "  Measure context tax    skillkit context --mcp",
+				type: "white",
+			},
+			{
+				text: "  Find dead weight       skillkit coverage <path>",
+				type: "white",
+			},
+			{ text: "", type: "empty" },
+			{ text: "  Full reference included", type: "accent" },
+			{ text: "  Exact flags, JSON, CI, safety, and data paths", type: "dim" },
+			{ text: "", type: "empty" },
+			{ text: "  Guidance version matches installed CLI", type: "accent" },
+		],
+	},
+	{
+		name: "audit",
+		cmd: 'skillkit audit ./skills --include "rn-*"',
+		description: "Static health checks for any skill pack or subset",
+		lines: [
+			{ text: "  SKILL AUDIT (21 skills)", type: "header" },
+			{ text: "", type: "empty" },
+			{
+				text: "  STATUS  SKILL                    TOKENS  REF  ISSUES",
+				type: "dim",
+			},
+			{
+				text: "  PASS    rn-component-a11y          1.2K    2       0",
+				type: "accent",
+			},
+			{
+				text: "  WARN    rn-maestro-e2e             4.8K    6       2",
+				type: "white",
+			},
+			{
+				text: "  PASS    rn-jest-mocks              1.7K    3       0",
+				type: "white",
+			},
+			{ text: "", type: "empty" },
+			{ text: "  CONTEXT PROFILE", type: "header" },
+			{ text: "  Catalog cost       ~1.1K tokens", type: "white" },
+			{
+				text: "  Activation cost    ~1.6K median / ~4.8K max",
+				type: "accent",
+			},
+			{
+				text: "  On-demand cost     ~12.7K reference tokens",
+				type: "white",
+			},
+			{ text: "", type: "empty" },
+			{ text: "  WARN 18 passed, 3 warned, 0 failed", type: "accent" },
+		],
+	},
 	{
 		name: "burn",
 		cmd: "skillkit burn --days 7",
@@ -251,7 +314,8 @@ function TerminalLine({ line }: { line: Command["lines"][0] }) {
 
 export function CommandsShowcase() {
 	const [active, setActive] = useState(0);
-	const cmd = COMMANDS[active]!;
+	const cmd = COMMANDS.at(active) ?? COMMANDS.at(0);
+	if (!cmd) return null;
 
 	return (
 		<section className="py-24 px-6">
@@ -329,9 +393,9 @@ export function CommandsShowcase() {
 							className="flex items-center justify-between px-4 py-1.5 border-t border-[#222] text-[10px] font-mono text-[#444]"
 							style={{ background: "#0e0e0e" }}
 						>
-							<span>skillkit v0.10</span>
+							<span>skillkit v0.12</span>
 							<span>local-first</span>
-							<span>13 commands</span>
+							<span>15 commands</span>
 						</div>
 					</div>
 				</motion.div>

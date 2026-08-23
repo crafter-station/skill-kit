@@ -1,11 +1,7 @@
 #!/usr/bin/env bun
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import pkg from "../package.json";
 import { bold, cyan, dim, yellow } from "./tui/colors";
 
-const pkg = JSON.parse(
-	readFileSync(join(dirname(import.meta.dir), "package.json"), "utf-8"),
-);
 const VERSION: string = pkg.version;
 
 function printHelp(): void {
@@ -15,11 +11,16 @@ function printHelp(): void {
   ${bold("USAGE")}
     skillkit <command> [args]
 
+  ${bold("START HERE")}
+    ${cyan("skillkit skills get core --full")}
+
   ${bold("COMMANDS")}
+    ${cyan("skills")}      Load version-matched skillkit guidance
     ${cyan("scan")}        Discover installed skills and index session data
     ${cyan("list")}        List installed skills with size & context budget
     ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
     ${cyan("health")}      Health check: unused skills, context budget, DB
+    ${cyan("audit")}       Audit a skill or pack against best practices
     ${cyan("trace")}       Run and record skill execution traces
     ${cyan("conflicts")}   Test skills for trigger collisions
     ${cyan("coverage")}    Analyze dead weight in a skill
@@ -39,6 +40,8 @@ function printHelp(): void {
     ${dim("stats")} ${cyan("--all")}               Show all skills, not just top 10
     ${dim("stats")} ${cyan("--json")}              JSON output
     ${dim("health")} ${cyan("--json")}             JSON output
+    ${dim("audit")} ${cyan("--include <glob>")}    Audit a subset of skills
+    ${dim("audit")} ${cyan("--json --strict")}     JSON output; fail on findings
     ${dim("trace")} ${cyan("--list")}               List recent traces
     ${dim("trace")} ${cyan("--list --json")}        List recent traces as JSON
     ${dim("trace")} ${cyan("--show <id>")}          Show trace details
@@ -62,7 +65,7 @@ function printHelp(): void {
     ${dim("any")}   ${cyan("--gemini")}             Only scan Gemini CLI
     ${dim("any")}   ${cyan("--opencode")}           Only scan OpenCode
 
-  ${dim("Install skills via skills.sh: npx skills add <owner/repo>")}
+  ${dim("Install skills via skills.sh: bunx skills add <owner/repo>")}
 `);
 }
 
@@ -70,6 +73,11 @@ async function main(): Promise<void> {
 	const cmd = process.argv[2];
 
 	switch (cmd) {
+		case "skills": {
+			const { runSkillsCommand } = await import("./commands/skills");
+			await runSkillsCommand();
+			break;
+		}
 		case "scan": {
 			const { runScan } = await import("./commands/scan");
 			await runScan();
@@ -89,6 +97,11 @@ async function main(): Promise<void> {
 		case "health": {
 			const { runHealth } = await import("./commands/health");
 			await runHealth();
+			break;
+		}
+		case "audit": {
+			const { runAuditCommand } = await import("./commands/audit");
+			await runAuditCommand();
 			break;
 		}
 		case "trace": {

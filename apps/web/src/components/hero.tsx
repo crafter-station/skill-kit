@@ -33,7 +33,7 @@ export function Hero() {
 							className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
 							aria-hidden="true"
 						/>
-						v0.10 — sessions, streaks, graphs
+						v0.12 | skill audits and version-matched guidance
 					</span>
 				</motion.div>
 
@@ -56,10 +56,11 @@ export function Hero() {
 					variants={fadeUp}
 					className="text-lg text-[#888] max-w-2xl leading-relaxed"
 				>
-					Observability for AI coding agents. Track burn rate, sessions, streaks,
-					and contribution graphs across 14 agents — Claude Code, Cursor, Codex,
-					Windsurf, Cline, Copilot CLI, and more — plus skill discovery for the
-					full skills.sh ecosystem (75 agents). All local, all offline.
+					Observability for AI coding agents. Track burn rate, sessions,
+					streaks, and contribution graphs across 14 agents — Claude Code,
+					Cursor, Codex, Windsurf, Cline, Copilot CLI, and more — plus skill
+					discovery for the full skills.sh ecosystem (75 agents). All local, all
+					offline.
 				</motion.p>
 
 				<motion.div
