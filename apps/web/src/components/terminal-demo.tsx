@@ -162,7 +162,6 @@ export function TerminalDemo() {
 				if (cancelled) break;
 				await delay(STEP_PAUSE);
 			}
-
 		};
 
 		run();
@@ -246,7 +245,7 @@ export function TerminalDemo() {
 					style={{ background: "#0e0e0e" }}
 				>
 					<span>-- NORMAL --</span>
-					<span>skillkit v0.10</span>
+					<span>skillkit v0.12</span>
 					<span>utf-8</span>
 				</div>
 			</div>

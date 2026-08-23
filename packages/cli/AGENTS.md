@@ -19,10 +19,12 @@ skillkit scan
 
 | Command | Description |
 |---------|-------------|
+| `skillkit skills get core [--full]` | Load guidance matched to this CLI version |
 | `skillkit scan` | Discover installed skills and index session data (run this first) |
 | `skillkit list` (alias `ls`) | List installed skills with size and context budget |
 | `skillkit stats` | Usage analytics with sparklines (last 30 days) |
 | `skillkit health` | Health check: unused skills, context budget, DB |
+| `skillkit audit [path ...]` | Audit a skill or pack against Agent Skills best practices |
 | `skillkit trace <prompt>` | Run and record a skill execution trace (spawns `claude -p`) |
 | `skillkit conflicts` | Test skills for trigger collisions |
 | `skillkit coverage <skill-path>` | Analyze dead weight in a skill |
@@ -36,9 +38,11 @@ skillkit scan
 
 ### Flags (from `skillkit help`)
 
+- `skills get core --full` (include the complete bundled command reference), `skills list --json`
 - `scan --include-commands` (also track slash commands), `scan --full` (re-index every session, ignore incremental cache)
 - `stats --days N` (default 30), `stats --all` (all skills, not just top 10), `stats --json`
 - `health --json`
+- `audit --include <glob>`, `audit --json`, `audit --strict`
 - `trace --list`, `trace --list --json`, `trace --show <id>`, `trace --model <model>`
 - `prune --skill <name>`, `prune --yes --json`
 - `burn --days N` (default 30), `burn --plan N` (monthly plan USD, default 200), `burn --json`
@@ -70,16 +74,23 @@ skillkit scan
    bunx @crafter/skillkit coverage ~/.claude/skills/my-skill/
    bunx @crafter/skillkit conflicts
    ```
+5. Audit a pack before publishing:
+   ```bash
+   bunx @crafter/skillkit audit ./skills --include "rn-*"
+   bunx @crafter/skillkit audit ./skills --json --strict
+   ```
 
 ## Task -> command
 
 | Task | Command |
 |------|---------|
+| "How should this CLI version be used?" | `skillkit skills get core --full` |
 | "Which skills do I actually use?" | `skillkit scan && skillkit stats` |
 | "What are my skills costing me in context?" | `skillkit context --json` |
 | "How much am I spending on Claude/Cursor?" | `skillkit burn --json` |
 | "Do any skills fire on the same prompts?" | `skillkit conflicts` |
 | "Is this skill bloated?" | `skillkit coverage <path>` |
+| "Is this skill pack structurally healthy?" | `skillkit audit <path>` |
 | "Clean up unused skills" | `skillkit prune --yes` |
 | "Did skill X trigger for prompt Y?" | `skillkit trace "<prompt>"` |
 | Machine-readable output for any of the above | add `--json` |
@@ -96,7 +107,7 @@ skillkit scan
 
 ## Library exports
 
-The package also exports a programmatic API (Bun runtime) from `@crafter/skillkit`: `runScan`, `runStats`, `runHealth`, `runList`, `runPrune`, `runTrace`, `scanAllSessions`, `scanInstalledSkills`, `getDetectedAgents`, `parseSessionFile` (plus Cursor/Codex/Gemini variants), DB helpers (`getDb`, `getSkillStats`, `getTopSkills`, `getInstalledSkills`, `getDailyUsage`, `recordInvocation`, `upsertInstalledSkill`), conflicts (`discoverAllSkills`, `findOverlappingPairs`, `generateProbes`, `analyzeCollision`, `summarizeConflicts`), coverage (`parseSkillDirectory`, `analyzeCoverage`), and trace store/report helpers, with their TypeScript types.
+The package also exports a programmatic API (Bun runtime) from `@crafter/skillkit`: `runScan`, `runStats`, `runHealth`, `runAuditCommand`, `runSkillsCommand`, `runList`, `runPrune`, `runTrace`, `scanAllSessions`, `scanInstalledSkills`, `getDetectedAgents`, `parseSessionFile` (plus Cursor/Codex/Gemini variants), DB helpers (`getDb`, `getSkillStats`, `getTopSkills`, `getInstalledSkills`, `getDailyUsage`, `recordInvocation`, `upsertInstalledSkill`), bundled skill helpers (`BUNDLED_SKILLS`, `getBundledSkill`, `renderBundledSkill`), audits (`auditSkill`, `auditSkills`, `discoverSkillDirectories`, `renderAuditReport`, `renderAuditJson`), conflicts (`discoverAllSkills`, `findOverlappingPairs`, `generateProbes`, `analyzeCollision`, `summarizeConflicts`), coverage (`parseSkillDirectory`, `analyzeCoverage`), and trace store/report helpers, with their TypeScript types.
 
 ## Data locations
 

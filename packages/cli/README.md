@@ -37,17 +37,29 @@ skillkit scan
 
 | Command | Description |
 |---------|-------------|
+| `skillkit skills get core [--full]` | Load guidance matched to this CLI version |
 | `skillkit scan` | Discover installed skills and index session data |
 | `skillkit list` | List installed skills with size and context budget |
 | `skillkit stats` | Usage analytics with sparklines (last 30 days) |
 | `skillkit health` | Health check: unused skills, context budget, DB |
+| `skillkit audit [path ...]` | Audit a skill or pack against Agent Skills best practices |
 | `skillkit prune` | Remove unused skills to reclaim context budget |
 | `skillkit burn` | Subscription burn rate analysis (cost, models, daily) |
 | `skillkit conflicts` | Test skills for trigger collisions |
 | `skillkit coverage <skill-path>` | Analyze dead weight in a skill |
 | `skillkit trace <prompt>` | Run and record a skill execution trace |
 
-Install skills via [skills.sh](https://skills.sh): `npx skills add <owner/repo>`
+Install skills via [skills.sh](https://skills.sh): `bunx skills add <owner/repo>`
+
+### Version-matched guidance
+
+```bash
+skillkit skills list
+skillkit skills get core
+skillkit skills get core --full
+```
+
+`core` is bundled with the CLI. The default output is the compact operating workflow. `--full` appends exact flags, JSON behavior, safety notes, data locations, and the complete command reference. Release validation keeps the bundled skill and installable discovery stub at the same version as the CLI.
 
 ## skill-creator vs skillkit
 
@@ -85,10 +97,11 @@ Anthropic's [skill-creator](https://github.com/anthropics/skill-creator) handles
 #      review in HTML viewer, iterate, optimize description
 
 # 2. DEPLOY
-npx skills add your-org/db-migrate
+bunx skills add your-org/db-migrate
 
 # 3. MONITOR — use skillkit (CLI, outside Claude)
 skillkit scan && skillkit stats
+skillkit audit ./skills --strict          # enforce structural health
 skillkit coverage ./skills/db-migrate/   # find dead sections
 skillkit conflicts                        # detect trigger collisions
 skillkit burn                             # cost analysis
@@ -134,6 +147,19 @@ $ skillkit health
   [████████░░] 78% metadata budget (12.5K / 16.0K)
   ! 3 skills unused in 30d — run skillkit prune
 ```
+
+### Audit
+
+Audits arbitrary local skill paths without requiring installation or analytics history.
+
+```bash
+skillkit audit ./skills
+skillkit audit ./skills/testing ./skills/release
+skillkit audit ./skills --include "rn-*"
+skillkit audit ./skills --json --strict
+```
+
+The report separates catalog cost from one-skill activation cost and on-demand reference cost. It also checks the 500-line and estimated 5,000-token recommendations, metadata, missing and unreferenced files, explicit reference routing, and overlapping descriptions. `--strict` exits with status 1 on any finding.
 
 ### Burn
 

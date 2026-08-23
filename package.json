@@ -13,7 +13,7 @@
 		"lint": "biome check --write .",
 		"lint:check": "biome check .",
 		"type-check": "bun run --filter '*' type-check",
-		"skill:version": "bun run packages/skill/version.ts"
+		"skill:version": "bun run scripts/sync-skill-version.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.0",

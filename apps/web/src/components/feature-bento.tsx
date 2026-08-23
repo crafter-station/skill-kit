@@ -1,9 +1,32 @@
 "use client";
 
-import { Activity, BarChart2, Calendar, Flame, Gauge, Zap } from "lucide-react";
+import {
+	Activity,
+	BarChart2,
+	BookOpen,
+	Calendar,
+	Flame,
+	Gauge,
+	ScanSearch,
+	Zap,
+} from "lucide-react";
 import { motion } from "motion/react";
 
 const cards = [
+	{
+		id: "skills",
+		icon: BookOpen,
+		title: "Version-Matched Guidance",
+		description:
+			"Agents load the canonical workflow and command reference directly from the installed CLI, keeping skill instructions and behavior in sync.",
+	},
+	{
+		id: "audit",
+		icon: ScanSearch,
+		title: "Skill Pack Audit",
+		description:
+			"Audit any local skill pack or subset for context cost, progressive disclosure, broken references, and overlapping descriptions before publishing.",
+	},
 	{
 		id: "burn",
 		icon: Flame,
