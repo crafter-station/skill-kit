@@ -8,146 +8,118 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import {
+	getHookCommand,
+	installHook,
+	isHookInstalled,
+	removeHook,
+} from "../lib/hooks";
 
 const TEST_DIR = join(tmpdir(), `skillkit-hook-test-${Date.now()}`);
 const SETTINGS_PATH = join(TEST_DIR, ".claude", "settings.json");
-
-function loadModule() {
-	const original = process.env.HOME;
-	process.env.HOME = TEST_DIR;
-
-	const mod = {
-		isHookInstalled: (): boolean => {
-			try {
-				if (!existsSync(SETTINGS_PATH)) return false;
-				const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
-				const sessionEnd = settings.hooks?.SessionEnd;
-				if (!Array.isArray(sessionEnd)) return false;
-				return sessionEnd.some((entry: any) =>
-					entry.hooks?.some((h: any) => h.command === "skillkit scan --quiet"),
-				);
-			} catch {
-				return false;
-			}
-		},
-
-		installHook: (): boolean => {
-			if (mod.isHookInstalled()) return false;
-			mkdirSync(join(TEST_DIR, ".claude"), { recursive: true });
-
-			let settings: any = {};
-			try {
-				if (existsSync(SETTINGS_PATH)) {
-					settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
-				}
-			} catch {}
-
-			if (!settings.hooks) settings.hooks = {};
-			if (!Array.isArray(settings.hooks.SessionEnd))
-				settings.hooks.SessionEnd = [];
-			settings.hooks.SessionEnd.push({
-				hooks: [
-					{
-						type: "command",
-						command: "skillkit scan --quiet",
-						timeout: 120,
-						async: true,
-					},
-				],
-			});
-			writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
-			return true;
-		},
-
-		removeHook: (): boolean => {
-			if (!mod.isHookInstalled()) return false;
-			const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
-			settings.hooks.SessionEnd = settings.hooks.SessionEnd.filter(
-				(entry: any) =>
-					!entry.hooks?.some((h: any) => h.command === "skillkit scan --quiet"),
-			);
-			if (settings.hooks.SessionEnd.length === 0)
-				delete settings.hooks.SessionEnd;
-			writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
-			return true;
-		},
-
-		cleanup: () => {
-			process.env.HOME = original;
-		},
-	};
-
-	return mod;
-}
+const OPTIONS = {
+	settingsPath: SETTINGS_PATH,
+	executablePath: "/Users/test/.local/bin/skillkit",
+	compiled: true,
+};
 
 describe("hooks", () => {
-	let mod: ReturnType<typeof loadModule>;
-
 	beforeEach(() => {
 		mkdirSync(join(TEST_DIR, ".claude"), { recursive: true });
-		mod = loadModule();
 	});
 
 	afterEach(() => {
-		mod.cleanup();
-		try {
-			rmSync(TEST_DIR, { recursive: true });
-		} catch {}
+		if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
 	});
 
-	it("detects no hook when settings missing", () => {
-		expect(mod.isHookInstalled()).toBe(false);
+	it("uses the absolute compiled executable path", () => {
+		expect(getHookCommand(OPTIONS)).toBe(
+			"'/Users/test/.local/bin/skillkit' scan --quiet",
+		);
+		expect(
+			getHookCommand({ ...OPTIONS, executablePath: "/Users/test/Skill Kit" }),
+		).toBe("'/Users/test/Skill Kit' scan --quiet");
 	});
 
-	it("detects no hook when settings empty", () => {
+	it("uses the command name during source execution", () => {
+		expect(getHookCommand({ ...OPTIONS, compiled: false })).toBe(
+			"skillkit scan --quiet",
+		);
+	});
+
+	it("detects no hook when settings are missing or empty", () => {
+		expect(isHookInstalled(OPTIONS)).toBe(false);
 		writeFileSync(SETTINGS_PATH, "{}");
-		expect(mod.isHookInstalled()).toBe(false);
+		expect(isHookInstalled(OPTIONS)).toBe(false);
 	});
 
-	it("installs hook", () => {
-		expect(mod.installHook()).toBe(true);
-		expect(mod.isHookInstalled()).toBe(true);
+	it("installs an absolute-path hook", () => {
+		expect(installHook(OPTIONS)).toBe(true);
+		expect(isHookInstalled(OPTIONS)).toBe(true);
 
 		const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
 		expect(settings.hooks.SessionEnd).toHaveLength(1);
 		expect(settings.hooks.SessionEnd[0].hooks[0].command).toBe(
-			"skillkit scan --quiet",
+			"'/Users/test/.local/bin/skillkit' scan --quiet",
 		);
 		expect(settings.hooks.SessionEnd[0].hooks[0].async).toBe(true);
 	});
 
 	it("does not double install", () => {
-		expect(mod.installHook()).toBe(true);
-		expect(mod.installHook()).toBe(false);
+		expect(installHook(OPTIONS)).toBe(true);
+		expect(installHook(OPTIONS)).toBe(false);
 
 		const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
 		expect(settings.hooks.SessionEnd).toHaveLength(1);
 	});
 
-	it("preserves existing hooks", () => {
+	it("migrates the legacy command and preserves unrelated hooks", () => {
 		writeFileSync(
 			SETTINGS_PATH,
 			JSON.stringify({
 				hooks: {
 					SessionEnd: [
 						{ hooks: [{ type: "command", command: "other-tool run" }] },
+						{
+							hooks: [{ type: "command", command: "skillkit scan --quiet" }],
+						},
 					],
 				},
 			}),
 		);
 
-		mod.installHook();
+		expect(installHook(OPTIONS)).toBe(true);
 		const settings = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
 		expect(settings.hooks.SessionEnd).toHaveLength(2);
+		expect(JSON.stringify(settings)).toContain("other-tool run");
+		expect(JSON.stringify(settings)).not.toContain(
+			'"command":"skillkit scan --quiet"',
+		);
+		expect(isHookInstalled(OPTIONS)).toBe(true);
 	});
 
-	it("removes hook", () => {
-		mod.installHook();
-		expect(mod.removeHook()).toBe(true);
-		expect(mod.isHookInstalled()).toBe(false);
+	it("removes current and legacy hooks", () => {
+		installHook(OPTIONS);
+		expect(removeHook(OPTIONS)).toBe(true);
+		expect(isHookInstalled(OPTIONS)).toBe(false);
+
+		writeFileSync(
+			SETTINGS_PATH,
+			JSON.stringify({
+				hooks: {
+					SessionEnd: [
+						{
+							hooks: [{ type: "command", command: "skillkit scan --quiet" }],
+						},
+					],
+				},
+			}),
+		);
+		expect(removeHook(OPTIONS)).toBe(true);
+		expect(isHookInstalled(OPTIONS)).toBe(false);
 	});
 
-	it("returns false when removing non-existent hook", () => {
-		expect(mod.removeHook()).toBe(false);
+	it("returns false when removing a non-existent hook", () => {
+		expect(removeHook(OPTIONS)).toBe(false);
 	});
 });

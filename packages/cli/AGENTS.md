@@ -20,9 +20,10 @@ skillkit scan
 | Command | Description |
 |---------|-------------|
 | `skillkit skills get core [--full]` | Load guidance matched to this CLI version |
-| `skillkit scan` | Discover installed skills and index session data (run this first) |
+| `skillkit scan` | Discover installed skills, index session data, and sync private receipts |
 | `skillkit list` (alias `ls`) | List installed skills with size and context budget |
 | `skillkit stats` | Usage analytics with sparklines (last 30 days) |
+| `skillkit receipts` | Private usage receipts with reviewed outcomes and pagination |
 | `skillkit health` | Health check: unused skills, context budget, DB |
 | `skillkit audit [path ...]` | Audit a skill or pack against Agent Skills best practices |
 | `skillkit trace <prompt>` | Run and record a skill execution trace (spawns `claude -p`) |
@@ -41,6 +42,7 @@ skillkit scan
 - `skills get core --full` (include the complete bundled command reference), `skills list --json`
 - `scan --include-commands` (also track slash commands), `scan --full` (re-index every session, ignore incremental cache)
 - `stats --days N` (default 30), `stats --all` (all skills, not just top 10), `stats --json`
+- `receipts --json`, `receipts --pending`, `receipts --limit N`, `receipts --after <id>`, `receipts --all`, `receipts --annotate <file>`, `receipts --remote <host.ts.net>`
 - `health --json`
 - `audit --include <glob>`, `audit --json`, `audit --strict`
 - `trace --list`, `trace --list --json`, `trace --show <id>`, `trace --model <model>`
@@ -86,6 +88,8 @@ skillkit scan
 |------|---------|
 | "How should this CLI version be used?" | `skillkit skills get core --full` |
 | "Which skills do I actually use?" | `skillkit scan && skillkit stats` |
+| "Show reviewable records of skill use" | `skillkit receipts --pending` |
+| "Read receipts from another Mac in my tailnet" | `skillkit receipts --remote user@mac.tailnet.ts.net --all --json` |
 | "What are my skills costing me in context?" | `skillkit context --json` |
 | "How much am I spending on Claude/Cursor?" | `skillkit burn --json` |
 | "Do any skills fire on the same prompts?" | `skillkit conflicts` |
@@ -111,7 +115,8 @@ The package also exports a programmatic API (Bun runtime) from `@crafter/skillki
 
 ## Data locations
 
-- `~/.skillkit/analytics.db` — SQLite database (invocations, traces, conflicts)
+- `~/.skillkit/analytics.db`: SQLite database with invocations, private receipts, traces, and conflicts
+- Remote receipt collection leaves source sessions and `analytics.db` on the remote Mac and transports only private receipt JSON over Tailscale SSH
 - `~/.claude/skills/` and per-agent skill dirs — read-only skill discovery
 - `~/.claude/projects/**/*.jsonl` — read-only session parsing
 

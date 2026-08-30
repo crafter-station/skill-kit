@@ -1,8 +1,6 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
-
-const SETTINGS_PATH = join(homedir(), ".claude", "settings.json");
+import { dirname, join } from "node:path";
 
 interface ClaudeSettings {
 	hooks?: {
@@ -19,67 +17,109 @@ interface ClaudeSettings {
 	[key: string]: unknown;
 }
 
-function loadSettings(): ClaudeSettings {
+export interface HookOptions {
+	settingsPath?: string;
+	executablePath?: string;
+	compiled?: boolean;
+}
+
+const LEGACY_HOOK_COMMAND = "skillkit scan --quiet";
+
+function shellQuote(value: string): string {
+	return `'${value.replaceAll("'", `'"'"'`)}'`;
+}
+
+export function getHookCommand(options: HookOptions = {}): string {
+	const compiled = options.compiled ?? Bun.main.startsWith("/$bunfs/");
+	const executable = compiled
+		? (options.executablePath ?? process.execPath)
+		: "skillkit";
+	return `${compiled ? shellQuote(executable) : executable} scan --quiet`;
+}
+
+function settingsPath(options: HookOptions): string {
+	return options.settingsPath ?? join(homedir(), ".claude", "settings.json");
+}
+
+function loadSettings(options: HookOptions): ClaudeSettings {
 	try {
-		if (existsSync(SETTINGS_PATH)) {
-			return JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
-		}
+		const path = settingsPath(options);
+		if (existsSync(path)) return JSON.parse(readFileSync(path, "utf-8"));
 	} catch {}
 	return {};
 }
 
-function saveSettings(settings: ClaudeSettings): void {
-	writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+function saveSettings(settings: ClaudeSettings, options: HookOptions): void {
+	const path = settingsPath(options);
+	mkdirSync(dirname(path), { recursive: true });
+	writeFileSync(path, JSON.stringify(settings, null, 2));
 }
 
-const HOOK_COMMAND = "skillkit scan --quiet";
+function isManagedCommand(command: string, options: HookOptions): boolean {
+	return command === LEGACY_HOOK_COMMAND || command === getHookCommand(options);
+}
 
-export function isHookInstalled(): boolean {
-	const settings = loadSettings();
+export function isHookInstalled(options: HookOptions = {}): boolean {
+	const settings = loadSettings(options);
 	const sessionEnd = settings.hooks?.SessionEnd;
 	if (!Array.isArray(sessionEnd)) return false;
 	return sessionEnd.some((entry) =>
-		entry.hooks?.some((h) => h.command === HOOK_COMMAND),
+		entry.hooks?.some((hook) => isManagedCommand(hook.command, options)),
 	);
 }
 
-export function installHook(): boolean {
-	if (isHookInstalled()) return false;
-
-	const settings = loadSettings();
+export function installHook(options: HookOptions = {}): boolean {
+	const command = getHookCommand(options);
+	const settings = loadSettings(options);
 	if (!settings.hooks) settings.hooks = {};
 	if (!Array.isArray(settings.hooks.SessionEnd)) settings.hooks.SessionEnd = [];
+	if (
+		settings.hooks.SessionEnd.some((entry) =>
+			entry.hooks?.some((hook) => hook.command === command),
+		)
+	) {
+		return false;
+	}
 
+	settings.hooks.SessionEnd = settings.hooks.SessionEnd.map((entry) => ({
+		...entry,
+		hooks: entry.hooks.filter((hook) => hook.command !== LEGACY_HOOK_COMMAND),
+	})).filter((entry) => entry.hooks.length > 0);
 	settings.hooks.SessionEnd.push({
 		hooks: [
 			{
 				type: "command",
-				command: HOOK_COMMAND,
+				command,
 				timeout: 120,
 				async: true,
 			},
 		],
 	});
 
-	saveSettings(settings);
+	saveSettings(settings, options);
 	return true;
 }
 
-export function removeHook(): boolean {
-	if (!isHookInstalled()) return false;
+export function removeHook(options: HookOptions = {}): boolean {
+	const settings = loadSettings(options);
+	const hooks = settings.hooks;
+	const sessionEnd = hooks?.SessionEnd;
+	if (!hooks || !Array.isArray(sessionEnd)) return false;
+	let removed = false;
+	const next = sessionEnd
+		.map((entry) => ({
+			...entry,
+			hooks: entry.hooks.filter((hook) => {
+				const managed = isManagedCommand(hook.command, options);
+				if (managed) removed = true;
+				return !managed;
+			}),
+		}))
+		.filter((entry) => entry.hooks.length > 0);
+	if (!removed) return false;
 
-	const settings = loadSettings();
-	const sessionEnd = settings.hooks?.SessionEnd;
-	if (!Array.isArray(sessionEnd)) return false;
-
-	settings.hooks!.SessionEnd = sessionEnd.filter(
-		(entry) => !entry.hooks?.some((h) => h.command === HOOK_COMMAND),
-	);
-
-	if (settings.hooks!.SessionEnd.length === 0) {
-		delete settings.hooks!.SessionEnd;
-	}
-
-	saveSettings(settings);
+	hooks.SessionEnd = next;
+	if (next.length === 0) delete hooks.SessionEnd;
+	saveSettings(settings, options);
 	return true;
 }

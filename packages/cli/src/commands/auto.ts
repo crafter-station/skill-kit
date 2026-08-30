@@ -1,4 +1,9 @@
-import { installHook, isHookInstalled, removeHook } from "../lib/hooks";
+import {
+	getHookCommand,
+	installHook,
+	isHookInstalled,
+	removeHook,
+} from "../lib/hooks";
 import { bold, cyan, dim, green, red } from "../tui/colors";
 
 export function runAuto(): void {
@@ -34,7 +39,7 @@ export function runAuto(): void {
 	console.log(
 		`  Claude Code hook: ${installed ? green("active") : red("inactive")}`,
 	);
-	console.log(`  Command:          ${dim("skillkit scan --quiet")}`);
+	console.log(`  Command:          ${dim(getHookCommand())}`);
 	console.log(`  Trigger:          ${dim("SessionEnd (async)")}\n`);
 
 	if (!installed) {

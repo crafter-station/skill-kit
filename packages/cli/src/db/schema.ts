@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { ensureConflictTable } from "../conflicts/store";
+import { ensureUsageReceiptTable } from "../receipts/store";
 import { ensureTraceTable } from "../trace/store";
 
 const DB_DIR = join(homedir(), ".skillkit");
@@ -101,30 +102,23 @@ export function getDb(): Database {
 	);
 	ensureTraceTable(db);
 	ensureConflictTable(db);
-	deduplicateInvocations(db);
+	ensureUsageReceiptTable(db);
+	deduplicatePersistedInvocationEvents(db);
 	return db;
 }
 
-function deduplicateInvocations(db: Database): void {
+export function deduplicatePersistedInvocationEvents(db: Database): void {
 	try {
-		db.run(
-			`DELETE FROM skill_invocations WHERE skill_name LIKE 'mcp_%' OR skill_name LIKE 'mcp__%' OR skill_name = 'update_plan'`,
-		);
-
-		const row = db
-			.query<{ dupes: number }, []>(
-				`SELECT COUNT(*) - COUNT(DISTINCT skill_name || '::' || REPLACE(timestamp, SUBSTR(timestamp, -5, 4), '')) as dupes FROM skill_invocations`,
-			)
-			.get();
-		if (row && row.dupes > 0) {
-			db.run(`
-				DELETE FROM skill_invocations WHERE rowid NOT IN (
-					SELECT MIN(rowid) FROM skill_invocations
-					GROUP BY skill_name, REPLACE(timestamp, SUBSTR(timestamp, -5, 4), '')
+		db.run(`
+			DELETE FROM skill_invocations
+			WHERE event_id IS NOT NULL
+				AND event_id != ''
+				AND id NOT IN (
+					SELECT MIN(id)
+					FROM skill_invocations
+					WHERE event_id IS NOT NULL AND event_id != ''
+					GROUP BY skill_name, COALESCE(agent, ''), COALESCE(session_id, ''), event_id
 				)
-			`);
-		}
-	} catch {
-		/* empty */
-	}
+		`);
+	} catch {}
 }

@@ -21,6 +21,7 @@ AI coding agents load skills into their context window on every session. More sk
 | `skills` | Load guidance matched to the installed CLI version |
 | `auto` | Auto-scan after Claude Code sessions |
 | `stats` | Usage analytics with sparklines (auto-scans on first run) |
+| `receipts` | Private, reviewable records grouped by skill, agent, and session |
 | `list` | List installed skills with size and context budget |
 | `health` | Health check: unused skills, context budget, DB |
 | `audit` | Audit any skill or pack against Agent Skills best practices |
@@ -48,6 +49,7 @@ AI coding agents load skills into their context window on every session. More sk
 | `--include-commands` | scan | Also track slash commands |
 | `--include <glob>` | audit | Audit only matching skills in a pack |
 | `--strict` | audit | Exit 1 when warnings or errors are found |
+| `--remote <host.ts.net>` | receipts | Scan and export receipts from a Mac over Tailscale SSH |
 | `--claude` | any | Only scan Claude Code |
 | `--opencode` | any | Only scan OpenCode |
 
@@ -140,7 +142,7 @@ $ npx @crafter/skillkit prune
 
 ## Data Storage
 
-All data stays on your machine. Analytics live in `~/.skillkit/analytics.db`; every agent source below is read-only.
+All data stays on the machine that owns the sessions. Analytics live in that machine's `~/.skillkit/analytics.db`; every agent source below is read-only. `receipts --remote` runs Skillkit on a Tailscale MagicDNS host and transports only its private receipt JSON, never its raw session files or database.
 
 ## Supported Agents
 

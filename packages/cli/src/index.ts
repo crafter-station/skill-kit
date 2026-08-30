@@ -24,6 +24,7 @@ export { runCoverageCommand } from "./commands/coverage";
 export { runHealth } from "./commands/health";
 export { runList } from "./commands/list";
 export { runPrune } from "./commands/prune";
+export { runReceiptsCommand } from "./commands/receipts";
 export { runScan } from "./commands/scan";
 export { runSkillsCommand } from "./commands/skills";
 export { runStats } from "./commands/stats";
@@ -54,6 +55,21 @@ export {
 	upsertInstalledSkill,
 } from "./db/queries";
 export { getDb } from "./db/schema";
+export type {
+	CaseReason,
+	CaseSignal,
+	ReceiptAnnotation,
+	ReceiptOutcome,
+	UsageReceipt,
+} from "./receipts/store";
+export {
+	annotateUsageReceipt,
+	annotateUsageReceipts,
+	ensureUsageReceiptTable,
+	getUsageReceipts,
+	iterateUsageReceipts,
+	syncUsageReceipts,
+} from "./receipts/store";
 export { parseSessionFile } from "./scanner/connectors/claude";
 export { parseCodexSessionFile } from "./scanner/connectors/codex";
 export { parseCursorSessionFile } from "./scanner/connectors/cursor";
