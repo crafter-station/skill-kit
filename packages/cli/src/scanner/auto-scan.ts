@@ -3,13 +3,23 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { deduplicateInvocations, upsertInstalledSkill } from "../db/queries";
+import { syncUsageReceipts } from "../receipts/store";
 import type { InstalledSkill } from "../types";
-import { isSkillName, scanAllSessions } from "./index";
+import { scanAllSessions } from "./index";
 import {
 	detectSkillSource,
 	getDetectedAgents,
 	scanInstalledSkills,
 } from "./skills";
+
+function syncReceiptsFailOpen(db: Database): void {
+	try {
+		syncUsageReceipts(db);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		console.error(`WARN usage receipts were not synced: ${message}`);
+	}
+}
 
 export function buildKnownSkills(
 	skills: InstalledSkill[],
@@ -78,6 +88,7 @@ export async function performScan(
 
 	const agents = getDetectedAgents(agentFilter);
 	if (agents.length === 0) {
+		syncReceiptsFailOpen(db);
 		return { skillCount: 0, invocationCount: 0 };
 	}
 
@@ -96,6 +107,7 @@ export async function performScan(
 	}
 
 	if (skills.length === 0) {
+		syncReceiptsFailOpen(db);
 		return { skillCount: 0, invocationCount: 0 };
 	}
 
@@ -181,6 +193,8 @@ export async function performScan(
 			[JSON.stringify([...cleanupAllowlist])],
 		);
 	}
+
+	syncReceiptsFailOpen(db);
 
 	return { skillCount: skills.length, invocationCount: newInvocations };
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import pkg from "../package.json";
-import { bold, cyan, dim, yellow } from "./tui/colors";
+import { bold, cyan, dim, red, yellow } from "./tui/colors";
 
 const VERSION: string = pkg.version;
 
@@ -19,6 +19,7 @@ function printHelp(): void {
     ${cyan("scan")}        Discover installed skills and index session data
     ${cyan("list")}        List installed skills with size & context budget
     ${cyan("stats")}       Usage analytics with sparklines (last 30 days)
+    ${cyan("receipts")}    Private, reviewable records of skill usage
     ${cyan("health")}      Health check: unused skills, context budget, DB
     ${cyan("audit")}       Audit a skill or pack against best practices
     ${cyan("trace")}       Run and record skill execution traces
@@ -39,6 +40,11 @@ function printHelp(): void {
     ${dim("stats")} ${cyan("--days N")}             Time range in days (default: 30)
     ${dim("stats")} ${cyan("--all")}               Show all skills, not just top 10
     ${dim("stats")} ${cyan("--json")}              JSON output
+    ${dim("receipts")} ${cyan("--json --pending")} List private usage receipts
+    ${dim("receipts")} ${cyan("--limit N --after <id>")} Page through receipts
+    ${dim("receipts")} ${cyan("--all --json")}        Stream every receipt as JSON
+    ${dim("receipts")} ${cyan("--annotate <file>")} Apply reviewed outcomes from JSON
+    ${dim("receipts")} ${cyan("--remote <host.ts.net>")} Scan and export from a Mac over Tailscale SSH
     ${dim("health")} ${cyan("--json")}             JSON output
     ${dim("audit")} ${cyan("--include <glob>")}    Audit a subset of skills
     ${dim("audit")} ${cyan("--json --strict")}     JSON output; fail on findings
@@ -92,6 +98,11 @@ async function main(): Promise<void> {
 		case "stats": {
 			const { runStats } = await import("./commands/stats");
 			await runStats();
+			break;
+		}
+		case "receipts": {
+			const { runReceiptsCommand } = await import("./commands/receipts");
+			await runReceiptsCommand();
 			break;
 		}
 		case "health": {
@@ -173,6 +184,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-	console.error(err);
+	console.error(
+		`\n  ${red(err instanceof Error ? err.message : String(err))}\n`,
+	);
 	process.exit(1);
 });

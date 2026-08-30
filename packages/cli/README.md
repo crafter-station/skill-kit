@@ -41,6 +41,7 @@ skillkit scan
 | `skillkit scan` | Discover installed skills and index session data |
 | `skillkit list` | List installed skills with size and context budget |
 | `skillkit stats` | Usage analytics with sparklines (last 30 days) |
+| `skillkit receipts` | Private, reviewable receipts grouped by skill, agent, and session |
 | `skillkit health` | Health check: unused skills, context budget, DB |
 | `skillkit audit [path ...]` | Audit a skill or pack against Agent Skills best practices |
 | `skillkit prune` | Remove unused skills to reclaim context budget |
@@ -81,6 +82,7 @@ Anthropic's [skill-creator](https://github.com/anthropics/skill-creator) handles
 | Description trigger optimization (train/test split) | yes | — |
 | **Production observability** | | |
 | Usage analytics across sessions | — | yes |
+| Private usage receipts with honest unknown outcomes | no | yes |
 | Context budget monitoring | — | yes |
 | Trigger conflict detection | — | yes |
 | Dead weight analysis | — | yes |
@@ -101,6 +103,7 @@ bunx skills add your-org/db-migrate
 
 # 3. MONITOR — use skillkit (CLI, outside Claude)
 skillkit scan && skillkit stats
+skillkit receipts --json
 skillkit audit ./skills --strict          # enforce structural health
 skillkit coverage ./skills/db-migrate/   # find dead sections
 skillkit conflicts                        # detect trigger collisions
@@ -137,6 +140,23 @@ $ skillkit stats
   review          ████████████████      38  ▁▃▅▆▇▇▆▅▃
   deploy          ████████████          27  ▁▁▂▃▅▇█▇▅
 ```
+
+### Receipts
+
+Every scan also creates idempotent private receipts grouped by skill, agent, and session. Historical procedure digests are marked `observed-after-session` or `unknown`, never exact by inference. Outcomes remain `unknown` until reviewed evidence annotates them.
+
+```bash
+skillkit receipts --pending
+skillkit receipts --json
+skillkit receipts --json --limit 100 --after <receipt-id>
+skillkit receipts --all --json
+skillkit receipts --annotate /private/path/annotations.json
+skillkit receipts --remote user@mac.tailnet.ts.net --all --json
+```
+
+Receipt exports include local metadata and stay private by default. Counts are telemetry, not proof that a skill succeeded or deserves promotion.
+
+Remote receipt collection accepts only Tailscale MagicDNS `*.ts.net` targets. It checks that the remote Skillkit version exactly matches the local CLI, runs the scan beside the source sessions, and returns private receipt JSON over non-interactive SSH. Raw transcripts and the remote SQLite database remain on the source Mac. Remote annotation is intentionally unsupported.
 
 ### Health
 

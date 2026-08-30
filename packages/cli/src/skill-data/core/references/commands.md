@@ -42,9 +42,13 @@ skillkit stats --all
 skillkit stats --days 90
 skillkit sessions
 skillkit graph
+skillkit receipts --pending
+skillkit receipts --json --limit 100 --after <receipt-id>
+skillkit receipts --all --json
+skillkit receipts --remote user@mac.tailnet.ts.net --all --json
 ```
 
-`stats` auto-scans on first use. `scan --full` ignores the incremental cache. `graph` is also available as `contrib`.
+`stats` auto-scans on first use. Every scan syncs private usage receipts. `scan --full` ignores the incremental cache. `graph` is also available as `contrib`. Receipt outcomes remain unknown until reviewed evidence annotates them. Remote receipts accept only Tailscale MagicDNS targets, check an exact Skillkit version match, scan on the source Mac, and never support remote annotation.
 
 ## Installed-skill health and cleanup
 
