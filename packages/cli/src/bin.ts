@@ -28,6 +28,7 @@ function printHelp(): void {
     ${cyan("prune")}       Remove unused skills to reclaim context budget
     ${cyan("burn")}        Subscription burn rate analysis (cost, models, daily)
     ${cyan("context")}     Context tax: tokens + cost loaded every API call
+    ${cyan("snapshot")}    Refresh the local Agentfiles analytics snapshot
     ${cyan("sessions")}    Daily usage across all agents
     ${cyan("graph")}       52-week contribution heatmap
     ${cyan("auto")}        Auto-scan after Claude Code sessions
@@ -87,6 +88,8 @@ async function main(): Promise<void> {
 		case "scan": {
 			const { runScan } = await import("./commands/scan");
 			await runScan();
+			const { writeAgentfilesSnapshot } = await import("./agentfiles/snapshot");
+			await writeAgentfilesSnapshot();
 			break;
 		}
 		case "list":
@@ -133,6 +136,12 @@ async function main(): Promise<void> {
 		case "prune": {
 			const { runPrune } = await import("./commands/prune");
 			await runPrune();
+			if (process.argv.includes("--yes")) {
+				const { writeAgentfilesSnapshot } = await import(
+					"./agentfiles/snapshot"
+				);
+				await writeAgentfilesSnapshot();
+			}
 			break;
 		}
 		case "burn": {
@@ -160,6 +169,11 @@ async function main(): Promise<void> {
 		case "ctx": {
 			const { runContextCommand } = await import("./commands/context");
 			await runContextCommand();
+			break;
+		}
+		case "snapshot": {
+			const { runAgentfilesSnapshot } = await import("./agentfiles/snapshot");
+			await runAgentfilesSnapshot();
 			break;
 		}
 		case "version":

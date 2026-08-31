@@ -3,8 +3,10 @@
 Local-first analytics for AI agent skills. Track usage, measure context budget, and prune what you don't use.
 
 ```bash
-npx @crafter/skillkit stats
+bunx @crafter/skillkit stats
 ```
+
+`npx -y @crafter/skillkit stats` also works when Bun is installed and available on `PATH`, because the executable uses the Bun runtime.
 
 Auto-discovers your skills, indexes sessions, and shows what matters. No setup needed.
 
@@ -34,6 +36,7 @@ AI coding agents load skills into their context window on every session. More sk
 | `sessions` | Daily usage across all agents |
 | `graph` | 52-week contribution heatmap |
 | `scan` | Force re-scan (runs automatically, rarely needed) |
+| `snapshot` | Refresh the versioned Agentfiles analytics snapshot |
 
 ### Flags
 
@@ -57,6 +60,18 @@ When an MCP server does not answer within `--mcp-timeout`, it is skipped and
 reported as timed out; the command does not hang waiting for it.
 
 Install skills via [skills.sh](https://skills.sh): `bunx skills add <owner/repo>`
+
+## Programmatic Agentfiles API
+
+The `@crafter/skillkit/agentfiles` export is portable JavaScript for Node and Electron. It loads the versioned snapshot without importing Bun SQLite or spawning the CLI.
+
+```ts
+import { loadAgentfilesSnapshot } from "@crafter/skillkit/agentfiles";
+
+const snapshot = loadAgentfilesSnapshot();
+```
+
+`skillkit scan` and `skillkit snapshot` refresh `~/.skillkit/agentfiles-snapshot.json`. The analytics engine remains Bun-based for now. The API gives native consumers a stable read boundary while the database layer is extracted behind a portable adapter.
 
 ### Version-matched agent guidance
 

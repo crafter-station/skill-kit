@@ -1,6 +1,6 @@
 ---
 name: core
-version: 0.13.0
+version: 0.14.0
 description: "Canonical skillkit workflow served by the installed CLI. Read before auditing skill packs or analyzing skill usage, context cost, conflicts, coverage, and token burn."
 ---
 
