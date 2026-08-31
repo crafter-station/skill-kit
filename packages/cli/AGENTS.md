@@ -32,6 +32,7 @@ skillkit scan
 | `skillkit prune` | Remove unused skills to reclaim context budget |
 | `skillkit burn` | Subscription burn rate analysis (cost, models, daily) |
 | `skillkit context` (alias `ctx`) | Context tax: tokens + cost loaded every API call |
+| `skillkit snapshot` | Refresh the local JSON snapshot consumed by Agentfiles |
 | `skillkit sessions` | Daily usage across all agents |
 | `skillkit graph` (alias `contrib`) | 52-week contribution heatmap |
 | `skillkit auto` | Auto-scan after Claude Code sessions |
@@ -113,9 +114,12 @@ skillkit scan
 
 The package also exports a programmatic API (Bun runtime) from `@crafter/skillkit`: `runScan`, `runStats`, `runHealth`, `runAuditCommand`, `runSkillsCommand`, `runList`, `runPrune`, `runTrace`, `scanAllSessions`, `scanInstalledSkills`, `getDetectedAgents`, `parseSessionFile` (plus Cursor/Codex/Gemini variants), DB helpers (`getDb`, `getSkillStats`, `getTopSkills`, `getInstalledSkills`, `getDailyUsage`, `recordInvocation`, `upsertInstalledSkill`), bundled skill helpers (`BUNDLED_SKILLS`, `getBundledSkill`, `renderBundledSkill`), audits (`auditSkill`, `auditSkills`, `discoverSkillDirectories`, `renderAuditReport`, `renderAuditJson`), conflicts (`discoverAllSkills`, `findOverlappingPairs`, `generateProbes`, `analyzeCollision`, `summarizeConflicts`), coverage (`parseSkillDirectory`, `analyzeCoverage`), and trace store/report helpers, with their TypeScript types.
 
+The `@crafter/skillkit/agentfiles` subpath is a separate Node and Electron compatible snapshot loader. It must remain free of Bun and SQLite imports.
+
 ## Data locations
 
 - `~/.skillkit/analytics.db`: SQLite database with invocations, private receipts, traces, and conflicts
+- `~/.skillkit/agentfiles-snapshot.json`: local analytics snapshot consumed by Agentfiles without shell execution
 - Remote receipt collection leaves source sessions and `analytics.db` on the remote Mac and transports only private receipt JSON over Tailscale SSH
 - `~/.claude/skills/` and per-agent skill dirs — read-only skill discovery
 - `~/.claude/projects/**/*.jsonl` — read-only session parsing

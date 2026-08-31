@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { getPricing } from "../commands/burn";
+import { getPricing, shouldPromptForPlan } from "../commands/burn";
 
 describe("getPricing", () => {
 	it("keeps published cache pricing for Anthropic models", () => {
@@ -54,5 +54,12 @@ describe("getPricing", () => {
 		expect(pricing.input).toBe(2);
 		expect(pricing.output).toBe(10);
 		expect(Number.isFinite(pricing.cacheRead)).toBe(true);
+	});
+});
+
+describe("plan prompt", () => {
+	it("never prompts for JSON output", () => {
+		expect(shouldPromptForPlan(true, false, true)).toBe(false);
+		expect(shouldPromptForPlan(true, false, false)).toBe(true);
 	});
 });

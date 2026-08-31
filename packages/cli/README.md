@@ -39,6 +39,7 @@ skillkit scan
 |---------|-------------|
 | `skillkit skills get core [--full]` | Load guidance matched to this CLI version |
 | `skillkit scan` | Discover installed skills and index session data |
+| `skillkit snapshot` | Refresh the local Agentfiles analytics snapshot |
 | `skillkit list` | List installed skills with size and context budget |
 | `skillkit stats` | Usage analytics with sparklines (last 30 days) |
 | `skillkit receipts` | Private, reviewable receipts grouped by skill, agent, and session |
@@ -51,6 +52,18 @@ skillkit scan
 | `skillkit trace <prompt>` | Run and record a skill execution trace |
 
 Install skills via [skills.sh](https://skills.sh): `bunx skills add <owner/repo>`
+
+## Programmatic Agentfiles API
+
+The `@crafter/skillkit/agentfiles` export is compatible with Node and Electron. It contains no Bun SQLite imports and can be used without spawning the CLI.
+
+```ts
+import { loadAgentfilesSnapshot } from "@crafter/skillkit/agentfiles";
+
+const snapshot = loadAgentfilesSnapshot();
+```
+
+`skillkit scan` and `skillkit snapshot` write the versioned local file at `~/.skillkit/agentfiles-snapshot.json`. Consumers should use the exported loader and types instead of reading or parsing the file directly.
 
 ### Version-matched guidance
 

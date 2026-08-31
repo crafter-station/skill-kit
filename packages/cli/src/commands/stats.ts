@@ -38,17 +38,53 @@ function getMostActiveDay(
 
 function parseDays(args: string[]): number {
 	for (let i = 0; i < args.length; i++) {
-		if (args[i] === "--days" && args[i + 1]) {
-			const n = parseInt(args[i + 1]!, 10);
-			if (!isNaN(n) && n > 0) return n;
+		const next = args[i + 1];
+		if (args[i] === "--days" && next) {
+			const n = parseInt(next, 10);
+			if (!Number.isNaN(n) && n > 0) return n;
 		}
 		const match = args[i]?.match(/^--days=(\d+)$/);
-		if (match) {
-			const n = parseInt(match[1]!, 10);
-			if (!isNaN(n) && n > 0) return n;
+		const matchedDays = match?.[1];
+		if (matchedDays) {
+			const n = parseInt(matchedDays, 10);
+			if (!Number.isNaN(n) && n > 0) return n;
 		}
 	}
 	return 30;
+}
+
+export function getStatsJson(
+	db: ReturnType<typeof getDb>,
+	days = 30,
+	agentFilter?: string,
+) {
+	const stats = getSkillStats(db, days, agentFilter);
+	if (stats.total === 0) return { error: "no_data", total: 0 };
+	const topSkills = getTopSkills(db, days, undefined, agentFilter);
+	const streak = getCurrentStreak(db, agentFilter);
+	const velocity = getWeeklyVelocity(db, agentFilter);
+	return {
+		period: { days },
+		total_invocations: stats.total,
+		unique_skills: stats.unique_skills,
+		most_active_day: getMostActiveDay(db, agentFilter),
+		streak: { current: streak.current, longest: streak.longest },
+		velocity: {
+			this_week: velocity.thisWeek,
+			last_week: velocity.lastWeek,
+			change_pct: velocity.change,
+		},
+		top_skills: topSkills.map((skill) => ({
+			name: skill.skill_name,
+			total: skill.total,
+			daily: getDailyUsage(db, skill.skill_name, days, agentFilter).map(
+				(day) => ({
+					date: day.date,
+					count: day.count,
+				}),
+			),
+		})),
+	};
 }
 
 export async function runStats(): Promise<void> {
@@ -110,29 +146,7 @@ export async function runStats(): Promise<void> {
 	const activeDay = getMostActiveDay(db, agentFilter);
 
 	if (isJson) {
-		const streak = getCurrentStreak(db, agentFilter);
-		const velocity = getWeeklyVelocity(db, agentFilter);
-		const output = {
-			period: { days },
-			total_invocations: stats.total,
-			unique_skills: stats.unique_skills,
-			most_active_day: activeDay,
-			streak: { current: streak.current, longest: streak.longest },
-			velocity: {
-				this_week: velocity.thisWeek,
-				last_week: velocity.lastWeek,
-				change_pct: velocity.change,
-			},
-			top_skills: topSkills.map((skill) => {
-				const daily = getDailyUsage(db, skill.skill_name, days, agentFilter);
-				return {
-					name: skill.skill_name,
-					total: skill.total,
-					daily: daily.map((d) => ({ date: d.date, count: d.count })),
-				};
-			}),
-		};
-		console.log(JSON.stringify(output, null, 2));
+		console.log(JSON.stringify(getStatsJson(db, days, agentFilter), null, 2));
 		return;
 	}
 

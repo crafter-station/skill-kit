@@ -1,6 +1,6 @@
 ---
 name: skillkit
-version: 0.13.0
+version: 0.14.0
 description: "Local-first analytics and structural audits for AI agent skills. Use when reviewing skill health, context cost, private local or Tailscale-remote usage receipts, conflicts, coverage, token burn, or pruning."
 allowed-tools: Bash(skillkit:*), Bash(bunx @crafter/skillkit:*)
 hidden: true

@@ -207,6 +207,13 @@ export function getPricing(model: string): ResolvedPricing {
 	return resolvePricing(FALLBACK_PRICING);
 }
 
+export function shouldPromptForPlan(
+	isTTY: boolean,
+	hasPlans: boolean,
+	isJson: boolean,
+): boolean {
+	return isTTY && !hasPlans && !isJson;
+}
 
 function printUnmappedWarning(): void {
 	if (unmappedModelsWarned.size === 0) return;
@@ -756,7 +763,7 @@ export async function runBurnCommand(): Promise<void> {
 
 	const config = loadConfig();
 	const isTTY = process.stdout.isTTY ?? false;
-	if (isTTY && !config.plans) {
+	if (shouldPromptForPlan(isTTY, Boolean(config.plans), isJson)) {
 		console.log(`  ${dim("First run — let's configure your plans.")}`);
 		await interactiveSetPlan();
 	}
